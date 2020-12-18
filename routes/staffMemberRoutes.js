@@ -31,7 +31,7 @@ router.get('/viewProfile',async (req,res)=>{
     }
 });
 
-router.get('/updateProfile',async(req,res)=>{
+router.post('/updateProfile',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputMobile=req.body.mobileNumber;
