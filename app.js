@@ -7,8 +7,9 @@ const externalRoutes=require('./routes/externalRoutes');
 const app = express();
 app.use(bodyParser.json());
 app.use('', externalRoutes);
-app.use(verify);
 app.use ("/hr",hrRoutes);
+// app.use(verify);
+
 app.use("/staffMember",staffMemberRoutes);
 
 module.exports=app;

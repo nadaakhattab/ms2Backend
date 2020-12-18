@@ -1,10 +1,12 @@
 const express = require('express')
 const router = express.Router()
+const bcrypt=require('bcryptjs');
 const location = require('../models/location');
 const faculty = require('../models/faculty');
 const staffMember= require('../models/staffMember');
 const department = require('../models/department');
-
+const course = require('../models/course');
+const idDb = require('../models/id');
 // Abl maykhosh to this route need a middlewear to verify that staff is hr 
 
 router.route('/addLocation').post( (req, res) => {
@@ -206,6 +208,7 @@ department.findOne({name:req.body.department}).then(result =>{
 //  });
 
  router.route('/deleteCourse').delete((req, res) => {
+   // display error law msh medyny department
 department.findOne({name:req.body.department}).then(result =>{
   console.log(result);
   if (result){
@@ -239,7 +242,31 @@ department.findOne({name:req.body.department}).then(result =>{
 })
  });
 
+//extra
+  router.route('/createCourse').post((req, res) => {
+course.findOne({name:req.body.name}).then(result =>{
+  // error message
+  if (result){res.send("already exists");}
+  else {
+course.create({...req.body}).then(result => {
+         res.send(result);
+     });
+  }
+});
+ });
 
+//extra
+   router.route('/createDepartment').post((req, res) => {
+department.findOne({name:req.body.name}).then(result =>{
+  // error message
+  if (result){res.send("already exists");}
+  else {
+department.create({...req.body}).then(result => {
+         res.send(result);
+     });
+  }
+});
+ });
 
 
  router.route('/addStaffMember').post( (req, res) => {
@@ -249,17 +276,63 @@ staffMember.findOne({email:req.body.email}).then(result =>{
   }
   else{
 
-location.findOne({...req.body.officeLocation}).then(result => {
-if(result.fullCapacity){
+location.findOne({room:req.body.officeLocation}).then(result => {
+  console.log(result);
+  if (result){
+    const locCapacity=result.capacity;
+if(result.capacity== result.maxCapacity){
 res.send("Can't assign the following office Location");
 }else {
   // req.body lazm yekon fyha  name, email, salary and office location.
-  // ID???
-  staffMember.create({...req.body}).then((result)=>{
-res.send(result);
-  });
+  let id= "";
+  let dayoff= null;
+  let idCount=null;
+    idDb.findOne({name:req.body.type}).then(async (result)=>{
+      if (result){
+        if(req.body.type=="HR"){
+      id=`hr-${result.count+1}`;
+    dayoff="Saturday";}
+    else{
+      id=`as-${result.count+1}`;
+    }
+    idCount=result.count+1;
+       let password= "123456";
+      //   const salt= await bcrypt.genSalt(10);
+      //  password= await bcrypt.hash(password,salt);
+        console.log("password",password);
+        const data = {
+          password,
+          id,
+          name: req.body.name,
+          email: req.body.email,
+          salary: req.body.salary,
+          officeLocation: req.body.officeLocation
+        }
+        if (dayoff){
+          data.dayoff= dayoff;
+        }
+staffMember.create({...data}).then(result=>{
 
+    idDb.updateOne({name:req.body.type},{$set:{count:idCount}}).then((result)=>{
+location.updateOne({room:req.body.officeLocation},{$set:{capacity:locCapacity+1}}).then((result)=>{
+      res.send(" created done");  });
+    });
+
+} ).catch (err =>{
+  console.log(err);
+  res.send("user Couldn't be created");
+})
+
+}
+else {
+  res.send("id doesn't exist");
+} 
+    });
+}}
+else {
+res.send("location not found");
 } });
+
 }
 });
  });
@@ -298,6 +371,7 @@ res.send(result);
   //  id:req.body.id
    staffMember.updateOne({email: req.body.email},{$set:{salary:req.body.salary}}).then(result => {
      res.send(result);
+
    }).catch(err => {
      res.send(err);
    })

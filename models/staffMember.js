@@ -11,11 +11,12 @@ const staffMemberSchema=new schema({
     type: {type:String,required:true},
     mobileNumber: String,
     dayOff: String,
-    firstLogin: Boolean
     //academic member
     // faculty: String,
     // department: String,
     // Courses: [String],    
+    firstLogin: {type:Boolean,default:true},
+
 }
 );
 
