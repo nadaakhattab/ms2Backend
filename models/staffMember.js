@@ -18,4 +18,5 @@ const staffMemberSchema=new schema({
     // Courses: [String],    
 }
 );
+
 module.exports=mongoose.model('staffMember',staffMemberSchema)

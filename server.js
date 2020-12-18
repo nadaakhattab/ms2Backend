@@ -7,7 +7,8 @@ global.refreshTokens=[];
 const connectionParams={
     useNewUrlParser: true,
     useCreateIndex: true,
-    useUnifiedTopology: true 
+    useUnifiedTopology: true ,
+    useFindAndModify: false 
 }
 mongoose.connect(URL,connectionParams).then(async()=>{
     console.log("Connected to db");
