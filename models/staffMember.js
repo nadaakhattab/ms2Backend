@@ -1,16 +1,21 @@
 const mongoose=require('mongoose');
 const schema=mongoose.Schema;
 const staffMemberSchema=new schema({
+    //upon registration
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
-    username:{type:String,required:true,unique:true},
-    id: Number,
-    name: String,
-    salary: Number,
-    faculty: String,
-    department: String,
-    attendanceSheet: Object,
-    type: String
+    id:{type:String,required:true,unique:true},
+    name: {type:String,required:true},
+    salary: {type:Number,required:true},
+    officeLocation: {type:String,required:true},
+    type: {type:String,required:true},
+    mobileNumber: String,
+    dayOff: String,
+
+    //academic member
+    // faculty: String,
+    // department: String,
+    // Courses: [String],    
 }
 );
 module.exports=mongoose.model('staffMember',staffMemberSchema)

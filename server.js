@@ -1,6 +1,9 @@
 const mongoose=require('mongoose');
 const app=require('./app');
 const URL = "mongodb+srv://nada:1234@aclproject.lz3yx.mongodb.net/GUCPortal?retryWrites=true&w=majority";
+global.accessKey="qfsgdbhcvkdlfgdfsdaksjaqfsvghbkshb";
+global.refreshKey="wghdkjfhl;gjlkuiopo23yorpiotpyhgf";
+global.refreshTokens=[];
 const connectionParams={
     useNewUrlParser: true,
     useCreateIndex: true,
