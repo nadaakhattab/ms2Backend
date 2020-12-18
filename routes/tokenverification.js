@@ -1,21 +1,28 @@
 const jwt= require('jsonwebtoken');
 
 module.exports= (req, res, next)=>{
-
+try{
         const accessToken= req.headers.authorization;
         console.log("Access Token"+accessToken);
-        if(!accessToken)  
+        if(accessToken)  
         {
-            return res.status(401).status('Access deined')
-        }
         try{    
-
         const payload=jwt.verify(accessToken,global.accessKey);
         req.headers.payload=payload;
-        next()
+        return next();
+    }
+        catch(error){
+        console.log('Error'+error);
+         return res.status(400).send('Expired Token');
+    }
+            
+        }
+        else {
+            console.log("denied");
+            return res.status(401).send('Access deined')
+        }
     }
     catch(error){
-        console.log('Error'+error);
-        res.status(400).send('ExpiredToken');
+        return res.status(404).send('Server Error');
     }
 }

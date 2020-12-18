@@ -8,7 +8,17 @@ const app = express();
 app.use(bodyParser.json());
 app.use('', externalRoutes);
 app.use(verify);
-app.use ("/hr",hrRoutes);
+
+function checkHr(req, res, next) {
+      if (req.headers.payload.type=="HR"){
+          console.log("HR Confirmed");
+        return next();  
+      }
+      else {
+          res.status(400).send("UnAuthorized: Not HR Member");
+      }
+}
+app.use ("/hr",checkHr,hrRoutes);
 app.use("/staffMember",staffMemberRoutes);
 
 module.exports=app;
