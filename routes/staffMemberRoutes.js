@@ -4,6 +4,7 @@ const staffMembers=require('../models/staffMember');
 const bcryptjs=require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
+const attendance = require('../models/attendance');
  
 router.post('/logout', (req, res) => {
     try{
@@ -50,8 +51,7 @@ router.post('/updateProfile',async(req,res)=>{
             if(inputEmail){
                 fieldsToUpdate.email=inputEmail;
             }
-            fieldsToUpdate.new=true;
-            var user=await staffMembers.findOneAndUpdate({id:userId}, fieldsToUpdate);
+            var user=await staffMembers.findOneAndUpdate({id:userId}, fieldsToUpdate,{new:true});
             return res.status(200).send(user);
         }
     }catch(error){
@@ -68,7 +68,7 @@ router.post('/changePassword',async(req,res)=>{
         }else{
             const salt=await bcryptjs.genSalt(10);
             var hashedPassword=await bcryptjs.hash(inputPassword,salt);           
-            var user=await staffMembers.findOneAndUpdate({id:userId},{password: hashedPassword, new:true});
+            var user=await staffMembers.findOneAndUpdate({id:userId},{password: hashedPassword},{new:true});
             res.status(200).send(user);
         }
     }catch(error){
@@ -76,4 +76,61 @@ router.post('/changePassword',async(req,res)=>{
     }
 });
 
+router.post('/signIn',async(req,res)=>{
+    try{
+        var userId=req.headers.payload.id;
+        const record=await attendance.findOne({id: userId});
+        var curDate=new Date();
+        var dateToday = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate());
+        if(record){
+            var signInArray=record.signIn;
+            signInArray.push(curDate);
+            var attendanceRecord=await attendance.findOneAndUpdate({id:userId,date:dateToday},{
+                signIn: signInArray,
+            },{new:true})
+            return res.status(200).send(attendanceRecord);
+        }else{
+            var attendanceRecord=await attendance.create({
+                id: userId,
+                date: dateToday,
+                signIn: [curDate],
+                signOut: []
+            });
+            return res.status(200).send(attendanceRecord);
+            
+        }
+    }catch(error){
+        return res.status(500).send(error.message);
+    }
+
+});
+
+router.post('/signOut',async(req,res)=>{
+    try{
+        var userId=req.headers.payload.id;
+        const record=await attendance.findOne({id: userId});
+        var curDate=new Date();
+        var dateToday = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate());
+        if(record){
+            var signOutArray=record.signOut;
+            signOutArray.push(curDate);
+            var attendanceRecord=await attendance.findOneAndUpdate({id:userId,date:dateToday},{
+                signOut: signOutArray,
+            },{new:true})
+            return res.status(200).send(attendanceRecord);
+        }else{
+            var attendanceRecord=await attendance.create({
+                id: userId,
+                date: dateToday,
+                signIn: [],
+                signOut: [curDate],
+            });
+            return res.status(200).send(attendanceRecord);
+            
+        }
+    }catch(error){
+        return res.status(500).send(error.message);
+    }
+
+});
 module.exports=router;
