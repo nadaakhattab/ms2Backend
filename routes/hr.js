@@ -7,6 +7,7 @@ const staffMember= require('../models/staffMember');
 const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
+
 // Abl maykhosh to this route need a middlewear to verify that staff is hr 
 
 router.route('/addLocation').post( (req, res) => {
