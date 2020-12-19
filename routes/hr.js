@@ -469,6 +469,7 @@ router.post('/signOut',async(req,res)=>{
         if(record){
           var signOutArray=record.signOut;
           signOutArray.push(curDate);
+          signOutArray.sort();
           var attendanceRecord=await attendance.findOneAndUpdate({id:userId,date:dateToday},{
               signOut: signOutArray,
           },{new:true})
