@@ -80,9 +80,9 @@ router.post('/changePassword',async(req,res)=>{
 router.post('/signIn',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
-        const record=await attendance.findOne({id: userId});
-        var curDate=new Date();
-        var dateToday = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate());
+        var curDate=new Date(Date.now());
+        var dateToday=curDate.toLocaleDateString();
+        const record=await attendance.findOne({id: userId,date:dateToday});
         if(record){
             var signInArray=record.signIn;
             signInArray.push(curDate);
@@ -109,9 +109,9 @@ router.post('/signIn',async(req,res)=>{
 router.post('/signOut',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
-        const record=await attendance.findOne({id: userId});
-        var curDate=new Date();
-        var dateToday = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate());
+        var curDate=new Date(Date.now());
+        var dateToday=curDate.toLocaleDateString();
+        const record=await attendance.findOne({id: userId,date:dateToday});
         if(record){
             var signOutArray=record.signOut;
             signOutArray.push(curDate);
@@ -144,20 +144,19 @@ router.post('/viewAttendance',async(req,res)=>{
         return res.status(400).send("Please enter month and year") 
 
     }else{
-        var monthDate=new Date(yearToView,monthToView);
+        var monthDate=new Date(yearToView,monthToView,11);
         var nextMonthDate;
-        if(monthToView===11){
-            nextMonthDate=new Date(yearToView+1,0);
-        
+        if(monthToView==11){
+            nextMonthDate=new Date(yearToView+1,0,10);   
         }else{
-            nextMonthDate=new Date(yearToView,monthToView+1);
+            nextMonthDate=new Date(yearToView,monthToView+1,10);
         }
-        var records=await attendance.find({id: userId},
-            {date:{
-                $gte: monthDate,
-                $lt: nextMonthDate
-        }});
-        return res.status(200).send(records);
+        var records=await attendance.find({id: userId});
+        var recordsToSend=records.filter(function(record){
+            var date=new Date(Date.parse(record.date));
+            return date>=monthDate && date<nextMonthDate
+        })
+        return res.status(200).send(recordsToSend);
     }
     }catch(error){
         return res.status(500).send(error.message);
@@ -178,22 +177,32 @@ router.get('/viewAllAttendance',async(req,res)=>{
 
 router.post('/missingDays',async(req,res)=>{
     try{
-        var start=req.body.startDate;
-        var end=req.body.endDate;
-        if(!start||!end){
+        var monthToView=req.body.month;
+        var yearToView=req.body.year;
+        if(!monthToView||!yearToView){
             //start or end not provided in body
             return res.status(400).send("No dates provided");
         }else{
             var userId=req.headers.payload.id;
             var user=await staffMembers.findOne({id: userId});
             if(user){
-                var startDate=new Date(start);
-                var endDate=new Date(end);
+                var startDate=new Date(yearToView,monthToView,11);
+                var endDate;
+                if(monthToView==11){
+                    endDate=new Date(yearToView+1,0,10);
+                
+                }else{
+                    endDate=new Date(yearToView,monthToView+1,10);
+                }
                 if(startDate<endDate){
-                    var userLeaves=user.acceptedLeaves;
+                    var userLeaves=[];
+                    userLeaves=user.acceptedLeaves;
                     //get records between 2 provided dates
-                    var records=await attendance.find({id: userId,
-                        date:{$gte:startDate,$lte:endDate}});
+                    var allRecords=await attendance.find({id: userId});
+                    var records=allRecords.filter(function(record){
+                        var date=new Date(Date.parse(record.date));
+                        return date>=startDate && date<endDate
+                    })
                     var missingDays=[];   
                     var d=startDate;
                     while(d<=endDate){
@@ -201,7 +210,7 @@ router.post('/missingDays',async(req,res)=>{
                        var day=d.getDay();
                        if(day!==5 && day!==user.dayOffNumber){
                            //not friday and not day off
-                           if(!userLeaves.constains(d)){
+                           if(!userLeaves.includes(d)){
                                //not a leave
                             var check= records.filter(function(record){
                                 return record.date==d;
@@ -213,7 +222,7 @@ router.post('/missingDays',async(req,res)=>{
 
                            }
                        }
-                        d.setDate(d.getDate()+1);
+                       d=new Date (d.setDate(d.getDate()+1));
                     } 
                     res.status(200).send(missingDays);
                 }else{
@@ -241,57 +250,71 @@ router.post('/hours',async(req,res)=>{
             var userId=req.headers.payload.id;
             var user=await staffMembers.findOne({id: userId});
             if(user){
-                var startDate=new Date(yearToView,monthToView);
+                var startDate=new Date(yearToView,monthToView,11);
                 var endDate;
-                if(monthToView===11){
-                    endDate=new Date(yearToView+1,0);
+                if(monthToView==11){
+                    endDate=new Date(yearToView+1,0,10);
                 
                 }else{
-                    endDate=new Date(yearToView,monthToView+1);
+                    endDate=new Date(yearToView,monthToView+1,10);
                 }
+
                 var curDate=new Date();
-                var dateToday = new Date(curDate.getFullYear(), curDate.getMonth(), curDate.getDate());
+                var dateToday = new Date(curDate.setHours(0,0,0));
                 if(dateToday<endDate){
                     endDate=dateToday;
                 }
-
                 if(startDate<endDate){
                     //get records between 2 provided dates
-                    var records=await attendance.find({id: userId,
-                        date:{$gte:startDate,$lt:endDate}});
+                        var allRecords=await attendance.find({id: userId});
+                        var records=allRecords.filter(function(record){
+                            var date=new Date(Date.parse(record.date));
+                            return date>=startDate && date<endDate
+                        })
                     var requiredHours=0;
                     var workedHours=0;    
                     for(var i=0;i<records.length;i++){
-                        var day=record.date.getDay();
+                        var day=new Date(Date.parse(records[i].date)).getDay();
+                        //console.log("Day"+day);
                         if(day!=5 && day!=user.dayOffNumber){
                             requiredHours+=8.24
                         }
-                        var signIn=records.signIn;
-                        var minSignIn=signIn[0].getHours();
-                        if(minSignIn<7){ 
-                            //add sign at 7 before 7
-                            minSignIn.setHours(7,0,0);
-                            signIn.unshift(minSignIn);
-                        }
-                        //remove sign ins not between 7 and 7 
-                        signIn=signIn.filter(function(timeRecord){
-                            return timeRecord.getHours()>=7 && timeRecord.getHours()<=15;
-                        }) 
+                        var signIn=records[i].signIn;
+                        if(signIn.length>0){
+                            var minSignIn=signIn[0];
+                            var minSigninHours=minSignIn.getHours();
+                            console.log("Sign in hour"+minSigninHours);
+                            if(minSigninHours<7){ 
+                                //add sign at 7 before 7
+                                minSignIn.setHours(7,0,0);
+                            }
+                            //remove sign ins not between 7 and 7 
+                            signIn=signIn.filter(function(timeRecord){
+                                return timeRecord.getHours()>=7 && timeRecord.getHours()<19;
+                            }) 
 
-                        var signOut=records.signOut;
-                        var maxSignOut=signOut[signOut.length-1].getHours();
-                        if(maxSignout>=15){
-                            //add sign out at 7
-                            maxSignout.setHours(15,0,0);
-                            signOut.push(maxSignOut);
                         }
-                        //remove sign ins not between 7 and 7 
-                        signOut=signOut.filter(function(timeRecord){
-                            return timeRecord.getHours()>=7 && timeRecord.getHours()<=15;
-                        }) 
+                        var signOut=records[i].signOut;
+                        if(signOut.length>0){
+                            var maxSignOut=signOut[signOut.length-1];
+                            var maxSignOutHours=maxSignOut.getHours();
+                            console.log("Sign in hour"+maxSignOutHours);
+                            if(maxSignOutHours>15){
+                                //add sign out at 7
+                                maxSignOut.setHours(19,0,0);
+                                // signOut.push(maxSignOut);
+                            }
+                            
+                            //remove sign ins not between 7 and 7 
+                            signOut=signOut.filter(function(timeRecord){
+                                return timeRecord.getHours()>7 && timeRecord.getHours()<=19;
+                            }) 
 
+
+                        }
                         for(var j=0;j<signOut.length&&signIn.length>0;j++){
-                            var min=signIn.get(0)
+                            //console.log(signIn);
+                            var min=signIn[0];
                             if(signOut[j]>min){
                                 signIn=signIn.filter(function(timeRecord){
                                     return timeRecord>min;

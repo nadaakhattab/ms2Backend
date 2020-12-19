@@ -7,6 +7,7 @@ const staffMember= require('../models/staffMember');
 const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
+const attendance = require('../models/attendance');
 
 // Abl maykhosh to this route need a middlewear to verify that staff is hr 
 
@@ -379,9 +380,293 @@ res.send("location not found");
 
  });
 
+ router.get('/viewAttendance/:id',async(req,res)=>{
+  try{
+    var userId=req.params.id;
+    var monthToView=req.body.month;
+    var yearToView=req.body.year;
+    if(!yearToView||!monthToView){
+        return res.status(400).send("Please enter month and year") 
+
+    }else{
+        var monthDate=new Date(yearToView,monthToView,11);
+        var nextMonthDate;
+        if(monthToView==11){
+            nextMonthDate=new Date(yearToView+1,0,10);   
+        }else{
+            nextMonthDate=new Date(yearToView,monthToView+1,10);
+        }
+        var records=await attendance.find({id: userId});
+        var recordsToSend=records.filter(function(record){
+            var date=new Date(Date.parse(record.date));
+            return date>=monthDate && date<nextMonthDate
+        })
+        return res.status(200).send(recordsToSend);
+    }
+    }catch(error){
+        return res.status(500).send(error.message);
+    }
+ });
+
+ router.post('/signIn',async(req,res)=>{
+  try{
+    var userId=req.body.id;
+    var datetime=req.body.date;
+    if(!userId && !datetime){
+      res.status(400).send("Please enter user id and date time")
+
+    }else{
+      var myId=req.headers.payload.id;
+      if(userId!=myId){
+        var curDate=new Date(datetime);
+        var dateToday=curDate.toLocaleDateString();
+        const record=await attendance.findOne({id: userId,date:dateToday});
+        if(record){
+            var signInArray=record.signIn;
+            signInArray.push(curDate);
+            signInArray.sort();
+            var attendanceRecord=await attendance.findOneAndUpdate({id:userId,date:dateToday},{
+                signIn: signInArray,
+            },{new:true})
+            return res.status(200).send(attendanceRecord);
+        }else{
+            var attendanceRecord=await attendance.create({
+                id: userId,
+                date: dateToday,
+                signIn: [curDate],
+                signOut: []
+            });
+            return res.status(200).send(attendanceRecord);
+            
+        }
+
+      }else{
+        res.status(404).send("Not authorized")
+      }
+      
+    }
 
 
+  }catch(error){
+      return res.status(500).send(error.message);
+  }
+
+});
+
+router.post('/signOut',async(req,res)=>{
+  try{
+    var userId=req.body.id;
+    var datetime=req.body.date;
+    if(!userId && !datetime){
+      res.status(400).send("Please enter user id and date time")
+
+    }else{
+      var myId=req.headers.payload.id;
+      if(userId!=myId){
+        var curDate=new Date(datetime);
+        var dateToday=curDate.toLocaleDateString();
+        const record=await attendance.findOne({id: userId,date:dateToday});
+        if(record){
+          var signOutArray=record.signOut;
+          signOutArray.push(curDate);
+          var attendanceRecord=await attendance.findOneAndUpdate({id:userId,date:dateToday},{
+              signOut: signOutArray,
+          },{new:true})
+          return res.status(200).send(attendanceRecord);
+      }else{
+          var attendanceRecord=await attendance.create({
+              id: userId,
+              date: dateToday,
+              signIn: [],
+              signOut: [curDate],
+          });
+          return res.status(200).send(attendanceRecord);
+          
+      }
+
+      }else{
+        res.status(404).send("Not authorized")
+      }
+      
+    }
 
 
+  }catch(error){
+      return res.status(500).send(error.message);
+  }
+
+});
+
+router.post('/missingHours',async(req,res)=>{
+
+  try{
+    var monthToView=req.body.month;
+    var yearToView=req.body.year;
+    if(!monthToView||!yearToView){
+        //start or end not provided in body
+        return res.status(400).send("No dates provided");
+    }else{
+      var users=await staffMember.find();
+      var startDate=new Date(yearToView,monthToView,11);
+      var endDate;
+      if(monthToView==11){
+          endDate=new Date(yearToView+1,0,10);
+      
+      }else{
+          endDate=new Date(yearToView,monthToView+1,10);
+      }
+      if(startDate<endDate){
+        var usersToSend=[];
+      for(var i=0;i<users.length;i++){
+        var user=users[i];
+        var userId=user.id;
+        var allRecords=users.filter(function(record){
+          return record.id==userId;
+        })
+        var records=allRecords.filter(function(record){
+          var date=new Date(Date.parse(record.date));
+          return date>=startDate && date<endDate
+      })
+  var requiredHours=0;
+  var workedHours=0;    
+  for(var i=0;i<records.length;i++){
+    var day=new Date(Date.parse(records[i].date)).getDay();
+    //console.log("Day"+day);
+    if(day!=5 && day!=user.dayOffNumber){
+        requiredHours+=8.24
+    }
+    var signIn=records[i].signIn;
+    if(signIn.length>0){
+        var minSignIn=signIn[0];
+        var minSigninHours=minSignIn.getHours();
+        console.log("Sign in hour"+minSigninHours);
+        if(minSigninHours<7){ 
+            //add sign at 7 before 7
+            minSignIn.setHours(7,0,0);
+        }
+        //remove sign ins not between 7 and 7 
+        signIn=signIn.filter(function(timeRecord){
+            return timeRecord.getHours()>=7 && timeRecord.getHours()<19;
+        }) 
+
+    }
+    var signOut=records[i].signOut;
+    if(signOut.length>0){
+        var maxSignOut=signOut[signOut.length-1];
+        var maxSignOutHours=maxSignOut.getHours();
+        console.log("Sign in hour"+maxSignOutHours);
+        if(maxSignOutHours>15){
+            //add sign out at 7
+            maxSignOut.setHours(19,0,0);
+            // signOut.push(maxSignOut);
+        }
+        
+        //remove sign ins not between 7 and 7 
+        signOut=signOut.filter(function(timeRecord){
+            return timeRecord.getHours()>7 && timeRecord.getHours()<=19;
+        }) 
+
+
+    }
+    for(var j=0;j<signOut.length&&signIn.length>0;j++){
+        //console.log(signIn);
+        var min=signIn[0];
+        if(signOut[j]>min){
+            signIn=signIn.filter(function(timeRecord){
+                return timeRecord>min;
+            })
+            workedHours+=(signOut[j].getTime()-min.getTime())/(1000*3600);
+        }
+    }
+} 
+  var missingHours=requiredHours-workedHours;
+  if(missingHours>0){
+    usersToSend.push(user);
+
+  }        
+      }
+    }else{
+      return res.status(400).send("Invalid dates");
+  }
+  res.status(200).send(usersToSend);
+      
+    }
+
+}catch(error){
+    return res.status(500).send(error.message);
+}
+
+});
+
+router.post('/missingDays',async(req,res)=>{
+  try{
+    var monthToView=req.body.month;
+    var yearToView=req.body.year;
+    if(!monthToView||!yearToView){
+        //start or end not provided in body
+        return res.status(400).send("No dates provided");
+    }else{
+      var users=await staffMember.find();
+      var startDate=new Date(yearToView,monthToView,11);
+      var endDate;
+      if(monthToView==11){
+          endDate=new Date(yearToView+1,0,10);
+      
+      }else{
+          endDate=new Date(yearToView,monthToView+1,10);
+      }
+      if(startDate<endDate){
+        var usersToSend=[];
+      for(var i=0;i<users.length;i++){
+        var user=users[i];
+        var userId=user.id;
+        var userLeaves=[];
+        userLeaves=user.acceptedLeaves;
+        var allRecords=users.filter(function(record){
+          return record.id==userId;
+        })
+        var records=allRecords.filter(function(record){
+          var date=new Date(Date.parse(record.date));
+          return date>=startDate && date<endDate
+      })
+      var missingDays=[];   
+                    var d=startDate;
+                    while(d<=endDate){
+                        //loop over days from start to end 
+                       var day=d.getDay();
+                       if(day!==5 && day!==user.dayOffNumber){
+                           //not friday and not day off
+                           if(!userLeaves.includes(d)){
+                               //not a leave
+                            var check= records.filter(function(record){
+                                return record.date==d;
+                            })
+                            if(check<1){
+                                //if no records found then add to missing 
+                                missingDays.push(d);
+                            }
+
+                           }
+                       }
+                       d=new Date (d.setDate(d.getDate()+1));
+                    } 
+                    if(missingDays.length>0){
+                      usersToSend.push(user);
+                    }
+
+
+      }
+    }else{
+      return res.status(400).send("Invalid dates");
+  }
+  res.status(200).send(usersToSend);
+      
+    }
+
+}catch(error){
+    return res.status(500).send(error.message);
+}
+
+});
 
 module.exports = router;
