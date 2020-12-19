@@ -9,7 +9,6 @@ const course = require('../models/course');
 const idDb = require('../models/id');
 const attendance = require('../models/attendance');
 
-// Abl maykhosh to this route need a middlewear to verify that staff is hr 
 
 router.route('/addLocation').post( (req, res) => {
 location.findOne({room:req.body.room}).then(result =>{
