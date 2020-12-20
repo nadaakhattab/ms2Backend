@@ -163,12 +163,14 @@ router.post('/sendLeaveRequest',async(req,res)=>{
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
-        var hod=await departments.find({name:departmentReq});
+
+        var dept=await departments.find({name:departmentReq});
+        const hod= dept.HOD;
         if(hod){
-            if(leaveType=="Compensation" && !reqReason){
+            if(leaveType=="Compensation" && reqReason==undefined){
                 return res.status(400).send("Please provide reason for compensation leave");
             }else{
-                if(!reqReason){
+                if(reqReason==undefined){
                     reqReason="";
                 }
                 var request=await requests.create({

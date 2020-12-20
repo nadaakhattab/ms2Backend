@@ -11,7 +11,8 @@ date:{type:Date,required:true},
 course: {type:String},
 day: {type:String},
 slot: {type:String},
-location: {type:String}
+location: {type:String},
+slotId: {type:Number}
 }
 );
 module.exports=mongoose.model('request',requestSchema)
