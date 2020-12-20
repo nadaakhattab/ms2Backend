@@ -5,6 +5,7 @@ const bcryptjs=require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
+const requests=require('../models/requests');
 
 
 router.post('/logout', (req, res) => {
@@ -195,8 +196,6 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                     endDate=new Date(yearToView,monthToView+1,10);
                 }
                 if(startDate<endDate){
-                    var userLeaves=[];
-                    userLeaves=user.acceptedLeaves;
                     //get records between 2 provided dates
                     var allRecords=await attendance.find({id: userId});
                     var records=allRecords.filter(function(record){
@@ -209,9 +208,9 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                         //loop over days from start to end 
                        var day=d.getDay();
                        if(day!==5 && day!==user.dayOffNumber){
-                           //not friday and not day off
-                           if(!userLeaves.includes(d)){
-                               //not a leave
+                        var leaves= await requests.find({fromId:userId,type:"leave",
+                        leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
+                        if(!leaves){
                             var check= records.filter(function(record){
                                 return record.date==d;
                             })
@@ -220,7 +219,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                                 missingDays.push(d);
                             }
 
-                           }
+                        }
                        }
                        d=new Date (d.setDate(d.getDate()+1));
                     } 

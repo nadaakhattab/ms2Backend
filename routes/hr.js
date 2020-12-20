@@ -8,9 +8,9 @@ const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
 const attendance = require('../models/attendance');
+const requests=require('../models/requests');
 const academicMember = require('../models/academicMember');
 const validations = require('../validations/hr');
-
 const Joi = require('joi');
 
 const validateBody =(req, res,next)  =>  { try{ 
@@ -952,8 +952,6 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
       for(var i=0;i<users.length;i++){
         var user=users[i];
         var userId=user.id;
-        var userLeaves=[];
-        userLeaves=user.acceptedLeaves;
         var allRecords=users.filter(function(record){
           return record.id==userId;
         })
@@ -967,9 +965,9 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                         //loop over days from start to end 
                        var day=d.getDay();
                        if(day!==5 && day!==user.dayOffNumber){
-                           //not friday and not day off
-                           if(!userLeaves.includes(d)){
-                               //not a leave
+                        var leaves= await requests.find({fromId:userId,type:"leave",
+                        leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
+                        if(!leaves){
                             var check= records.filter(function(record){
                                 return record.date==d;
                             })
@@ -978,7 +976,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                                 missingDays.push(d);
                             }
 
-                           }
+                        }
                        }
                        d=new Date (d.setDate(d.getDate()+1));
                     } 

@@ -14,7 +14,9 @@ router.post('/sendReplacementRequest',async(req,res)=>{
         var reqDay=req.body.day;
         var reqLocation=req.body.location;
         var sendingId=req.headers.payload.id;
-        if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay){
+        var reqDate=req.body.date;
+
+        if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay||!reqDate){
             return res.status(400).send("Please provide id of replacement");
         }else{
             var sending=await academicMembers.find({id:sendingId,course:courseId});
@@ -29,7 +31,8 @@ router.post('/sendReplacementRequest',async(req,res)=>{
                     slot:reqSlot,
                     location:reqLocation,
                     course:courseId,
-                    day:reqDay
+                    day:reqDay,
+                    date:reqDate
                 });
                 return res.status(200).send(request);
             }else{
@@ -63,24 +66,29 @@ router.post('/sendSlotLinkingRequest',async(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var courseId=req.body.course;
-        var reqSlot=req.body.slot;
-        var reqDay=req.body.day;
-        var reqLocation=req.body.location;
+        var slotId=req.body.id;
         var course=await courses.findOne({name: courseId});
+        var todayDate=new Date();
+        todayDate.setHours(0,0,0);
         if(course){
-            var reqSlotValid=await slots.findOne({course:courseId,slot:reqSlot,location:reqLocation,day:reqDay});
+            var reqSlotValid=await slots.findOne({course:courseId,id:slotId});
             if(reqSlotValid){
-                var sendTo=course.coordinator;
-                var request=await requests.create({
-                    fromId: sendingId,
-                    toId:sendTo,
-                    type: "slotLinking",
-                    slot:reqSlot,
-                    location:reqLocation,
-                    course:courseId,
-                    day:reqDay
-                });
-                return res.status(200).send(request);
+                if(!reqSlotValid.instructor){
+                    var sendTo=course.coordinator;
+                    var request=await requests.create({
+                        fromId: sendingId,
+                        toId:sendTo,
+                        type: "slotLinking",
+                        slotId:slotId,
+                        course:courseId,
+                        date:todayDate
+                    });
+                    return res.status(200).send(request);
+
+                }else{
+                    return res.status(404).send("Slot already assigned");
+                }
+                
             }else{
                 return res.status(404).send("Slot not found");
             }
@@ -100,6 +108,8 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
         var hod=await departments.find({name:departmentReq});
+        var todayDate=new Date();
+        todayDate.setHours(0,0,0);
         if(hod){
             if(!reqReason){
                 reqReason="";
@@ -108,7 +118,8 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
                 fromId: sendingId,
                 toId:replacementId,
                 type: "changeDayOff",
-                reason: reqReason
+                reason: reqReason,
+                date:todayDate
             });
             return res.status(200).send(request);
 
@@ -163,9 +174,9 @@ router.post('/sendLeaveRequest',async(req,res)=>{
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
-
-        var dept=await departments.find({name:departmentReq});
-        const hod= dept.HOD;
+        var hod=await departments.find({name:departmentReq});
+        var todayDate=new Date();
+        todayDate.setHours(0,0,0);
         if(hod){
             if(leaveType=="Compensation" && reqReason==undefined){
                 return res.status(400).send("Please provide reason for compensation leave");
@@ -177,7 +188,8 @@ router.post('/sendLeaveRequest',async(req,res)=>{
                     fromId: sendingId,
                     toId:replacementId,
                     type: "replacement",
-                    reason: reqReason
+                    reason: reqReason,
+                    date:todayDate
                 });
                 return res.status(200).send(request);
 
@@ -218,8 +230,10 @@ router.delete('/cancelRequest/:id',async(req,res)=>{
 router.get('/schedule',async(req,res)=>{
     try{
         var userId=req.headers.params.id;
+        var todayDate=new Date();
+        todayDate.setHours(0,0,0);
         var scheduleSlots= await slots.find({id:userId});
-        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted"});
+        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",date:{$gte:todayDate}});
         var schedule={};
         if(scheduleSlots){
             schedule.slots=scheduleSlots;
