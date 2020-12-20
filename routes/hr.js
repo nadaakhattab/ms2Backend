@@ -966,7 +966,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                        var day=d.getDay();
                        if(day!==5 && day!==user.dayOffNumber){
                         var leaves= await requests.find({fromId:userId,type:"leave",
-                        date:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
+                        leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
                         if(!leaves){
                             var check= records.filter(function(record){
                                 return record.date==d;

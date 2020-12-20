@@ -6,7 +6,8 @@ course: String,
 day: String,
 slot: String, //slot number
 instructor: String ,// id of instructor
-location: String
+location: String,
+slotId: Number
 }
 );
 module.exports=mongoose.model('slot',slotSchema);
