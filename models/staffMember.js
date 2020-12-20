@@ -11,14 +11,8 @@ const staffMemberSchema=new schema({
     type: {type:String,required:true},
     mobileNumber: String,
     dayOff: String,
-    dayOffNumber:Number,
-    acceptedLeaves: [Date],
-    //academic member
-    // faculty: String,
-    // department: String,
-    // Courses: [String],    
+    dayOffNumber:Number,  
     firstLogin: {type:Boolean,default:true},
-
 }
 );
 
