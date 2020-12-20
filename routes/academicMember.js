@@ -14,9 +14,9 @@ router.post('/sendReplacementRequest',async(req,res)=>{
         var reqDay=req.body.day;
         var reqLocation=req.body.location;
         var sendingId=req.headers.payload.id;
-        var todayDate=new Date();
-        todayDate.setHours(0,0,0);
-        if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay){
+        var reqDate=req.body.date;
+
+        if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay||!reqDate){
             return res.status(400).send("Please provide id of replacement");
         }else{
             var sending=await academicMembers.find({id:sendingId,course:courseId});
@@ -32,7 +32,7 @@ router.post('/sendReplacementRequest',async(req,res)=>{
                     location:reqLocation,
                     course:courseId,
                     day:reqDay,
-                    date:todayDate
+                    date:reqDate
                 });
                 return res.status(200).send(request);
             }else{
@@ -230,8 +230,10 @@ router.delete('/cancelRequest/:id',async(req,res)=>{
 router.get('/schedule',async(req,res)=>{
     try{
         var userId=req.headers.params.id;
+        var todayDate=new Date();
+        todayDate.setHours(0,0,0);
         var scheduleSlots= await slots.find({id:userId});
-        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted"});
+        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",date:{$gte:todayDate}});
         var schedule={};
         if(scheduleSlots){
             schedule.slots=scheduleSlots;
