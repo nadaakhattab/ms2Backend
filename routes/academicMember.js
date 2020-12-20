@@ -5,6 +5,11 @@ const requests=require('../models/requests');
 const departments=require('../models/department');
 const slots=require('../models/slot');
 const courses=require('../models/course');
+const staffMember = require('../models/staffMember');
+const attendance = require('../models/attendance');
+const academicMember = require('../models/academicMember');
+const { request } = require('express');
+const { date } = require('joi');
 
 router.post('/sendReplacementRequest',async(req,res)=>{
     try{
@@ -191,31 +196,203 @@ router.get('/viewRequests/:status',async(req,res)=>{
 
 //add code
 router.post('/sendLeaveRequest',async(req,res)=>{
-    try{
-        var sendingId=req.headers.payload.id;
+
+try{
+    if(req.headers.payload.type=="HR"){
+         res.status(301).send("HR submit leave requests");
+    }
+      var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
+<<<<<<< Updated upstream
         var hod=await departments.find({_id:departmentReq});
+=======
+>>>>>>> Stashed changes
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
+        var dept=await departments.find({name:departmentReq});
+        const hod= dept.HOD;
         if(hod){
-            if(leaveType=="Compensation" && !reqReason){
-                return res.status(400).send("Please provide reason for compensation leave");
-            }else{
-                if(!reqReason){
-                    reqReason="";
+            switch(leaveType){
+            case 'Annual':
+                if(date>leaveStartDate){
+                     res.status(301).send("Can't submit request: Deadline passed"); 
                 }
-                var request=await requests.create({
+                else{
+                    request.findOne({ fromId: sendingId,type:"Replacement", status:"Accepted",leaveStartDate,leaveEndDate}).then ((acceptedRequest=>{
+                        academicMember.findOne({id:acceptedRequest.instructor}).then (replacement=>{
+                            //look if there is a replacement for his slots in this day & instructor teaches same course that is accepted if true {
+                            if(replacement){
+                                //there is a replacement person 
+                            academicMember.findOne({id:sendingId}).then((currUser)=>{
+                                if(currUser.course==replacement.course){
+                                var request=await requests.create({
+                                                fromId: sendingId,
+                                                toId:replacementId,
+                                                type: "Annual",
+                                                reason: reqReason,
+                                                date:todayDate,
+                                                replacement:replacement.id
+                                        
+                                            });
+                                            return res.status(200).send(request);
+                                }
+                                else{
+                                    res.status(301).send("Error:Replacement Staff doesnt teach the same Course");
+                                }
+                            })
+                        }
+                        //No replacement
+                         //send the request with request.replacement= instructor that accepted his request
+// }else { send without a replacement so HOD WILL DECIDE}
+                          var request=await requests.create({
+                                                fromId: sendingId,
+                                                toId:replacementId,
+                                                type: "Annual",
+                                                reason: reqReason,
+                                                date:todayDate,
+                                        
+                                            });
+                                            return res.status(200).json({
+                                                message:"Your request has been submitted. It is up to the HOD to accept/decline. since you had no replacement instructors during your leave",
+                                                data:request});
+                        });     
+                    }));
+
+                }
+                break;
+
+            case'Accidental':
+                staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
+                   let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
+                   duration= duration/(1000*3600*24);
+                if(member.annualLeaves-duration>0.9 && duration<=6){
+                const newLeaves= member.annualLeaves-duration;
+                    staffMember.findOneAndUpdate({id:req.headers.payload.id},{$set:{annualLeaves:newLeaves}}).then(updatedmem=>{
+                        requests.create({
                     fromId: sendingId,
                     toId:replacementId,
-                    type: "replacement",
+                    type: "Accidental",
                     reason: reqReason,
-                    date:todayDate
+                    date:todayDate,
+                    leaveStartDate:req.body.leaveStartDate,
+                    leaveEndDate:req.body.leaveEndDate,
+                    //status = accepted?? since already etkhasamo men his leaves?
+                }).then(request=>{
+                   return res.status(200).send(request);  
                 });
-                return res.status(200).send(request);
+                        });    
+                    }
+                    else {
+                        res.status(301).send("Can't Make leave request as number of leaves exceeded permited");
+                    }});
+                    break;
+            case"Sick":
+            let dif= date.getTime()-leaveStartDate.getTime();
+            dif= dif/(1000*3600*24);
+            if(dif<=3){
+            if(req.body.documents==undefined){
+                res.status(301).send("Error Must Submit Documents for proof");
+            }else {
+            requests.create({
+                    fromId: sendingId,
+                    toId:replacementId,
+                    type: "Sick",
+                    reason: reqReason,
+                    date:todayDate,
+                    leaveStartDate:req.body.leaveStartDate,
+                    leaveEndDate:req.body.leaveEndDate,
+                    documents:req.body.documents
+                }).then(request=>{
+                   return res.status(200).send(request);  
+                });
+}
+            }
+            else{
+                res.status(301).send("Can't submit request: Deadline passed");
+            }
+            break;
 
+
+            case"Maternity":
+ staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
+     if(member.gender=="female"){
+ if(req.body.documents==undefined){
+                res.status(301).send("Error Must Submit Documents for proof");
+            }else {
+            requests.create({
+                    fromId: sendingId,
+                    toId:replacementId,
+                    type: "Maternity",
+                    reason: reqReason,
+                    date:todayDate,
+                    leaveStartDate:req.body.leaveStartDate,
+                    leaveEndDate:req.body.leaveEndDate,
+                    documents:req.body.documents
+                }).then(request=>{
+                   return res.status(200).send(request);  
+                });
+                }}
+                else{
+                    res.status(301).send("ERROR: Maternity leaves are for Females only");
+                }
+            });
+            break;
+
+            case"Compensation":
+           
+            //get month &year from leavestartdate && get day from his dayoff
+              if(reqReason==undefined){
+                return res.status(400).send("Please provide reason for compensation leave");
+                 } 
+
+                  //find a day in this month 
+            attendance.findMany({id:fromId}).then(result=>{
+                if(result){
+//filter el result bel day w el month
+
+   var startDate=new Date(leaveStartDate.getYear(),leaveStartDate.getMonth(),11);
+                var endDate;
+                if(leaveStartDate.getMonth()==11){
+                    endDate=new Date(leaveStartDate.getYear()+1,0,10);
+                
+                 }else{
+                    endDate=new Date(leaveStartDate.getYear(),leaveStartDate.getMonth()+1,10);
+                }
+
+                   var records=result.filter(function(record){
+                            var newdate=new Date(Date.parse(record.date));
+                            return newdate>=startDate && newdate<endDate
+                        })
+
+                for(let i=0;i<records.length;i++){
+                       let day=new Date(Date.parse(records[i].date)).getDay();
+                        if(day==user.dayOffNumber){
+                          
+                     requests.create({
+                    fromId: sendingId,
+                    toId:replacementId,
+                    type: "Compensation",
+                    reason: reqReason,
+                    date:todayDate,
+                    leaveStartDate:req.body.leaveStartDate,
+                    leaveEndDate:req.body.leaveEndDate,
+               
+                }).then(request=>{
+                   return res.status(200).send(request);  
+                });
+
+                        }
+                }
+             
+                }else{
+                    res.status(301).send("You didn't attend any extra day form your day off for compensation");
+
+                }
+            })
+            break;
             }
         }else{
             return res.status(404).send("HOD not found");
@@ -223,6 +400,8 @@ router.post('/sendLeaveRequest',async(req,res)=>{
     }catch(error){
         return res.status(500).send(error.message);
     }
+
+
 
 });
 

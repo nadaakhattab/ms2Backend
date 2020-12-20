@@ -680,3 +680,28 @@ takes :
 /editDepartment shouls take name & only the edited fields
 
 
+
+.........Coordinator
+
+Body of addSlot
+{
+    "course":"advanced",
+    "day":"Thursday",
+    "slot":"5",
+    "instructor":"as-20",
+    "location":"c7.202"
+
+}
+result successfully created
+
+
+Body of editSlot
+{"id":3,
+    "course":"advanced",
+    "day":"teysday",
+    "slot":"5",
+    "instructor":"as-20",
+    "location":"c7.22"
+
+}
+result success message
