@@ -6,6 +6,8 @@ const verify= require('./routes/tokenverification');
 const externalRoutes=require('./routes/externalRoutes');
 const coordinatorRoutes=require('./routes/coordinator');
 const academicMemberRoutes=require('./routes/academicMember');
+const hodRoutes=require('./routes/hod');
+const ciRoutes=require('./routes/ci')
 
 const app = express();
 app.use(bodyParser.json());
@@ -45,9 +47,29 @@ function checkAM(req, res, next) {
   }
 }
 
+function checkHOD(req,res,next){
+  if(req.headers.payload.type=="HOD"){
+      console.log("HOD Confirmed");
+      return next();}
+      else{
+          res.status(400).send("UnAuthorized: Not Head of Department")
+      }
+  }
+
+  function checkCI(req,res,next){
+      if(req.headers.payload.type=="CI"){
+          console.log("CI Confirmed");
+          return next();}
+          else{
+              res.status(400).send("UnAuthorized: Not a Course Instructor")
+          }
+      }
+
 app.use ("/hr",checkHr,hrRoutes);
 app.use ("/coordinator",checkCC,coordinatorRoutes);
 app.use("/academicMember",checkAM,academicMemberRoutes);
+app.use("/hod",checkHOD, hodRoutes);
+app.use("/ci",checkCI,ciRoutes)
 app.use("/staffMember",staffMemberRoutes);
 module.exports=app;
 
