@@ -81,7 +81,7 @@ router.post('/resetPassword',async(req,res)=>{
     try{
         const inputEmail=req.body.email;
         if(!inputEmail){
-            return res.status(400).send("Please enter email and password");
+            return res.status(400).send("Please enter email");
         }else{
             const user= await staffMembers.findOne({email:inputEmail});
             if(!user){

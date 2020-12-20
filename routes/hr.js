@@ -380,11 +380,11 @@ res.send("location not found");
 
  });
 
- router.get('/viewAttendance/:id',async(req,res)=>{
+ router.get('/viewAttendance/:id/:yearToView/:monthToView',async(req,res)=>{
   try{
     var userId=req.params.id;
-    var monthToView=req.body.month;
-    var yearToView=req.body.year;
+    var monthToView=parseInt(req.params.monthToView-1);
+    var yearToView=parseInt(req.params.yearToView);
     if(!yearToView||!monthToView){
         return res.status(400).send("Please enter month and year") 
 
@@ -498,11 +498,11 @@ router.post('/signOut',async(req,res)=>{
 
 });
 
-router.post('/missingHours',async(req,res)=>{
+router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
 
   try{
-    var monthToView=req.body.month;
-    var yearToView=req.body.year;
+    var monthToView=parseInt(req.params.monthToView-1);
+    var yearToView=parseInt(req.params.yearToView);
     if(!monthToView||!yearToView){
         //start or end not provided in body
         return res.status(400).send("No dates provided");
@@ -599,10 +599,10 @@ router.post('/missingHours',async(req,res)=>{
 
 });
 
-router.post('/missingDays',async(req,res)=>{
+router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
   try{
-    var monthToView=req.body.month;
-    var yearToView=req.body.year;
+    var monthToView=parseInt(req.params.monthToView-1);
+    var yearToView=parseInt(req.params.yearToView);
     if(!monthToView||!yearToView){
         //start or end not provided in body
         return res.status(400).send("No dates provided");

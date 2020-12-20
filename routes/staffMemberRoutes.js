@@ -6,7 +6,7 @@ const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
 
- 
+
 router.post('/logout', (req, res) => {
     try{
         const refreshToken=req.body.token;
@@ -37,7 +37,7 @@ router.post('/updateProfile',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputMobile=req.body.mobileNumber;
-        var inputOfficeLocation=req.body.officeLocation;
+        // var inputOfficeLocation=req.body.officeLocation;
         var inputEmail=req.body.email;
         var fieldsToUpdate={};
         if(!inputMobile && !inputOfficeLocation && !inputEmail){
@@ -46,9 +46,9 @@ router.post('/updateProfile',async(req,res)=>{
             if(inputMobile){
                 fieldsToUpdate.mobileNumber=inputMobile;
             }
-            if(inputOfficeLocation){
-                fieldsToUpdate.officeLocation=inputOfficeLocation;
-            }
+            // if(inputOfficeLocation){
+            //     fieldsToUpdate.officeLocation=inputOfficeLocation;
+            // }
             if(inputEmail){
                 fieldsToUpdate.email=inputEmail;
             }
@@ -70,7 +70,7 @@ router.post('/changePassword',async(req,res)=>{
             const salt=await bcryptjs.genSalt(10);
             var hashedPassword=await bcryptjs.hash(inputPassword,salt);           
             var user=await staffMembers.findOneAndUpdate({id:userId},{password: hashedPassword},{new:true});
-            res.status(200).send(user);
+            res.status(200).send("Password changed successfully");
         }
     }catch(error){
         return res.status(500).send(error.message);
@@ -135,11 +135,11 @@ router.post('/signOut',async(req,res)=>{
 
 });
 
-router.post('/viewAttendance',async(req,res)=>{
+router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
     try{
     var userId=req.headers.payload.id;
-    var monthToView=req.body.month;
-    var yearToView=req.body.year;
+    var monthToView=parseInt(req.params.monthToView-1);
+    var yearToView=parseInt(req.params.yearToView);
     if(!yearToView||!monthToView){
         return res.status(400).send("Please enter month and year") 
 
@@ -175,10 +175,10 @@ router.get('/viewAllAttendance',async(req,res)=>{
     }
 });
 
-router.post('/missingDays',async(req,res)=>{
+router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
     try{
-        var monthToView=req.body.month;
-        var yearToView=req.body.year;
+        var monthToView=parseInt(req.params.monthToView-1);
+        var yearToView=parseInt(req.params.yearToView);
         if(!monthToView||!yearToView){
             //start or end not provided in body
             return res.status(400).send("No dates provided");
@@ -239,10 +239,10 @@ router.post('/missingDays',async(req,res)=>{
     }
 });
 
-router.post('/hours',async(req,res)=>{
+router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
     try{
-        var monthToView=req.body.month;
-        var yearToView=req.body.year;
+        var monthToView=parseInt(req.params.monthToView-1);
+        var yearToView=parseInt(req.params.yearToView);
         if(!monthToView||!yearToView){
             //start or end not provided in body
             return res.status(400).send("No dates provided");
@@ -254,7 +254,7 @@ router.post('/hours',async(req,res)=>{
                 var endDate;
                 if(monthToView==11){
                     endDate=new Date(yearToView+1,0,10);
-                
+                                
                 }else{
                     endDate=new Date(yearToView,monthToView+1,10);
                 }
@@ -350,5 +350,88 @@ router.post('/hours',async(req,res)=>{
     }
 
 });
+
+
+//in course instructor
+// router.post('/assignCourseCordinator',async(req,res)=>{
+//     try{
+//         var taId=req.body.id;
+//         var courseName=req.body.courseName;
+//         if(!idToAssign||!courseName){
+//             return res.status(400).send("Please provide course name and ta id");
+//         }else{
+//             var course=courses.find({name:courseName});
+//             if(course.instructors.includes(userId)){
+//                 var user=await staffMembers.findOne({id: taId});
+//                 if(user){
+//                     if(user.type=="TA"){
+//                         var course=await courses.findOneAndUpdate({name:courseName},{coordinator: taId},{new:true});
+//                         res.status(200).send(course);
+//                     }else{
+//                         return res.status(400).send("Course coordinator must be a TA");
+//                     }
+//                 }else{
+//                     return res.status(401).send("Invalid id");
+//                 }
+//             }else{
+//                 return res.status(400).send("Can only assign in your course");
+//             }
+//         }
+//     }catch(error){
+//         return res.status(500).send(error.message);
+//     }
+
+
+// });
+
+// router.post('/assignSlot',async(req,res)=>{
+//     try{
+//         var userId=req.headers.payload.id;
+//         var idToAssign=req.body.id;
+//         var courseName=req.body.courseName;
+//         var dayToAssign=req.body.day;
+//         var slotToAssign=req.body.slot;
+//         var locationToAssign=req.body.slot;
+//         if(!idToAssign||!courseName){
+//             return res.status(400).send("Please provide course name and ta id");
+//         }else{
+//             var course=courses.find({name:courseName});
+//             if(course.instructors.includes(userId)){
+//                 var user=await staffMembers.findOne({id: idToAssign});
+//                 if(user.type=="HOD"||user.type=="TA"||user.type=="CI"||user.type=="CC"){
+//                     var slot=await slots.findOne({location:locationToAssign,slot:slotToAssign,day:dayToAssign});
+//                     if(slot){
+//                         if(slot.course==courseName){
+//                             if(slot.instructor){
+//                                 var slot=await slots.findOneAndUpdate({location:locationToAssign,slot:slotToAssign,day:dayToAssign},
+//                                     {instructor: idToAssign},{new:true});
+    
+//                             }else{
+//                                 return res.status(400).send("Slot assigned to another TA");
+//                             }
+    
+//                         }else{
+//                             return res.status(400).send("Slot assigned to another course");
+    
+//                         }
+    
+//                     }else{
+//                         return res.status(401).send("Invalid slot");
+    
+//                     }
+//                 }else{
+//                     return res.status(400).send("Id to assign must be an academic member");
+//                 }
+
+//             }else{
+//                 return res.status(400).send("Can only assign in your course");
+//             }
+//         }
+//     }catch(error){
+//         return res.status(500).send(error.message);
+//     }
+
+
+// });
 
 module.exports=router;
