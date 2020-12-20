@@ -472,10 +472,10 @@ B)Functionalities:
                     Functionality: send replacement request
                     Route: /academicMember/sendReplacementRequest
                     Request type: POST
-                    RequestBody: course is mongodb id for course CS
+                    RequestBody: 
                     {
                         "id":"12",
-                        "course":"5fdfa935d6361919d8df027c",
+                        "course":"c1",
                         "slot": "1",
                         "day":"sunday",
                         "location":"c7.204",
@@ -525,9 +525,9 @@ B)Functionalities:
                 Functionality: send slot linking request to course coordinator
                 Route: /academicMember/sendSlotLinkingRequest
                 Request type: POST
-                RequestBody: course is mongo db id for course CS and slot is slot id
+                RequestBody: 
                 {
-                    "course":"5fdfa935d6361919d8df027c",
+                    "course":"c1",
                     "slot":1
                 }
                 Response: returns created slot linking request

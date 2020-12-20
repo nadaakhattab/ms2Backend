@@ -23,18 +23,28 @@ router.route('/addInstructor').post( (req, res) => {
             if(dep){
                 var instructor=await staffMember.findOne({id:inputInstructor,type:"CI"});
                 if(instructor){
-                    var vCourse=await course.findOne({_id:course});
+                    var vCourse=await course.findOne({name:course});
                     if(vCourse){
                         var newInstructors=vCourse.instructors;
                         newInstructors.push(inputInstructor);
                         var updated=await course.findOneAndUpdate({_id:course},{instructors:newInstructors},{new:true});
-                        var academicMembers=await academicMember.create({
-                            id:inputInstructor,
-                            course:inputCourse,
-                            department:dep._id,
-                            faculty: dep.faculty
-                        });
-    
+                        if(updated){
+                            var academicMembers=await academicMember.create({
+                                id:inputInstructor,
+                                course:inputCourse,
+                                department:dep._id,
+                                faculty: dep.faculty
+                            });
+                            if(academicMembers){
+                                return res.status(200).send(updated);
+
+                            }
+
+                        }else{
+                            return res.status(500).send("Error adding course");
+
+                        }
+  
                     }else{
                         return res.status(400).send("Invalid course");
                         
@@ -57,18 +67,28 @@ router.route('/addInstructor').post( (req, res) => {
 
      });
 
-    router.route('/editinstructor').put((req, res) => {
-    course.updateOne({instructors:req.body.instructors},{$set:{...req.body}}).then(result =>{
-        // error message
-        console.log(result);
-        if (result.nModified!=0){
-            
-            res.send("edited");}
-        else {
-      res.send(" doesn't exist");
-        }
-      });
-       });
+router.route('/updateInstructor').put((req, res) => {
+    try{
+
+    }catch(error){
+
+    }
+
+
+
+
+
+        course.updateOne({instructors:req.body.instructors},{$set:{...req.body}}).then(result =>{
+            // error message
+            console.log(result);
+            if (result.nModified!=0){
+                
+                res.send("edited");}
+            else {
+          res.send(" doesn't exist");
+            }
+          });
+           });
 
 
       router.route('/deleteinstructor').delete((req, res) => {

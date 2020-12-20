@@ -84,7 +84,7 @@ router.post('/sendSlotLinkingRequest',async(req,res)=>{
         if(!courseId||!slotId){
             return res.status(400).send("Please provide course name and replacement id");
         }else{
-            var course=await courses.findOne({_id: courseId});
+            var course=await courses.findOne({name: courseId});
             var todayDate=new Date();
             todayDate.setHours(0,0,0);
             if(course){
@@ -128,7 +128,7 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
         var sending=await academicMembers.findOne({id:sendingId});
         if(sending){
             var departmentReq=sending.department;
-            var hod=await departments.findOne({_id:departmentReq});
+            var hod=await departments.findOne({name:departmentReq});
             var todayDate=new Date();
             todayDate.setHours(0,0,0);
             if(hod){
