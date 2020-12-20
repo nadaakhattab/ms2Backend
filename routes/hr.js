@@ -968,13 +968,17 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                         var leaves= await requests.find({fromId:userId,type:"leave",
                         leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
                         if(!leaves){
+                          if(leaves.length>0){
                             var check= records.filter(function(record){
-                                return record.date==d;
-                            })
-                            if(check<1){
-                                //if no records found then add to missing 
-                                missingDays.push(d);
-                            }
+                              return record.date==d;
+                          })
+                          if(check<1){
+                              //if no records found then add to missing 
+                              missingDays.push(d);
+                          }
+
+                          }
+
 
                         }
                        }

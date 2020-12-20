@@ -211,13 +211,17 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                         var leaves= await requests.find({fromId:userId,type:"leave",
                         leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
                         if(!leaves){
-                            var check= records.filter(function(record){
-                                return record.date==d;
-                            })
-                            if(check<1){
-                                //if no records found then add to missing 
-                                missingDays.push(d);
+                            if(leaves.length>0){
+                                var check= records.filter(function(record){
+                                    return record.date==d;
+                                })
+                                if(check<1){
+                                    //if no records found then add to missing 
+                                    missingDays.push(d);
+                                }
+
                             }
+
 
                         }
                        }
@@ -274,7 +278,6 @@ router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
                     var workedHours=0;    
                     for(var i=0;i<records.length;i++){
                         var day=new Date(Date.parse(records[i].date)).getDay();
-                        //console.log("Day"+day);
                         if(day!=5 && day!=user.dayOffNumber){
                             requiredHours+=8.24
                         }
