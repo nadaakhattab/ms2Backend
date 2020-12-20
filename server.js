@@ -20,4 +20,5 @@ mongoose.connect(URL,connectionParams).then(async()=>{
     console.log("Error connecting to db"+error);
 }); 
 
-app.listen()
+app.listen();
+
