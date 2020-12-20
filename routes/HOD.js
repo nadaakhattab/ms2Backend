@@ -23,16 +23,16 @@ router.route('/addInstructor').post( (req, res) => {
             if(dep){
                 var instructor=await staffMember.findOne({id:inputInstructor,type:"CI"});
                 if(instructor){
-                    var vCourse=await course.findOne({name:course});
+                    var vCourse=await course.findOne({name:inputCourse});
                     if(vCourse){
                         var newInstructors=vCourse.instructors;
                         newInstructors.push(inputInstructor);
-                        var updated=await course.findOneAndUpdate({_id:course},{instructors:newInstructors},{new:true});
+                        var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
                         if(updated){
                             var academicMembers=await academicMember.create({
                                 id:inputInstructor,
                                 course:inputCourse,
-                                department:dep._id,
+                                department:dep.name,
                                 faculty: dep.faculty
                             });
                             if(academicMembers){
