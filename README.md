@@ -1,7 +1,7 @@
 1)GET REQUEST WITH PARAMETERS
 Functionality: 
 Route: 
-Request type: POST
+Request type: GET
 Parameters:
 Example of how to call route:
 Response:
@@ -23,7 +23,7 @@ Request Header Params: includes payload object which is provided at token verifi
 3)GET REQUEST WITHOUT PARAMETERS
 Functionality: 
 Route: 
-Request type: POST
+Request type: GET
 Response:
 *Note:
 Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -434,21 +434,207 @@ B)Functionalities:
 
         4.4)Academic Member Functionalities 
 
-            a)
+            a)View their own including all teaching activities and replacements
+                Functionality: view schedule
+                Route: /academicMember/schedule
+                Request type: GET
+                Response: array of assigned schedule slots and array of upcoming replacement slots
+                {
+                    "slots": [
+                        {
+                            "_id": "5fde48ba97fdb6097746b1e0",
+                            "id": 3,
+                            "course": "advanced",
+                            "slot": "3",
+                            "day": "Friday",
+                            "__v": 0,
+                            "instructor": "1"
+                        }
+                    ],
+                    "replacements": [
+                        {
+                            "status": "Accepted",
+                            "_id": "5fdf9aded403214ebd266ca9",
+                            "type": "replacement",
+                            "fromId": "1",
+                            "toId": "1",
+                            "date": "2020-12-25T22:00:00.000Z",
+                            "slotId": 3
+                        }
+                    ]
+                }               
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                
 
-            b)
+            b)Send and view replacement requests
+                i)Send replacement request
+                    Functionality: send replacement request
+                    Route: /academicMember/sendReplacementRequest
+                    Request type: POST
+                    RequestBody:
+                    {
+                        "id":"12",
+                        "course":"CS",
+                        "slot": "1",
+                        "day":"sunday",
+                        "location":"c7.204",
+                        "date":"12/25/2020"
+                    }                    
+                    Response: returns creates request with status as pending
+                    {
+                        "status": "Pending",
+                        "_id": "5fdfa935d6361919d8df027c",
+                        "fromId": "1",
+                        "toId": "12",
+                        "type": "replacement",
+                        "slot": "1",
+                        "location": "c7.204",
+                        "course": "CS",
+                        "day": "sunday",
+                        "date": "2020-12-24T22:00:00.000Z",
+                        "__v": 0
+                    }                    
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member 
 
-            c)
+                ii)  
+                    Functionality: view replacement requests sent to me
+                    Route: /academicMember/viewReplacementRequests
+                    Request type: GET
+                    Response: array of replacement requests sent to me each like the following
+                    {
+                        "status": "Pending",
+                        "_id": "5fdfa4dc5164763108a0a268",
+                        "fromId": "12",
+                        "toId": "1",
+                        "type": "replacement",
+                        "slot": "1",
+                        "location": "c7.204",
+                        "course": "CS",
+                        "day": "sunday",
+                        "date": "2020-12-24T22:00:00.000Z",
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                        
 
-            d)
+            c)Send slot linking request
+                Functionality: send slot linking request to course coordinator
+                Route: /academicMember/sendSlotLinkingRequest
+                Request type: POST
+                RequestBody:
+                {
+                    "course":"CS",
+                    "slot":1
+                }
+                Response: returns created slot linking request
+                {
+                    "status": "Pending",
+                    "_id": "5fdfad9284dfad32489e3cd0",
+                    "fromId": "1",
+                    "toId": "as-2",
+                    "type": "slotLinking",
+                    "course": "CS",
+                    "date": "2020-12-19T22:00:00.434Z",
+                    "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+            d)Send change day off request
+                Functionality: send change day off request to HOD
+                Route: /academicMember/sendChangeDayOffRequest
+                Request type: POST
+                RequestBody: reason is optional can also send an empty body
+                {
+                    "reason":"req"
+                }
+                Response: returns created change day off request
+                {
+                    "status": "Pending",
+                    "_id": "5fdfb1f1375893216869af34",
+                    "fromId": "1",
+                    "toId": "1",
+                    "type": "changeDayOff",
+                    "reason": "req",
+                    "date": "2020-12-19T22:00:00.170Z",
+                    "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
             e)
 
             f)
             
-            g)
+            g)View submitted requests
+                i)View all submitted requests
+                    Functionality: get all requests that I previously sent
+                    Route: /academicMember/viewRequests
+                    Request type: GET
+                    Response: array of requests each of the following format
+                    {
+                        "status": "Pending",
+                        "_id": "5fdfa54626a6a437e04a4213",
+                        "fromId": "1",
+                        "toId": "12",
+                        "type": "replacement",
+                        "slot": "1",
+                        "location": "c7.204",
+                        "course": "CS",
+                        "day": "sunday",
+                        "date": "2020-12-24T22:00:00.000Z",
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-            h)                           
+                ii)View submitted requests with specific status 
+                    Functionality: get all Accepted/Pending/Rejected requests sent by me
+                    Route: /academicMember/:status
+                    Request type: GET
+                    Parameters: status is Accepted/Pending/Rejected based on request status criteria I want to view
+                    Example of how to call route: /academicMember/viewRequests/Rejected
+                    Response: array of requests sent by me with provided status in parameters each of the following format
+                    {
+                        "status": "Rejected",
+                        "_id": "5fdfb1799e83011954fd2596",
+                        "fromId": "1",
+                        "toId": "1",
+                        "type": "changeDayOff",
+                        "date": "2020-12-19T22:00:00.888Z",
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member             
+
+            h)Cancel a pending request or cancel a leave request whose day is yet to come
+                Functionality: cancel request that is still being processed(pending) or cancel a leave request that i did not use yet
+                Route: /academicMember/cancelRequest/:id
+                Request type: DELETE
+                Parameters: id is the mongodb id of the request I want to cancel
+                Example of how to call route: /academicMember/cancelRequest/5fdfb1f1375893216869af34
+                Response: returns deleted request
+                {
+                    "status": "Pending",
+                    "_id": "5fdfb1f1375893216869af34",
+                    "fromId": "1",
+                    "toId": "1",
+                    "type": "changeDayOff",
+                    "reason": "req",
+                    "date": "2020-12-25T22:00:00.170Z",
+                    "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                       
         
 
                       
