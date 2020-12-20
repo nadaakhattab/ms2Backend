@@ -49,7 +49,6 @@ app.use ("/hr",checkHr,hrRoutes);
 app.use ("/coordinator",checkCC,coordinatorRoutes);
 app.use("/academicMember",checkAM,academicMemberRoutes);
 app.use("/staffMember",staffMemberRoutes);
-
 module.exports=app;
 
 

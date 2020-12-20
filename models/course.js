@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 const schema=mongoose.Schema;
 const courseSchema=new schema({
-name: String, // unique
+name: {type:String, unique:true, required:true},
 coordinator: String, //Must be one of the TAs --> RESPRESENTS THE ID
 instructors :[String], //ID
 TAs: [String], //id

@@ -9,17 +9,24 @@ const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
 
+// Add 1 slot do we need another for many slots??
 
-// add 1 slot
 router.route('/addSlot').post( (req, res) => {
     // law ha-assign an instructor need to chcek that he exists first
-slot.findOne({ id:req.body.id}).then(result =>{
-  // error message
-  if (result){res.send("SlotID already exists");}
+slot.findOne({slot: req.body.slot, day: req.body.day, location: req.body.location}).then(result =>{
+  if (result){res.status(300).send("Can't Create Slot: Location already taken");}
   else {
-slot.create({id:req.body.id,course:req.body.course, slot: req.body.slot, day: req.body.day, instructor:req.body.instructor}).then(result => {
-         res.send(result);
-     });
+ let newId;
+    idDb.findOne({name:"slot"}).then(idSlot =>{
+        newId= idSlot.count+1;
+        // {id:newId,course:req.body.course, slot: req.body.slot, day: req.body.day, instructor:req.body.instructor,location: req.body.location}
+      return slot.create({...req.body});
+    }).then(()=>{
+        idDb.update({name:"slot"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send(result);
+        })
+    });
+
   }
 }).catch(err => {
     res.status(500).send(`Server Error:${err} `);
@@ -31,15 +38,47 @@ slot.create({id:req.body.id,course:req.body.course, slot: req.body.slot, day: re
 
 
 router.route('/editSlot').put((req, res) => {
-slot.updateOne({id:req.body.id},{$set:{...req.body}}).then(result =>{
-  // error message
-  console.log(result);
-  if (result.nModified!=0){ 
-      res.send("edited");}
-  else {
-res.send("Slot doesn't exist");
-  }
+    const toEdit= {}
+    if(req.body.course){
+        toEdit.course=req.body.course;
+    }
+      if(req.body.slot){
+        toEdit.slot=req.body.slot;
+    }
+      if(req.body.day){
+        toEdit.day=req.body.day;
+    }
+      if(req.body.instructor){
+        toEdit.instructor=req.body.instructor;
+    }
+        if(req.body.location){
+        toEdit.location=req.body.location;
+    }
+
+slot.findOne({id:req.body.id}).then(oldSlot =>{
+    slot.findOne({slot:(toEdit.slot?toEdit.slot:oldSlot.slot), 
+        day:(toEdit.day?toEdit.day:oldSlot.day),
+         location:(toEdit.location?toEdit.location:oldSlot.location),
+    }).then(similarSlot =>{
+        if(similarSlot && similarSlot.id!=oldSlot.id){
+            res.status(300).send("Location already taken in desired slot");
+        }
+else {
+    slot.findOneAndUpdate({id:req.body.id},{$set:{...toEdit}},{new: true}).then(result =>{
+        res.status(200).send("Success");
+}).catch(err =>{
+    console.log(err);
+    res.status(500).send("Database Error: Can't be Updated");
 });
+}
+
+    });
+
+}).catch(err=>{
+    res.status(300).send("Slot Doesn't Exist");
+})
+    
+
  });
 
 
@@ -65,45 +104,68 @@ console.log(req.headers.payload.id);
            else {
                res.send("No requests");
            }
-           
-       
     });}
 
     });
 });
 
 
-// adds slot linking request Extra remove it if done
-router.route('/addRequests').post( (req, res) => {
-
-   linkingRequest.updateOne({id:req.body.id},{$set:{accepted:req.body.accepted}}).then(result =>{
-  // error message
+router.route('/replyRequest').post( (req, res) => {
+   linkingRequest.findOneAndUpdate({id:req.body.id},{$set:{accepted:req.body.accepted}}, {
+          new: true,
+        }).then(result =>{
   console.log(result);
-  if (result.nModified!=0){ 
-
 if(accepted){
-    // Add it to sender schedule el hwa instructor of linkingrequest el baghayaraaha now
-
-    
+slot.findOneAndUpdate({id: req.body.id},{$set:{instructor:result.instructor}}).then(slotRes =>{
+    res.status(200).send("Succesffuly linked");
+});
 }
-      res.send("edited");}
-  else {
-res.send("Request doesn't exist");
-  }
+        }
+).catch(err =>{
+    res.status(500).send("Database Error");
+});
+    
 });
 
- });
 
 
- router.route('/replyRequest').post( (req, res) => {
-     // if accepted request --> create a slot? wla m3mola already 
-linkingRequest.create({course:req.body.course, slot: req.body.slot, day: req.body.day, instructor:req.body.instructor}).then(result => {
-         res.send(result);
-     }).catch(err => {
-    res.status(500).send(`Server Error:${err} `);
-})
 
- });
 
+
+
+    // Add it to sender schedule el hwa instructor of linkingrequest el baghayaraaha now
+// check that no slot exists with the same location & day & slot where instructor is set
+// slot.findOne({slot: result.slot, day: result.day, location:result.location}).then(slotRes =>{
+//     if(slotRes){
+//         // there exists a slot
+//         if (slotRes.instructor){
+//                if (slotRes.instructor!== result.instructor){
+//                    res.status(300).send("Can't Assign this slot. Location occupied")
+//                }
+//         }
+//        if(slotRes.course==result.course){
+// slot.updateOne({id:slotRes.id},{$set:{instructor:result.instructor}}).then(() =>{
+//     res.status(200).send("Done");
+// }).catch(err =>{
+//     res.status(500).send("Database Error");
+// })
+//        } 
+//     }
+//     else {
+//         //create a slot
+//  let newId;
+//     idDb.findOne({name:"slot"}).then(idSlot =>{
+//         newId= idSlot.count+1;
+//       return slot.create({id:newId,course:result.course, slot:result.slot, day: result.day, instructor:result.instructor,location: result.location}).then(result => {
+         
+//      }); 
+
+//     }).then(()=>{
+//         idDb.update({name:"slot"},{$set:{count:newId}}).then(()=>{
+//             res.status(200).send(result);
+//         })
+
+//     });
+//     }
 
 module.exports = router;

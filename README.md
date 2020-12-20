@@ -258,14 +258,123 @@ B)Functionalities:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
             Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-    3)HR Functionalities: 
+    3)HR Functionalities: /hr
         a)
 
-        b)
+        b)Faculty : 
+            i) Add a Faculty
+            Functionality: Adds a new Faculty
+            Route: /addFaculty
+            Request type: POST
+            RequestBody: {"name":"FacultyNameExample"}
+            Response: Info of Faculty as added to DB (_id is needed later for updating a Faculty)
+            {
+                "message": "Added Successfully",
+                "data": {
+                    "departments": [],
+                    "_id": "5fdf588498dd31107d603f82",
+                    "name": "FacultyNameExample",
+                    "__v": 0
+                }
+            }
 
-        c)
+            ii) update a Faculty
+            Functionality: Updated the Faculty Name
+            Route: /editFaculty
+            Request type: PUT
+            RequestBody: {
+                "_id": "5fdf61b607779c12abf3e7b9",
+                "name":"FacultyNameUpdated2"
+                }
+            Response: {
+                    "message": "edited Successfully",
+                    "data": {
+                        "departments": [],
+                        "_id": "5fdf61b607779c12abf3e7b9",
+                        "name": "FacultyNameUpdated3",
+                        "__v": 0
+                    }
+                }
 
-        d)
+            iii) Delete a Faculty
+            Functionality: Deletes a Faculty & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses, departments
+            Route: /deleteFaculty
+            Request type: DELETE
+            RequestBody: {
+                "name":"FacultyNameUpdated3"
+                }
+            Response: Faculty successfuly deleted
+
+        c)Department:
+        i) Add a Department
+            Functionality: Adds a new Department & adds it to its corresponsing department if HOD is added will create an academic member for him/her with their corresponding faculty & department
+            Route: /addDepartment
+            Request type: POST
+            RequestBody: {
+                "faculty":"FacTrial",
+                "department":"Dept",
+                "HOD":"as-20"
+                }
+            Response:
+            Successfully created
+            *Note: faculty & department are required
+
+            ii) update a Department
+            Functionality: can update the Department HOD and/or Faculty 
+            Route: /editFaculty
+            Request type: PUT
+            RequestBody: {
+                "faculty":"Engineering",
+                "department":"DeptNew",
+                "HOD":"as-20"
+
+                }
+            Response: updated Successfully
+            *Note: Faculty & department are required (if no updates are going to happen for the faculty, place its current faculty name)
+
+            iii) Delete a Department
+            Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses
+            Route: /deleteDepartment
+            Request type: DELETE
+            RequestBody: {
+                "faculty":"Engineering",
+                "department":"Media03"
+                }
+            Response: Faculty successfuly deleted
+            *Note: faculty & department are a must
+        d)Course:
+        i) Add a Course
+            Functionality: Adds a new Course & adds it to its corresponsing department
+            Route: /addCourse
+            Request type: POST
+            RequestBody: {
+                "course":"aNewCourse",
+            "department":"DeptNew"
+            }
+            Response:
+            Course Added
+            *Note: course & department are required
+
+            ii) update a Course
+            Functionality: can update the Department of the course Only (which will automatically update its corresponding faculty too)
+            Route: /editCourse
+            Request type: PUT
+            RequestBody: {
+            "course":"aNewCourse4",
+            "department":"FarahDeptNew"
+
+            }
+            Response: success
+            *Note: Faculty & department are required 
+
+            iii) Delete a Course
+            Functionality: Deletes a course & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this course), and its record in the department's courses list
+            Route: /deleteCourse
+            Request type: DELETE
+            RequestBody:{
+                    "course":"aNewCourse4"
+                }
+            Response: Deleted successfully
             
         e)
 
@@ -357,5 +466,31 @@ B)Functionalities:
 
 
 
+HR
+
+Add Location:
+Inputs Ex:
+"room":"c7.202",
+"type":"tutorial",
+"maxCapacity":0
+
+DELETE Location:
+Must input room
+"room":"c7.202",
+don't need haga tanya
+...................................
+/AddFaculty must have faculty name:
+"name"
+returns success & data of faculty (we need _id for updating)
+
+
+/addDepratment:
+takes :
+    "name":"Media Dept",
+    "courses":["mass","applied"],
+    "HOD":"as-20",
+    "faculty":"Engineering"
+
+/editDepartment shouls take name & only the edited fields
 
 
