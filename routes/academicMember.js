@@ -206,10 +206,6 @@ try{
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
-<<<<<<< Updated upstream
-        var hod=await departments.find({_id:departmentReq});
-=======
->>>>>>> Stashed changes
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
         var dept=await departments.find({name:departmentReq});
