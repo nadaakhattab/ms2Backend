@@ -19,25 +19,33 @@ router.post('/sendReplacementRequest',async(req,res)=>{
         if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay||!reqDate){
             return res.status(400).send("Please provide id of replacement");
         }else{
-            var sending=await academicMembers.find({id:sendingId,course:courseId});
-            var departmentReq=sending.department;
-            var valid=await academicMembers.find({id:replacementId,department:departmentReq,course:courseId});
-            if(valid){
-                var request=await requests.create({
-                    fromId: sendingId,
-                    toId:replacementId,
-                    type: "replacement",
-                    reason: reqReason,
-                    slot:reqSlot,
-                    location:reqLocation,
-                    course:courseId,
-                    day:reqDay,
-                    date:reqDate
-                });
-                return res.status(200).send(request);
+            var sending=await academicMembers.findOne({id:sendingId,course:courseId});
+            if(sending){
+                var departmentReq=sending.department;
+                var valid=await academicMembers.findOne({id:replacementId,department:departmentReq,course:courseId});
+                console.log(sending);
+                if(valid){
+                    var request=await requests.create({
+                        fromId: sendingId,
+                        toId:replacementId,
+                        type: "replacement",
+                        slot:reqSlot,
+                        location:reqLocation,
+                        course:courseId,
+                        day:reqDay,
+                        date:reqDate
+                    });
+                    return res.status(200).send(request);
+                }else{
+                    return res.status(403).send("Please choose replacement in same department and course");
+                }
+
             }else{
-                return res.status(403).send("Please choose replacement in same department and course");
+                return res.status(403).send("Academic member not found");
+
             }
+
+
         }
 
     }catch(error){
@@ -46,11 +54,11 @@ router.post('/sendReplacementRequest',async(req,res)=>{
 
 });
 
-router.get('/viewReplacementRequest',async(req,res)=>{
+router.get('/viewReplacementRequests',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var request=await requests.find({toId:userId});
-        if(request){
+        if(request.length>0){
             return res.status(200).send(request);
         }else{
             return res.status(200).send("No requests present");
@@ -66,35 +74,42 @@ router.post('/sendSlotLinkingRequest',async(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var courseId=req.body.course;
-        var slotId=req.body.id;
-        var course=await courses.findOne({name: courseId});
-        var todayDate=new Date();
-        todayDate.setHours(0,0,0);
-        if(course){
-            var reqSlotValid=await slots.findOne({course:courseId,id:slotId});
-            if(reqSlotValid){
-                if(!reqSlotValid.instructor){
-                    var sendTo=course.coordinator;
-                    var request=await requests.create({
-                        fromId: sendingId,
-                        toId:sendTo,
-                        type: "slotLinking",
-                        slotId:slotId,
-                        course:courseId,
-                        date:todayDate
-                    });
-                    return res.status(200).send(request);
-
-                }else{
-                    return res.status(404).send("Slot already assigned");
-                }
-                
-            }else{
-                return res.status(404).send("Slot not found");
-            }
+        var slotId=req.body.slot;
+        console.log(slotId);
+        if(!courseId||!slotId){
+            return res.status(400).send("Please provide course name and replacement id");
         }else{
-            return res.status(404).send("Course not found");
+            var course=await courses.findOne({_id: courseId});
+            var todayDate=new Date();
+            todayDate.setHours(0,0,0);
+            if(course){
+                var reqSlotValid=await slots.findOne({course:courseId,id:slotId});
+                if(reqSlotValid){
+                    if(!reqSlotValid.instructor){
+                        var sendTo=course.coordinator;
+                        var request=await requests.create({
+                            fromId: sendingId,
+                            toId:sendTo,
+                            type: "slotLinking",
+                            slotId:slotId,
+                            course:courseId,
+                            date:todayDate
+                        });
+                        return res.status(200).send(request);
+    
+                    }else{
+                        return res.status(404).send("Slot already assigned");
+                    }
+                    
+                }else{
+                    return res.status(404).send("Slot not found");
+                }
+            }else{
+                return res.status(404).send("Course not found");
+            }
+
         }
+
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -106,27 +121,30 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
         var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
         var sending=await academicMembers.findOne({id:sendingId});
-        var departmentReq=sending.department;
-        var hod=await departments.find({name:departmentReq});
-        var todayDate=new Date();
-        todayDate.setHours(0,0,0);
-        if(hod){
-            if(!reqReason){
-                reqReason="";
+        if(sending){
+            var departmentReq=sending.department;
+            var hod=await departments.findOne({_id:departmentReq});
+            var todayDate=new Date();
+            todayDate.setHours(0,0,0);
+            if(hod){
+                var request=await requests.create({
+                    fromId: sendingId,
+                    toId:hod.HOD,
+                    type: "changeDayOff",
+                    reason: reqReason,
+                    date:todayDate
+                });
+                return res.status(200).send(request);
+    
+            }else{
+                return res.status(404).send("HOD not found");   
             }
-            var request=await requests.create({
-                fromId: sendingId,
-                toId:replacementId,
-                type: "changeDayOff",
-                reason: reqReason,
-                date:todayDate
-            });
-            return res.status(200).send(request);
 
         }else{
-            return res.status(404).send("HOD not found");
+            return res.status(404).send("Department not found");
 
         }
+
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -137,7 +155,7 @@ router.get('/viewRequests',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var request=await requests.find({fromId:userId});
-        if(request){
+        if(request.length>0){
             return res.status(200).send(request);
         }else{
             return res.status(200).send("No submitted requests present");
@@ -153,12 +171,17 @@ router.get('/viewRequests/:status',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var reqStatus=req.params.status;
-        var request=await requests.find({fromId:userId,status:reqStatus});
-        if(request){
-            return res.status(200).send(request);
+        if(reqStatus=="Accepted"||reqStatus=="Pending"||reqStatus=="Rejected"){
+            var request=await requests.find({fromId:userId,status:reqStatus});
+            if(request.length>0){
+                return res.status(200).send(request);
+            }else{
+                return res.status(200).send("No requests present with that status");
+            }
         }else{
-            return res.status(200).send("No submitted requests present");
+            return res.status(404).send("Invalid status");
         }
+
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -174,7 +197,7 @@ router.post('/sendLeaveRequest',async(req,res)=>{
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
-        var hod=await departments.find({name:departmentReq});
+        var hod=await departments.find({_id:departmentReq});
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
         if(hod){
@@ -229,20 +252,24 @@ router.delete('/cancelRequest/:id',async(req,res)=>{
 
 router.get('/schedule',async(req,res)=>{
     try{
-        var userId=req.headers.params.id;
+        
+        var userId=req.headers.payload.id;
+        console.log(userId);
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
-        var scheduleSlots= await slots.find({id:userId});
-        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",date:{$gte:todayDate}});
+        var scheduleSlots= await slots.find({instructor:userId});
+        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",date:{$gte:todayDate},type:"replacement"});
         var schedule={};
-        if(scheduleSlots){
-            schedule.slots=scheduleSlots;
-            if(scheduleReplacements){
-                schedule.replacements=scheduleReplacements;
+        if(scheduleSlots && scheduleReplacements ){
+            if(!(scheduleSlots.length>0)||!(scheduleReplacements.length>0)){
+                return res.status(200).send("No teaching activities or replacements");
+            }else{
+                    schedule.slots=scheduleSlots;
+                    schedule.replacements=scheduleReplacements;
+                    return res.status(200).send(schedule);
             }
-            res.status(200).send(schedule);
         }else{
-            res.status(200).send("No teaching activities");
+            return res.status(200).send("No teaching activities");
         }
     }catch(error){
         return res.status(500).send(error.message);
