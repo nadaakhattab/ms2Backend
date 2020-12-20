@@ -33,9 +33,9 @@ function checkCC(req, res, next) {
 }
 
 app.use ("/hr",checkHr,hrRoutes);
-app.use ("/coordinator",checkCC,coordinatorRoutes);
+// app.use ("/coordinator",checkCC,coordinatorRoutes);
 app.use("/staffMember",staffMemberRoutes);
-
+app.use ("/coordinator",coordinatorRoutes);
 module.exports=app;
 
 
