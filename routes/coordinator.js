@@ -1,7 +1,6 @@
 const express=require('express');
 const router=express.Router();
 const slot=require('../models/slot');
-const linkingRequest=require('../models/linkingRequest');
 const request=require('../models/requests');
 const location = require('../models/location');
 const faculty = require('../models/faculty');
