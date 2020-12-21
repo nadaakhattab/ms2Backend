@@ -42,12 +42,22 @@ catch(err){
 
 
 router.route('/addLocation').post(validateBody,(req, res,next) => {
-location.findOne({room:req.body.room}).then(result =>{
+location.findOne({displayName:req.body.room}).then(result =>{
   if (result){ return res.status(501).send("Location Already exists");}
   else {
-location.create({room: req.body.room, type: req.body.type, capacity: req.body.capacity}).then(result => {
+  idDb.findOne({name:"location"}).then(idSlot =>{
+        newId= idSlot.count+1;
+      location.create({room:newId,displayName: req.body.room, type: req.body.type, capacity: req.body.capacity}).then(result => {
        return  res.status(200).send("Successfully Added");
      });
+
+    }).then(()=>{
+        idDb.updateOne({name:"location"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send("Successfully created");
+        })
+    });
+
+
   }
 });
 } );
@@ -63,6 +73,10 @@ location.create({room: req.body.room, type: req.body.type, capacity: req.body.ca
    }
       if(req.body.capacity){
      toUpdate.capacity= req.body.capacity;
+   }
+
+      if(req.body.displayName){
+     toUpdate.displayName= req.body.displayName;
    }
 location.updateOne({room:req.body.room},{$set:{...toUpdate}}).then(result =>{
   // error message
@@ -98,12 +112,23 @@ faculty.findOne({name:req.body.name}).then(result =>{
   // error message
   if (result){res.status(301).send("Faculty already exists");}
   else {
- 
-faculty.create({name:req.body.name}).then(result => {
+
+ idDb.findOne({name:"faculty"}).then(idSlot =>{
+        newId= idSlot.count+1;
+faculty.create({name:newId, displayName:req.body.name}).then(result => {
          res.status(200).json({
            message:"Added Successfully",
            data:result});
      });
+
+    }).then(()=>{
+        idDb.updateOne({name:"faculty"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send("Successfully created");
+        })
+    });
+
+
+ 
   }
 }).catch(err=>{
   res.status(500).send("Database Error")
@@ -114,16 +139,16 @@ faculty.create({name:req.body.name}).then(result => {
 
 router.route('/editFaculty').put((req, res) => {
   const toUpdate ={}
-   if(req.body.name){
-     toUpdate.name=req.body.name;
+   if(req.body.displayName){
+     toUpdate.name=req.body.displayName;
      
    }
    else {
      res.status(301).send("Can't update a faculty without name");
    }
 
-   if(!req.body._id){
-     res.status(301).send("ERROR: ID required");
+   if(req.body.name==undefined){
+     res.status(301).send("ERROR: NameId required");
    }
 
 faculty.findOne({name:req.body.name}).then(fac=>{
@@ -131,7 +156,7 @@ faculty.findOne({name:req.body.name}).then(fac=>{
   res.status(301).send("Name already Exists");
    }
 
-   faculty.findOneAndUpdate({_id:req.body._id},{...toUpdate}, {new:true}).then(result =>{
+   faculty.findOneAndUpdate({name:req.body.name},{...toUpdate}, {new:true}).then(result =>{
   // error message
   console.log(result);
   if (result){
@@ -259,11 +284,25 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
 
 
     // The new department must be created
-   Promise.all(arrayofPromises).then(()=>{ department.create({name: req.body.department,...toAdd}).then(newDept=>{
+   Promise.all(arrayofPromises).then(()=>{ 
+     
+  idDb.findOne({name:"department"}).then(idSlot =>{
+        newId= idSlot.count+1;
+
+
+      return   department.create({name:newId,displayName: req.body.department,...toAdd}).then(newDept=>{
         faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
       res.status(200).send("Successfully created");
         });
     });
+
+    }).then(()=>{
+        idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send("Successfully created");
+        })
+    });
+    
+
   
    }).catch (err =>{
      res.status(500).send("HOD/ COURSES Doesn't exist");
@@ -360,10 +399,14 @@ resolve();
 router.route('/editDepartment').put((req, res) => {
   const toUpdate={};
   const arrayofPromises=[];
+  if(req.body.displayName){
+    toUpdate.displayName=req.body.displayName;
+  }
   if(req.body.faculty){
 toUpdate.faculty=req.body.faculty;
   arrayofPromises.push(checkFaculty(req.body.department,req.body.faculty));
   }
+
 
     // check if HOD 
     if(req.body.HOD){
@@ -460,9 +503,20 @@ department.findOne({name:req.body.department}).then(result =>{
    courses.push(req.body.course); 
    department.findOneAndUpdate({name:req.body.department},{$set:{courses}},{new:true}).then (result => {
      console.log("Deaprtment res: ",result);
-    course.create({name:req.body.course, department:req.body.department, faculty:result.faculty}).then(courseNew =>{
+
+ idDb.findOne({name:"course"}).then(idSlot =>{
+        newId= idSlot.count+1;
+      return    course.create({name:newId,displayName:req.body.course, department:req.body.department, faculty:result.faculty}).then(courseNew =>{
    res.status(200).send("course added");
     });
+
+    }).then(()=>{
+        idDb.updateOne({name:"course"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send("Successfully created");
+        })
+    });
+
+ 
 
    }).catch (err =>{
      res.status(300).send("course not added in Department");
@@ -489,10 +543,15 @@ router.route('/editCourse').put((req, res) => {
   if(req.body.course==undefined){
      res.status(301).send("Can't Add a course without specifying its Name");
    }
+   const toUpdate={};
+   if(req.body.displayName){
+     toUpdate.displayName=req.body.displayName;
+
+   }
    if(req.body.department!==undefined){
      department.findOne({name:req.body.department}).then (departmentres =>{
        if(departmentres){
-course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty}},{new:true}).then(result =>{
+course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate}},{new:true}).then(result =>{
   console.log(result);
  academicMember.updateMany({course:req.body.course},{faculty:result.faculty, department:result.department}).then(()=>{
  res.status(200).send("success");

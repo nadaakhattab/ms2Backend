@@ -219,7 +219,7 @@ try{
         var departmentReq=sending.department;
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
-        var dept=await departments.find({name:departmentReq});
+        var dept=await departments.find({_id:departmentReq});
         const hod= dept.HOD;
         if(hod){
             switch(leaveType){
