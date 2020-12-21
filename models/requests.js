@@ -17,7 +17,9 @@ slot: {type:String},
 location: {type:String},
 slotId: {type:Number},
 documents: {type:Object},
-replacement: String // id of the replacement person
+replacement: {type:String}, // id of the replacement person
+dayToChange: {type:Number},
+rejectionReason:{type:String}
 }
 );
 module.exports=mongoose.model('request',requestSchema)

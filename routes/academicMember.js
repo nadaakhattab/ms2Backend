@@ -8,6 +8,7 @@ const courses=require('../models/course');
 const staffMember = require('../models/staffMember');
 const attendance = require('../models/attendance');
 const academicMember = require('../models/academicMember');
+const notification=require('../models/notification');
 const { request } = require('express');
 const { date } = require('joi');
 
@@ -125,30 +126,40 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
-        var sending=await academicMembers.findOne({id:sendingId});
-        if(sending){
-            var departmentReq=sending.department;
-            var hod=await departments.findOne({name:departmentReq});
-            var todayDate=new Date();
-            todayDate.setHours(0,0,0);
-            if(hod){
-                var request=await requests.create({
-                    fromId: sendingId,
-                    toId:hod.HOD,
-                    type: "changeDayOff",
-                    reason: reqReason,
-                    date:todayDate
-                });
-                return res.status(200).send(request);
+        var dayToChange=req.body.day;
+
+        if(dayToChange){
+            var sending=await academicMembers.findOne({id:sendingId});
+            if(sending){
+                var departmentReq=sending.department;
+                var hod=await departments.findOne({name:departmentReq});
+                var todayDate=new Date();
+                todayDate.setHours(0,0,0);
+                if(hod){
+                    var request=await requests.create({
+                        fromId: sendingId,
+                        toId:hod.HOD,
+                        type: "changeDayOff",
+                        reason: reqReason,
+                        date:todayDate,
+                        dayToChange:day
+                    });
+                    return res.status(200).send(request);
+        
+                }else{
+                    return res.status(404).send("HOD not found");   
+                }
     
             }else{
-                return res.status(404).send("HOD not found");   
+                return res.status(404).send("Department not found");
+    
             }
 
         }else{
-            return res.status(404).send("Department not found");
+            return res.status(400).send("Please provide day off");
 
         }
+
 
     }catch(error){
         return res.status(500).send(error.message);
@@ -403,14 +414,24 @@ try{
 
 router.delete('/cancelRequest/:id',async(req,res)=>{
     try{
-            var reqId=req.params.id;
+    var reqId=req.params.id;
     var request=await requests.findOne({_id:reqId});
     if(request){
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
         if(request.status=="Pending"||request.date>todayDate){
-            var request=await requests.findOneAndDelete({_id:reqId});
-            return res.status(200).send(request);
+            if(request.type=="leave"){
+                if(request.leaveType=="Annual"||request.leaveType=="Accidental"){
+                    var days=Math.ceil(((request.startDate).getTime()-(request.endDate).getTime())/(1000*3600*24));
+                    var from=request.fromId;
+                    var staff=await staffMember.findOne({id:from});
+                    var leaves=staff.annualLeaves;
+                    leaves=leaves+days;
+                    var staffUpdate=await staffMember.findOneAndUpdate({id:from},{annualLeaves:leaves});
+                }
+            }
+            var requestDeleted=await requests.findOneAndDelete({_id:reqId});
+            return res.status(200).send(requestDeleted);
         }else{
             return res.status(400).send("can not delete request as it is not pending/date has passed");
         }
@@ -451,5 +472,31 @@ router.get('/schedule',async(req,res)=>{
     }
 
 });
+
+router.get('/notifications/:id',async(req,res)=>{
+    try{
+        var userId=req.params.id;
+        var notify=await notification.find({to:userId});
+        if(notify){
+            if(notify.length>0){
+                return res.status(200).send(notify);
+        
+            }else{
+                return res.status(200).send("No notifications to show");
+        
+            }
+    
+        }else{
+            return res.status(404).send("Error")
+    
+        }
+
+    }catch(error){
+        return res.status(500).send(error.message);
+
+    }
+
+
+})
 
 module.exports = router;
