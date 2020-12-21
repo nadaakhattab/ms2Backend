@@ -8,31 +8,84 @@ const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
 const attendance = require('../models/attendance');
+const academicMember = require('../models/academicMember');
+ const slot = require('../models/slot');
+
+let assignedCourse=0;
+function checkSlots(slot,i){
+  return new Promise((resolve, reject) => {
+
+     if(slot.instructor){
+         assignedCourse++;
+  resolve();
+   }else{
+  resolve();
+   }
  
+ 
+  });
+}
+
+ let courseCov={};
+function checkCourseCov(coursei,i){
+  return new Promise((resolve, reject) => {
+console.log(coursei.course);
+ slot.find({course:coursei.course}).then((slots)=>{
+ console.log("SLOTS",slots);
+     if(slots){
+        
+         const arrayofPromises=[];
+    for(let i=0;i<slots.length;i++){
+        
+        arrayofPromises.push(
+        checkSlots(slots[i]),coursei.course);
+    }
+    Promise.all(arrayofPromises).then(()=>{
+        
+        courseCov[coursei.course]=(assignedCourse/slots.length)*100;
+          assignedCourse=0; 
+          console.log(courseCov);
+        resolve();
+    }).catch(()=>{reject()});
+    }
+      else{
+        resolve();  
+      }
+     
+ }).catch(()=>{
+     reject()});
+  });
+}
+
+
+
 
 router.route('/viewCoverage').get((req, res) => {
     try{
-        
+        courseCov={};
     console.log(req.headers.payload.id);
-    course.findOne({instructors: req.headers.payload.id}).then((course)=>{
-        console.log(course);
-        if(course){
-            var id= req.body.id;
-            var cname= req.body.name;
-            if(course.instructors.includes(id)){
-                const x= slot.findOne({course:cname}).count();
-                const y=slot.findOne({course:cname ,assigned:true}).count();
-                const result=(x/y)*100;
-                return result;
-            }
-            else{
-                
-            }
+    academicMember.find({id: req.headers.payload.id}).then((listOfcourses)=>{
+        console.log(listOfcourses);
+        if(listOfcourses){
+       
+        const arrayofPromises=[];
+          for (let i=0; i<listOfcourses.length;i++){
+   console.log("members: ",listOfcourses[i]);
+       arrayofPromises.push( checkCourseCov(listOfcourses[i],i));
+          }
+       
+
+          Promise.all(arrayofPromises).then(()=>{
+              console.log(courseCov);
+              res.status(200).send(courseCov);
+          }).catch(err=>{
+              res.status(500).send("Server Error");
+          })
         
 
         }
         else{
-
+ return res.status(300).send("No courses exists");
         }
 
 
@@ -43,23 +96,49 @@ router.route('/viewCoverage').get((req, res) => {
     }
    });
 
+let allSlotsInCourse={}
+   function checkCourseAssig(coursei,i){
+  return new Promise((resolve, reject) => {
+console.log(coursei.course);
+ slot.find({course:coursei.course}).then((slots)=>{
+ console.log("SLOTS",slots);
+     if(slots){
+        
+   allSlotsInCourse[coursei.course]=slots;
+   resolve();
+    }
+      else{
+        resolve();  
+      }
+     
+ }).catch(()=>{
+     reject()});
+  });
+}
 
-   router.route('/viewassignment').get((req, res) => {
+   router.route('/viewSlotsAssignment').get((req, res) => {
     try{
     console.log(req.headers.payload.id);
-    course.findOne({instructors: req.headers.payload.id}).then((course)=>{
-        console.log(course);
-        if(course){
-                try{
-                var result=await slot.findOne({instructor:name})
-                if(!result){
-                    return res.status(404).send("Result not found");
-                }else{
-                    return res.status(200).send(user);
-                }
-            }catch(error){
-                return res.status(500).send(error.message);
-            }
+    academicMember.find({id: req.headers.payload.id}).then((listOfCourseAssig)=>{
+        console.log(listOfCourseAssig);
+        if(listOfCourseAssig){
+        allSlotsInCourse={};
+
+             const arrayofPromises=[];
+          for (let i=0; i<listOfCourseAssig.length;i++){
+   console.log("members: ",listOfCourseAssig[i]);
+       arrayofPromises.push( checkCourseAssig(listOfCourseAssig[i],i));
+          }
+       
+
+          Promise.all(arrayofPromises).then(()=>{
+              console.log(allSlotsInCourse);
+              res.status(200).send(allSlotsInCourse);
+          }).catch(err=>{
+              res.status(500).send("Server Error");
+          })
+
+
         }
    });
     }
@@ -69,34 +148,76 @@ router.route('/viewCoverage').get((req, res) => {
        });
 
 
-       router.route('/viewStaff').get((req, res) => {
-        try{
-        console.log(req.headers.payload.id);
-        course.findOne({instructors: req.headers.payload.id}).then((course)=>{
-            console.log(course);
-            if(course){
-                const snames= staffMember.name;
-                const courses= department.courses;
-                const staff=[];
-                for(var i=0; i<courses.length; i++)
-                {
-                    course.findOne({name:courses[i]}).then((course)=>{
-                        staff.push(courses[i].coordinator);
-                        for(var m=0; i<courses.TAs.length;m++){
-                            staff.push(courses.TAs[m]);
-                        }
-                        for(var j=0;j<courses.instructors.length;j++){
-                            staff.push(courses.instructors[i]);
-                        }
-                    });
-                }
-                const results=[];
-                for(var y=0;y<staff.length;y++)
-                {
-                    var depuser=staffMember.findOne({id:staff[i]}) ;
-                    results.push(depuser);
+
+
+         let saveRes={};
+       function addStaff(members,i){
+  return new Promise((resolve, reject) => {
+ staffMember.findOne({id:members.id}).then((profile)=>{
+     saveRes[i]=profile; 
+      console.log("profile ",profile);
+     resolve();
+ }).catch(()=>{
+     reject()});
+  });
+}
+
+let finalCourseWithstaff={};
+   function getStaffCourse(coursei,i){
+  return new Promise((resolve, reject) => {
+       saveRes={};
+console.log(coursei.course);
+ academicMember.find({course:coursei.course}).then((members)=>{
+ console.log("SLOTS",members);
+     if(members){
+        
+//Loop on All members in this course
+        const arrayofPromises=[];
+                for(let i=0; i<members.length;i++){
+                     arrayofPromises.push( addStaff(members[i],i));
                 }
 
+
+                Promise.all(arrayofPromises).then(()=>{
+                    finalCourseWithstaff[coursei.course]=saveRes;
+                    saveRes={};
+                           resolve();
+                        }).catch(err=>{
+                            reject();
+                        })
+
+
+    }
+      else{
+        resolve();  
+      }
+     
+ }).catch(()=>{
+     reject()});
+  });
+}
+
+       router.route('/viewStaff').get((req, res) => {
+        try{
+            finalCourseWithstaff={};
+        console.log(req.headers.payload.id);
+        academicMember.find({id: req.headers.payload.id}).then((course)=>{
+
+            console.log(course);
+            //Loop on courses el hwa fyha 
+            if(course){
+           const arrayofPromises=[];
+                for(let i=0; i<course.length;i++){
+                     arrayofPromises.push( getStaffCourse(course[i],i));
+                }
+
+
+                Promise.all(arrayofPromises).then(()=>{
+                            console.log(finalCourseWithstaff);
+                            res.status(200).send(finalCourseWithstaff);
+                        }).catch(err=>{
+                            res.status(500).send("Server Error");
+                        })
             }
             
     

@@ -224,7 +224,7 @@ try{
                                 //there is a replacement person 
                             academicMember.findOne({id:sendingId}).then((currUser)=>{
                                 if(currUser.course==replacement.course){
-                                var request=await requests.create({
+                               requests.create({
                                                 fromId: sendingId,
                                                 toId:replacementId,
                                                 type: "Annual",
@@ -232,8 +232,10 @@ try{
                                                 date:todayDate,
                                                 replacement:replacement.id
                                         
-                                            });
-                                            return res.status(200).send(request);
+                                            }).then((reques)=>{
+                                               return res.status(200).send(reques); 
+                                            })
+                                            
                                 }
                                 else{
                                     res.status(301).send("Error:Replacement Staff doesnt teach the same Course");
@@ -243,17 +245,19 @@ try{
                         //No replacement
                          //send the request with request.replacement= instructor that accepted his request
 // }else { send without a replacement so HOD WILL DECIDE}
-                          var request=await requests.create({
+                        requests.create({
                                                 fromId: sendingId,
                                                 toId:replacementId,
                                                 type: "Annual",
                                                 reason: reqReason,
                                                 date:todayDate,
                                         
-                                            });
-                                            return res.status(200).json({
+                                            }).then(reques=>{
+                         res.status(200).json({
                                                 message:"Your request has been submitted. It is up to the HOD to accept/decline. since you had no replacement instructors during your leave",
                                                 data:request});
+                                            });
+                                           
                         });     
                     }));
 
