@@ -897,7 +897,7 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
         //start or end not provided in body
         return res.status(400).send("No dates provided");
     }else{
-      var users=await staffMember.find();
+      var users=await staffMember.find({});
       var startDate=new Date(yearToView,monthToView,11);
       var endDate;
       if(monthToView==11){
@@ -997,7 +997,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
         //start or end not provided in body
         return res.status(400).send("No dates provided");
     }else{
-      var users=await staffMember.find();
+      var users=await staffMember.find({});
       var startDate=new Date(yearToView,monthToView,11);
       var endDate;
       if(monthToView==11){
