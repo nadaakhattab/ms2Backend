@@ -139,20 +139,6 @@ router.route('/updateInstructor').post(async(req, res) => {
         return res.status(500).send(error.message);
     }
 
-
-
-
-
-        course.updateOne({instructors:req.body.instructors},{$set:{...req.body}}).then(result =>{
-            // error message
-            console.log(result);
-            if (result.nModified!=0){
-                
-                res.send("edited");}
-            else {
-          res.send(" doesn't exist");
-            }
-          });
     });
 
 router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => {
