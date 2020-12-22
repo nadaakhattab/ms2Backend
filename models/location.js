@@ -4,7 +4,7 @@ const locationSchema=new schema({
 displayName: {type:String,unique:true},
 room: {type:String,unique:true},
 type: String, // lab, tut, lec, office
-capacity: Number,
+capacity: {type:Number, default:0},
 maxCapacity:Number
 
 }
