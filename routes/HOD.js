@@ -256,11 +256,11 @@ router.route('/addTA').post( async(req, res) => {
         
     }); 
     
-router.route('/deleteTA').delete(async(req, res) => {
+router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
         try{
             var myId=req.headers.payload.id;
-            var inputCourse=req.body.course;
-            var inputInstructor=req.body.ta;
+            var inputCourse=req.params.course;
+            var inputInstructor=req.params.ta;
             if(!inputCourse||!inputInstructor){
                 return res.status(400).send("Please provide instructor and course id");
             }else{
