@@ -22,6 +22,16 @@ switch(req.path){
   break;
    case '/deleteLocation':result = validations.DeleteLocation.validate(req.body); 
   break;
+  case '/addFaculty':result = validations.AddFaculty.validate(req.body); 
+  break;
+  case '/editFaculty':result = validations.EditFaculty.validate(req.body); 
+  break;
+  case '/addCourse':result = validations.AddCourse.validate(req.body); 
+  break;
+  case '/signIn':result = validations.SignIn.validate(req.body); 
+  break;
+  case '/signOut':result = validations.SignOut.validate(req.body); 
+  break;
 
 }
 
@@ -47,7 +57,7 @@ location.findOne({displayName:req.body.room}).then(result =>{
   else {
   idDb.findOne({name:"location"}).then(idSlot =>{
         newId= idSlot.count+1;
-      location.create({room:newId,displayName: req.body.room, type: req.body.type, capacity: req.body.capacity}).then(result => {
+      location.create({room:newId,displayName: req.body.room, type: req.body.type, maxCapacity: req.body.maxCapacity}).then(result => {
        return  res.status(200).send("Successfully Added");
      });
 
@@ -91,7 +101,7 @@ res.status(501).send("Location doesn't exist");
  });
 
 
-router.route('/deleteLocation').delete((req, res) => {
+router.route('/deleteLocation').delete(validateBody,(req, res) => {
  location.deleteOne({room: req.body.room}).then(result => {
   if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
@@ -104,7 +114,7 @@ router.route('/deleteLocation').delete((req, res) => {
 
 
 
- router.route('/addFaculty').post((req, res) => {
+ router.route('/addFaculty').post(validateBody,(req, res) => {
      if(req.body.name==undefined){
      res.status(301).send("Can't create a faculty without name");
    }
@@ -137,7 +147,7 @@ faculty.create({name:newId, displayName:req.body.name}).then(result => {
 
 
 
-router.route('/editFaculty').put((req, res) => {
+router.route('/editFaculty').put(validateBody,(req, res) => {
   const toUpdate ={}
    if(req.body.displayName){
      toUpdate.name=req.body.displayName;
@@ -240,7 +250,7 @@ resolve();
   });
   });
 }
- router.route('/addDepartment').post((req, res) => {
+ router.route('/addDepartment').post(validateBody,(req, res) => {
    if(req.body.faculty==undefined || req.body.department==undefined){
      res.status(301).send("Please add All required Fields");
    }
@@ -396,7 +406,7 @@ resolve();
 }
 
 
-router.route('/editDepartment').put((req, res) => {
+router.route('/editDepartment').put(validateBody,(req, res) => {
   const toUpdate={};
   const arrayofPromises=[];
   if(req.body.displayName){
@@ -482,7 +492,7 @@ res.status(300).send("Faculty doesn't exist ");
 
 
 
- router.route('/addCourse').post((req, res) => {
+ router.route('/addCourse').post(validateBody,(req, res) => {
   //takes department name & course name
   const toAdd={};
   if(req.body.department==undefined||req.body.course==undefined){
@@ -538,7 +548,7 @@ res.status(300).send("Department Doesn't exist");
  });
 
 
-router.route('/editCourse').put((req, res) => {
+router.route('/editCourse').put(validateBody,(req, res) => {
   // law hay update el department lazm aroh ashylo from old department & add in new department IMPORTANT
   if(req.body.course==undefined){
      res.status(301).send("Can't Add a course without specifying its Name");
@@ -661,7 +671,7 @@ department.findOne({name:courseFound.department}).then(result =>{
 //  });
 
 
- router.route('/addStaffMember').post( (req, res) => {
+ router.route('/addStaffMember').post(validateBody, (req, res) => {
 staffMember.findOne({email:req.body.email}).then(result =>{
   if(result){
   res.send("Email already exists");
@@ -798,7 +808,7 @@ res.send("location not found");
     }
  });
 
- router.post('/signIn',async(req,res)=>{
+ router.post('/signIn',validateBody,async(req,res)=>{
   try{
     var userId=req.body.id;
     var datetime=req.body.date;
@@ -843,7 +853,7 @@ res.send("location not found");
 
 });
 
-router.post('/signOut',async(req,res)=>{
+router.post('/signOut',validateBody,async(req,res)=>{
   try{
     var userId=req.body.id;
     var datetime=req.body.date;
