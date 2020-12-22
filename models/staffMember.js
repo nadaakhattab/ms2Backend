@@ -11,9 +11,9 @@ const staffMemberSchema=new schema({
     type: {type:String,required:true},
     mobileNumber: String,
     dayOff: String,
-    dayOffNumber:Number,  
+    dayOffNumber:{type:Number,  required:true},
     firstLogin: {type:Boolean,default:true},
-    annualLeaves:{type:Number},
+    annualLeaves:{type:Number,default:0},
     gender:String
 }
 );
