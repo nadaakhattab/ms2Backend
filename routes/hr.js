@@ -20,8 +20,8 @@ switch(req.path){
   break;
    case '/editLocation':result = validations.EditLocation.validate(req.body); 
   break;
-   case '/deleteLocation':result = validations.DeleteLocation.validate(req.body); 
-  break;
+  //  case '/deleteLocation':result = validations.DeleteLocation.validate(req.body); 
+  // break;
 
 }
 
@@ -91,8 +91,8 @@ res.status(501).send("Location doesn't exist");
  });
 
 
-router.route('/deleteLocation').delete((req, res) => {
- location.deleteOne({room: req.body.room}).then(result => {
+router.route('/deleteLocation/:room').delete((req, res) => {
+ location.deleteOne({room: req.params.room}).then(result => {
   if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
   }
@@ -177,14 +177,14 @@ faculty.findOne({name:req.body.name}).then(fac=>{
 
 
 
- router.route('/deleteFaculty').delete((req, res) => {
-   if(req.body.name== undefined){
+ router.route('/deleteFaculty/:name').delete((req, res) => {
+   if(req.params.name== undefined){
      res.status(301).send("Can't delete Faculty. Please Add Faculty Name");
    }
- faculty.deleteOne({name:req.body.name}).then(result => {
-department.deleteMany({faculty:req.body.name}).then (depts=>{
-  course.deleteMany({faculty:req.body.name}).then (course =>{
-academicMember.deleteMany({faculty:req.body.name}).then(()=>{
+ faculty.deleteOne({name:req.params.name}).then(result => {
+department.deleteMany({faculty:req.params.name}).then (depts=>{
+  course.deleteMany({faculty:req.params.name}).then (course =>{
+academicMember.deleteMany({faculty:req.params.name}).then(()=>{
    res.status(200).send("Faculty successfuly deleted");
 });
   });
@@ -436,25 +436,25 @@ Promise.all(arrayofPromises).then(()=>{
 
 
  //must take faculty name as input and department name
- router.route('/deleteDepartment').delete((req, res) => {
-   if(req.body.faculty==undefined||req.body.department==undefined){
+ router.route('/deleteDepartment/:faculty/:department').delete((req, res) => {
+   if(req.params.faculty==undefined||req.params.department==undefined){
      res.status(301).send("Can't Delete Department without specifying the department & Faculty");
    }
-faculty.findOne({name:req.body.faculty}).then(result =>{
+faculty.findOne({name:req.params.faculty}).then(result =>{
   console.log(result);
   if (result){
  const departments =[];
- if(result.departments.includes(req.body.department)){
+ if(result.departments.includes(req.params.department)){
    result.departments.forEach(dept=> {
-     if (dept!= req.body.department){
+     if (dept!= req.params.department){
        departments.push(dept);
      }
      
    });
-   faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
-     department.deleteOne({name:req.body.department}).then(deletedDept =>{
-course.deleteMany({department:req.body.department}).then(courses=>{
-  academicMember.deleteMany({department:req.body.department}).then(()=>{
+   faculty.updateOne({name:req.params.faculty},{$set:{departments}}).then (result => {
+     department.deleteOne({name:req.params.department}).then(deletedDept =>{
+course.deleteMany({department:req.params.department}).then(courses=>{
+  academicMember.deleteMany({department:req.params.department}).then(()=>{
 res.status(200).send("Deleted successfully");
   })
 })
@@ -577,10 +577,10 @@ res.status(300).send("Department doesn't exist");
 
 });
 
- router.route('/deleteCourse').delete((req, res) => {
+ router.route('/deleteCourse/:course').delete((req, res) => {
    // display error law msh medyny department
 
-   course.findOne({name:req.body.course}).then(courseFound =>{
+   course.findOne({name:req.params.course}).then(courseFound =>{
      if(!courseFound ){
  res.status(301).send("Course Doesn't Exist");
      }
@@ -589,16 +589,16 @@ department.findOne({name:courseFound.department}).then(result =>{
   console.log(result);
   if (result){
  const courses =[];
- if(result.courses.includes(req.body.course)){
+ if(result.courses.includes(req.params.course)){
    result.courses.forEach(course=> {
-     if (course!= req.body.course){
+     if (course!= req.params.course){
        courses.push(course);
      }
      
    });
    department.updateOne({name:courseFound.department},{$set:{courses}}).then (result => {
-          course.deleteOne({name:req.body.course}).then(deletedCourse =>{
- academicMember.deleteMany({course:req.body.course},{faculty:result.faculty, department:result.department}).then(()=>{
+          course.deleteOne({name:req.params.course}).then(deletedCourse =>{
+ academicMember.deleteMany({course:req.params.course},{faculty:result.faculty, department:result.department}).then(()=>{
   res.status(200).send("Deleted successfully");
   });
  
@@ -625,12 +625,6 @@ department.findOne({name:courseFound.department}).then(result =>{
    }).catch (err=>{
  res.status(500).send("Database Error");
    });
-
-
-
-
-
-
 
  });
 
@@ -741,7 +735,7 @@ res.send("location not found");
 
  });
 
- router.route('/attendanceRecord').get( (req, res) => {
+ router.route('/attendanceRecord/:id').get( (req, res) => {
    staffMember.findOne({...req.body}).then(result=>{
      res.send(result.attendanceSheet);
 
@@ -749,7 +743,7 @@ res.send("location not found");
  });
 
 
- router.route('/deleteStaff').delete((req, res) => {
+ router.route('/deleteStaff/:id').delete((req, res) => {
    staffMember.deleteOne({...req.body}).then(result => {
    res.send("staff successfuly deleted");
  }).catch (err=>{
