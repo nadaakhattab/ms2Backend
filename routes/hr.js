@@ -12,6 +12,7 @@ const requests=require('../models/requests');
 const academicMember = require('../models/academicMember');
 const validations = require('../validations/hr');
 const Joi = require('joi');
+const { findOneAndUpdate } = require('../models/location');
 
 const validateBody =(req, res,next)  =>  { try{ 
   let result;
@@ -757,26 +758,73 @@ res.send("location not found");
  });
 
  router.route('/attendanceRecord/:id').get( (req, res) => {
-   staffMember.findOne({...req.body}).then(result=>{
-     res.send(result.attendanceSheet);
+  
+   staffMember.findOne({id:req.params.id}).then(result=>{
+     if(result){
+attendance.find({id:req.params.id}).then((att)=>{
+res.status(200).send(att);
+})
+     }
+     else {
+       res.status(300).send("Member doesnt exist");
+     }
+    
 
    })
  });
 
+ 
 
- router.route('/deleteStaff/:id').delete((req, res) => {
-   staffMember.deleteOne({...req.body}).then(result => {
-   res.send("staff successfuly deleted");
- }).catch (err=>{
-   res.send(err);
- })
+ router.route('/deleteStaff/:id').delete(async (req, res) => {
+   if(req.params.id==undefined){
+     res.status(300).send("Error: Please add required paramters");
+   }
+   const result =await staffMember.deleteOne({id:req.params.id});
 
- });
+
+   if(result){
+     const listofAllCourse= await academicMember.find({id:req.params.id});
+if (listofAllCourse){
+// get each course --> loop on its ta/ instructor/ coordinator if ==req.para.id remove it
+listofAllCourse.forEach((mem)=>{
+ const course= await course.findOne({name:mem.course});
+ if(course){
+
+const courseTas= [];
+course.TAs.forEach((ta)=>{
+  if(ta!==req.params.id){
+    courseTas.push(ta);
+  }
+});
+const courseInst= [];
+course.instructors.forEach((inst)=>{
+  if(inst!==req.params.id){
+    courseInst.push(inst);
+  }
+});
+const coord= null;
+if(course.coordinator!==req.params.id){
+coord= course.coordinator;
+}
+const toUpdate={TAs:courseTas,
+instructors: courseInst,
+coordinator:coord};
+
+course.findOneAndUpdate({name:mem.name},{...toUpdate},{new:true}).then ((updated)=>{
+res.status(200).send(updated);
+});
+  }
+});
+}
+   }
+});
 
 
  router.route('/updateSalary').put((req, res) => {
   //  id:req.body.id
-   staffMember.updateOne({email: req.body.email},{$set:{salary:req.body.salary}}).then(result => {
+  
+// check law mafysh haga bel id da a2ol invalid
+   staffMember.findOneAndUpdate({id: req.body.id},{$set:{salary:req.body.salary}}).then(result => {
      res.send(result);
 
    }).catch(err => {
