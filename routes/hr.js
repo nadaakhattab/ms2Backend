@@ -656,6 +656,7 @@ department.findOne({name:courseFound.department}).then(result =>{
 
 
  router.route('/addStaffMember').post( (req, res) => {
+   //gender, dayOff, annualLeves
 staffMember.findOne({email:req.body.email}).then(result =>{
   if(result){
   res.send("Email already exists");
@@ -686,16 +687,27 @@ res.send("Can't assign the following office Location");
       //   const salt= await bcrypt.genSalt(10);
       //  password= await bcrypt.hash(password,salt);
         console.log("password",password);
+       let dayyOffNumber;
+       switch (req.body.dayOff){
+         case 'Sunday': dayyOffNumber=0; break;
+          case 'Monday': dayyOffNumber=1; break;
+          case 'Teusday': dayyOffNumber=2; break;
+            case 'Wednesday': dayyOffNumber=3; break;
+             case 'Thursday': dayyOffNumber=4; break;
+              case 'Friday': dayyOffNumber=5; break;
+               case 'Saturday': dayyOffNumber=6; break;
+       }
         const data = {
           password,
           id,
           name: req.body.name,
           email: req.body.email,
           salary: req.body.salary,
-          officeLocation: req.body.officeLocation
-        }
-        if (dayoff){
-          data.dayoff= dayoff;
+          officeLocation: req.body.officeLocation,
+          gender:req.body.gender,
+          dayOff:req.body.dayOff,
+          dayOffNumber
+
         }
 staffMember.create({...data}).then(result=>{
 
