@@ -73,7 +73,7 @@ router.route('/updateInstructor').post(async(req, res) => {
         var oldInstructor=req.body.oldInstructor;
         var newInstructor=req.body.newInstructor;
         if(!inputCourse||!oldInstructor||!newInstructor){
-            return res.status(400).send("Please provide instructor and course id");
+            return res.status(400).send("Please provide id of old instructor,new instructor and course id");
         }else{
             var dep=await department.findOne({HOD: myId});
             if(dep){
@@ -98,7 +98,7 @@ router.route('/updateInstructor').post(async(req, res) => {
                                     faculty:dep.faculty
                                 })
                                 var academicMemberAdd=await academicMember.create({
-                                    id:inputInstructor,
+                                    id:newInstructor,
                                     course:inputCourse,
                                     department:dep.name,
                                     faculty: dep.faculty
@@ -139,27 +139,13 @@ router.route('/updateInstructor').post(async(req, res) => {
         return res.status(500).send(error.message);
     }
 
-
-
-
-
-        course.updateOne({instructors:req.body.instructors},{$set:{...req.body}}).then(result =>{
-            // error message
-            console.log(result);
-            if (result.nModified!=0){
-                
-                res.send("edited");}
-            else {
-          res.send(" doesn't exist");
-            }
-          });
     });
 
-router.route('/deleteinstructor').delete(async(req, res) => {
+router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => {
     try{
         var myId=req.headers.payload.id;
-        var inputCourse=req.body.course;
-        var inputInstructor=req.body.instructor;
+        var inputCourse=req.params.course;
+        var inputInstructor=req.params.instructor;
         if(!inputCourse||!inputInstructor){
             return res.status(400).send("Please provide instructor and course id");
         }else{
@@ -335,53 +321,60 @@ router.post('/acceptRequest',async(req,res)=>{
         if(requestId){
             var requestToAccept=await request.findOne({_id:requestId});
             if(requestToAccept){
-                if(requestToAccept.type=="changeDayOff"){
-                    var academicMember=requestToAccept.fromId;
-                    var weekday = new Array(7);
-                    weekday[0] = "Sunday";
-                    weekday[1] = "Monday";
-                    weekday[2] = "Tuesday";
-                    weekday[3] = "Wednesday";
-                    weekday[4] = "Thursday";
-                    weekday[5] = "Friday";
-                    weekday[6] = "Saturday";
-                    var updatedSlots=await slot.findOneAndDelete({instructor:academicMember,day:weekday[requestToAccept.dayToChange]});
-                    var updatedStaff=await staffMember.findOneAndUpdate({id:academicMember},{dayOff:weekday[requestToAccept.dayToChange],dayOffNumber:requestToAccept.dayToChange},{new:true})
+                if(requestToAccept.status=="Pending"){
+                    if(requestToAccept.type=="changeDayOff"){
+                        var academicMember=requestToAccept.fromId;
+                        var weekday = new Array(7);
+                        weekday[0] = "Sunday";
+                        weekday[1] = "Monday";
+                        weekday[2] = "Tuesday";
+                        weekday[3] = "Wednesday";
+                        weekday[4] = "Thursday";
+                        weekday[5] = "Friday";
+                        weekday[6] = "Saturday";
+                        var updatedSlots=await slot.findOneAndDelete({instructor:academicMember,day:weekday[requestToAccept.dayToChange]});
+                        var updatedStaff=await staffMember.findOneAndUpdate({id:academicMember},{dayOff:weekday[requestToAccept.dayToChange],dayOffNumber:requestToAccept.dayToChange},{new:true})
+                        var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
+                        var notify=await notification.create({
+                            requestID: requestId,
+                            accepted: true,
+                            to:academicMember
+                        });
+                        return res.status(200).send(acceptedRequest);                 
+                    }
+                    if(requestToAccept.type=="leave"){
+                        if(requestToAccept.leaveType=="Annual"||requestToAccept.leaveType=="Accidental"){
+                            var days=Math.ceil(((requestToAccept.startDate).getTime()-(requestToAccept.endDate).getTime())/(1000*3600*24));
+                            if((Math.floor(staffMember.annualLeaves))>=days){
+                                var updatedLeaves=days-(Math.floor(staffMember.annualLeaves));
+                                var updatedStaff=findOneAndUpdate({id:academicMember},{annualLeaves:updatedLeaves});
+                                var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
+                                var notify=await notification.create({
+                                    requestID: requestId,
+                                    accepted: true,
+                                    to:academicMember
+                                });
+                                return res.status(200).send(acceptedRequest);
+                            }else{
+                                return res.status(400).send("No enough annual leaves");
+                            }
+                        }
+    
+                        
+                    }
                     var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
                     var notify=await notification.create({
                         requestID: requestId,
                         accepted: true,
                         to:academicMember
                     });
-                    return res.status(200).send(acceptedRequest);                 
-                }
-                if(requestToAccept.type=="leave"){
-                    if(requestToAccept.leaveType=="Annual"||requestToAccept.leaveType=="Accidental"){
-                        var days=Math.ceil(((requestToAccept.startDate).getTime()-(requestToAccept.endDate).getTime())/(1000*3600*24));
-                        if((Math.floor(staffMember.annualLeaves))>=days){
-                            var updatedLeaves=days-(Math.floor(staffMember.annualLeaves));
-                            var updatedStaff=findOneAndUpdate({id:academicMember},{annualLeaves:updatedLeaves});
-                            var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
-                            var notify=await notification.create({
-                                requestID: requestId,
-                                accepted: true,
-                                to:academicMember
-                            });
-                            return res.status(200).send(acceptedRequest);
-                        }else{
-                            return res.status(400).send("No enough annual leaves");
-                        }
-                    }
+                    return res.status(200).send(acceptedRequest);
 
-                    
+                }else{
+                    return res.status(400).send("Cannot accept request that is not pending");
+
                 }
-                var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
-                var notify=await notification.create({
-                    requestID: requestId,
-                    accepted: true,
-                    to:academicMember
-                });
-                return res.status(200).send(acceptedRequest);
+
 
             }else{
                 return res.status(404).send("Request not found");
@@ -404,15 +397,21 @@ router.post('/rejectRequest',async(req,res)=>{
         var requestId=req.body.id;
         var rejectReason=req.body.reason;
         if(requestId){
-            var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Rejected",rejectionReason:rejectReason},{new:true});
+            var acceptedRequest=await request.findOne({_id:requestId});
             if(acceptedRequest){
+                if(acceptedRequest.status=="Pending"){
+                    var req=await request.findOneAndUpdate({_id:requestId},{status:"Rejected",rejectionReason:rejectReason},{new:true});
                 var academicMember=acceptedRequest.fromId;
                 var notify=await notification.create({
                     requestID: requestId,
                     accepted: false,
                     to:academicMember
                 });
-                return res.status(200).send(acceptedRequest);
+                return res.status(200).send(req);
+            }else{
+                return res.status(400).send("Cannot accept request that is not pending");
+
+            }
             }else{
                 return res.status(404).send("Request not found");
 

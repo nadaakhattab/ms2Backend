@@ -392,7 +392,84 @@ B)Functionalities:
 
         4.1)HOD Functionalities:
 
-            a)
+            a)Assign/delete/update a course instructor for each course in his department
+                i)Add course instructor
+                    Functionality: add course instructor to course
+                    Route: /hod/addInstructor
+                    Request type: POST
+                    RequestBody:
+                    {
+                        "course":"c1",
+                        "instructor":"12"
+                    }
+                    Response: course with course id of instructor added in instructors
+                    {
+                        "instructors": [
+                            "12"
+                        ],
+                        "TAs": [
+                            "walid",
+                            "ahmed"
+                        ],
+                        "_id": "5fdfac852e200aca12fee9c9",
+                        "name": "c1",
+                        "coordinator": "as-2",
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+                ii)update course instructor
+                    Functionality: update course instructor by adding new one and removing old
+                    Route: /hod/updateInstructor
+                    Request type: POST
+                    RequestBody:
+                    {
+                        "course":"c1",
+                        "oldInstructor":"12",
+                        "newInstructor":"15"
+                    }   
+                    Response: course with course id of instructor added in instructors
+                    {
+                        "instructors": [
+                            "15"
+                        ],
+                        "TAs": [
+                            "walid",
+                            "ahmed"
+                        ],
+                        "_id": "5fdfac852e200aca12fee9c9",
+                        "name": "c1",
+                        "coordinator": "as-2",
+                        "__v": 0
+                    }   
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+                iii)delete course instructor
+                        Functionality: delete course instructor from list of course
+                        Route: /hod/deleteinstructor/:course/:instructor
+                        Request type: GET
+                        Parameters: course is course id i want to delete from and instructor is instructor id i want to delete
+                        Example of how to call route: /hod/deleteInstructor/c1/15
+                        Response:
+                        {
+                            "instructors": [],
+                            "TAs": [
+                                "walid",
+                                "ahmed"
+                            ],
+                            "_id": "5fdfac852e200aca12fee9c9",
+                            "name": "c1",
+                            "coordinator": "as-2",
+                            "__v": 0
+                        }
+                        *Note:
+                        Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                        Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
 
             b)
 
@@ -400,9 +477,53 @@ B)Functionalities:
 
             d)
             
-            e)
+            e)Accept request
+                Functionality: accept request sent 
+                Route: /hod/acceptRequest
+                Request type: POST
+                RequestBody: id is mongoodb id for the request
+                {
+                    "id":"5fdfb1799e83011954fd2596"
+                }
+                Response: request with updted status and appropriate logic handled
+                {
+                    "status": "Accepted",
+                    "_id": "5fdfb1799e83011954fd2596",
+                    "fromId": "12",
+                    "toId": "1",
+                    "type": "changeDayOff",
+                    "date": "2020-12-19T22:00:00.888Z",
+                    "__v": 0,
+                    "dayToChange": 6
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-            f)
+            f)reject request
+                Functionality: reject request sent 
+                Route: /hod/rejectRequest
+                Request type: POST
+                RequestBody: id is mongoodb id for the request, reason is optional and is rejection reason provided
+                {
+                    "id":"5fdfb1799e83011954fd2596",
+                    "reason":"rejection reason"
+                }
+                Response: request with updted status 
+                {
+                    "status": "Rejected",
+                    "_id": "5fdfb1799e83011954fd2596",
+                    "fromId": "12",
+                    "toId": "1",
+                    "type": "changeDayOff",
+                    "date": "2020-12-19T22:00:00.888Z",
+                    "__v": 0,
+                    "dayToChange": 6,
+                    "rejectionReason": "rejection reason"
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
             g)
 
@@ -490,7 +611,7 @@ B)Functionalities:
                         "type": "replacement",
                         "slot": "1",
                         "location": "c7.204",
-                        "course": "CS",
+                        "course": "c1",
                         "day": "sunday",
                         "date": "2020-12-24T22:00:00.000Z",
                         "__v": 0
@@ -512,7 +633,7 @@ B)Functionalities:
                         "type": "replacement",
                         "slot": "1",
                         "location": "c7.204",
-                        "course": "CS",
+                        "course": "c1",
                         "day": "sunday",
                         "date": "2020-12-24T22:00:00.000Z",
                         "__v": 0
@@ -537,7 +658,7 @@ B)Functionalities:
                     "fromId": "1",
                     "toId": "as-2",
                     "type": "slotLinking",
-                    "course": "CS",
+                    "course": "c1",
                     "date": "2020-12-19T22:00:00.434Z",
                     "__v": 0
                 }
@@ -586,7 +707,7 @@ B)Functionalities:
                         "type": "replacement",
                         "slot": "1",
                         "location": "c7.204",
-                        "course": "CS",
+                        "course": "c1",
                         "day": "sunday",
                         "date": "2020-12-24T22:00:00.000Z",
                         "__v": 0
