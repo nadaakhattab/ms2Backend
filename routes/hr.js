@@ -22,6 +22,16 @@ switch(req.path){
   break;
    case '/deleteLocation':result = validations.DeleteLocation.validate(req.body); 
   break;
+  case '/addFaculty':result = validations.AddFaculty.validate(req.body); 
+  break;
+  case '/editFaculty':result = validations.EditFaculty.validate(req.body); 
+  break;
+  case '/addCourse':result = validations.AddCourse.validate(req.body); 
+  break;
+  case '/signIn':result = validations.SignIn.validate(req.body); 
+  break;
+  case '/signOut':result = validations.SignOut.validate(req.body); 
+  break;
 
 }
 
@@ -47,7 +57,7 @@ location.findOne({displayName:req.body.room}).then(result =>{
   else {
   idDb.findOne({name:"location"}).then(idSlot =>{
         newId= idSlot.count+1;
-      location.create({room:newId,displayName: req.body.room, type: req.body.type, capacity: req.body.capacity}).then(result => {
+      location.create({room:newId,displayName: req.body.room, type: req.body.type, maxCapacity: req.body.maxCapacity}).then(result => {
        return  res.status(200).send("Successfully Added");
      });
 
@@ -91,8 +101,8 @@ res.status(501).send("Location doesn't exist");
  });
 
 
-router.route('/deleteLocation').delete((req, res) => {
- location.deleteOne({room: req.body.room}).then(result => {
+router.route('/deleteLocation/:room').delete((req, res) => {
+ location.deleteOne({room: req.params.room}).then(result => {
   if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
   }
@@ -104,7 +114,7 @@ router.route('/deleteLocation').delete((req, res) => {
 
 
 
- router.route('/addFaculty').post((req, res) => {
+ router.route('/addFaculty').post(validateBody,(req, res) => {
      if(req.body.name==undefined){
      res.status(301).send("Can't create a faculty without name");
    }
@@ -137,7 +147,7 @@ faculty.create({name:newId, displayName:req.body.name}).then(result => {
 
 
 
-router.route('/editFaculty').put((req, res) => {
+router.route('/editFaculty').put(validateBody,(req, res) => {
   const toUpdate ={}
    if(req.body.displayName){
      toUpdate.name=req.body.displayName;
@@ -177,14 +187,14 @@ faculty.findOne({name:req.body.name}).then(fac=>{
 
 
 
- router.route('/deleteFaculty').delete((req, res) => {
-   if(req.body.name== undefined){
+ router.route('/deleteFaculty/:name').delete((req, res) => {
+   if(req.params.name== undefined){
      res.status(301).send("Can't delete Faculty. Please Add Faculty Name");
    }
- faculty.deleteOne({name:req.body.name}).then(result => {
-department.deleteMany({faculty:req.body.name}).then (depts=>{
-  course.deleteMany({faculty:req.body.name}).then (course =>{
-academicMember.deleteMany({faculty:req.body.name}).then(()=>{
+ faculty.deleteOne({name:req.params.name}).then(result => {
+department.deleteMany({faculty:req.params.name}).then (depts=>{
+  course.deleteMany({faculty:req.params.name}).then (course =>{
+academicMember.deleteMany({faculty:req.params.name}).then(()=>{
    res.status(200).send("Faculty successfuly deleted");
 });
   });
@@ -240,7 +250,7 @@ resolve();
   });
   });
 }
- router.route('/addDepartment').post((req, res) => {
+ router.route('/addDepartment').post(validateBody,(req, res) => {
    if(req.body.faculty==undefined || req.body.department==undefined){
      res.status(301).send("Please add All required Fields");
    }
@@ -396,7 +406,7 @@ resolve();
 }
 
 
-router.route('/editDepartment').put((req, res) => {
+router.route('/editDepartment').put(validateBody,(req, res) => {
   const toUpdate={};
   const arrayofPromises=[];
   if(req.body.displayName){
@@ -436,25 +446,25 @@ Promise.all(arrayofPromises).then(()=>{
 
 
  //must take faculty name as input and department name
- router.route('/deleteDepartment').delete((req, res) => {
-   if(req.body.faculty==undefined||req.body.department==undefined){
+ router.route('/deleteDepartment/:faculty/:department').delete((req, res) => {
+   if(req.params.faculty==undefined||req.params.department==undefined){
      res.status(301).send("Can't Delete Department without specifying the department & Faculty");
    }
-faculty.findOne({name:req.body.faculty}).then(result =>{
+faculty.findOne({name:req.params.faculty}).then(result =>{
   console.log(result);
   if (result){
  const departments =[];
- if(result.departments.includes(req.body.department)){
+ if(result.departments.includes(req.params.department)){
    result.departments.forEach(dept=> {
-     if (dept!= req.body.department){
+     if (dept!= req.params.department){
        departments.push(dept);
      }
      
    });
-   faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
-     department.deleteOne({name:req.body.department}).then(deletedDept =>{
-course.deleteMany({department:req.body.department}).then(courses=>{
-  academicMember.deleteMany({department:req.body.department}).then(()=>{
+   faculty.updateOne({name:req.params.faculty},{$set:{departments}}).then (result => {
+     department.deleteOne({name:req.params.department}).then(deletedDept =>{
+course.deleteMany({department:req.params.department}).then(courses=>{
+  academicMember.deleteMany({department:req.params.department}).then(()=>{
 res.status(200).send("Deleted successfully");
   })
 })
@@ -482,7 +492,7 @@ res.status(300).send("Faculty doesn't exist ");
 
 
 
- router.route('/addCourse').post((req, res) => {
+ router.route('/addCourse').post(validateBody,(req, res) => {
   //takes department name & course name
   const toAdd={};
   if(req.body.department==undefined||req.body.course==undefined){
@@ -538,7 +548,7 @@ res.status(300).send("Department Doesn't exist");
  });
 
 
-router.route('/editCourse').put((req, res) => {
+router.route('/editCourse').put(validateBody,(req, res) => {
   // law hay update el department lazm aroh ashylo from old department & add in new department IMPORTANT
   if(req.body.course==undefined){
      res.status(301).send("Can't Add a course without specifying its Name");
@@ -577,10 +587,10 @@ res.status(300).send("Department doesn't exist");
 
 });
 
- router.route('/deleteCourse').delete((req, res) => {
+ router.route('/deleteCourse/:course').delete((req, res) => {
    // display error law msh medyny department
 
-   course.findOne({name:req.body.course}).then(courseFound =>{
+   course.findOne({name:req.params.course}).then(courseFound =>{
      if(!courseFound ){
  res.status(301).send("Course Doesn't Exist");
      }
@@ -589,16 +599,16 @@ department.findOne({name:courseFound.department}).then(result =>{
   console.log(result);
   if (result){
  const courses =[];
- if(result.courses.includes(req.body.course)){
+ if(result.courses.includes(req.params.course)){
    result.courses.forEach(course=> {
-     if (course!= req.body.course){
+     if (course!= req.params.course){
        courses.push(course);
      }
      
    });
    department.updateOne({name:courseFound.department},{$set:{courses}}).then (result => {
-          course.deleteOne({name:req.body.course}).then(deletedCourse =>{
- academicMember.deleteMany({course:req.body.course},{faculty:result.faculty, department:result.department}).then(()=>{
+          course.deleteOne({name:req.params.course}).then(deletedCourse =>{
+ academicMember.deleteMany({course:req.params.course},{faculty:result.faculty, department:result.department}).then(()=>{
   res.status(200).send("Deleted successfully");
   });
  
@@ -625,12 +635,6 @@ department.findOne({name:courseFound.department}).then(result =>{
    }).catch (err=>{
  res.status(500).send("Database Error");
    });
-
-
-
-
-
-
 
  });
 
@@ -661,7 +665,7 @@ department.findOne({name:courseFound.department}).then(result =>{
 //  });
 
 
- router.route('/addStaffMember').post( (req, res) => {
+ router.route('/addStaffMember').post(validateBody, (req, res) => {
 staffMember.findOne({email:req.body.email}).then(result =>{
   if(result){
   res.send("Email already exists");
@@ -692,16 +696,27 @@ res.send("Can't assign the following office Location");
       //   const salt= await bcrypt.genSalt(10);
       //  password= await bcrypt.hash(password,salt);
         console.log("password",password);
+       let dayyOffNumber;
+       switch (req.body.dayOff){
+         case 'Sunday': dayyOffNumber=0; break;
+          case 'Monday': dayyOffNumber=1; break;
+          case 'Teusday': dayyOffNumber=2; break;
+            case 'Wednesday': dayyOffNumber=3; break;
+             case 'Thursday': dayyOffNumber=4; break;
+              case 'Friday': dayyOffNumber=5; break;
+               case 'Saturday': dayyOffNumber=6; break;
+       }
         const data = {
           password,
           id,
           name: req.body.name,
           email: req.body.email,
           salary: req.body.salary,
-          officeLocation: req.body.officeLocation
-        }
-        if (dayoff){
-          data.dayoff= dayoff;
+          officeLocation: req.body.officeLocation,
+          gender:req.body.gender,
+          dayOff:req.body.dayOff,
+          dayOffNumber
+
         }
 staffMember.create({...data}).then(result=>{
 
@@ -741,7 +756,7 @@ res.send("location not found");
 
  });
 
- router.route('/attendanceRecord').get( (req, res) => {
+ router.route('/attendanceRecord/:id').get( (req, res) => {
    staffMember.findOne({...req.body}).then(result=>{
      res.send(result.attendanceSheet);
 
@@ -749,7 +764,7 @@ res.send("location not found");
  });
 
 
- router.route('/deleteStaff').delete((req, res) => {
+ router.route('/deleteStaff/:id').delete((req, res) => {
    staffMember.deleteOne({...req.body}).then(result => {
    res.send("staff successfuly deleted");
  }).catch (err=>{
@@ -798,7 +813,7 @@ res.send("location not found");
     }
  });
 
- router.post('/signIn',async(req,res)=>{
+ router.post('/signIn',validateBody,async(req,res)=>{
   try{
     var userId=req.body.id;
     var datetime=req.body.date;
@@ -843,7 +858,7 @@ res.send("location not found");
 
 });
 
-router.post('/signOut',async(req,res)=>{
+router.post('/signOut',validateBody,async(req,res)=>{
   try{
     var userId=req.body.id;
     var datetime=req.body.date;
