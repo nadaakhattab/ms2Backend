@@ -112,13 +112,13 @@ AddStaffMember:Joi.object({
 
 SignIn:Joi.object({
   id: Joi.number().required(),
-  date: Joi.date.required(),
+  date: Joi.date().required(),
 },
 ),
 
 SignOut:Joi.object({
   id: Joi.number().required(),
-  date: Joi.date.required(),
+  date: Joi.date().required(),
 },
 ),
 

@@ -9,6 +9,7 @@ const course = require('../models/course');
 const idDb = require('../models/id');
 const attendance = require('../models/attendance');
 const slot = require('../models/slot');
+const academicMember=require('../models/academicMember');
  
 
 
@@ -23,40 +24,59 @@ router.post('/assignSlot',async(req,res)=>{
             if(!idToAssign||!courseName||!slotId){
                 return res.status(400).send("Please provide course name and ta and slot id");
             }else{
-                var course=await course.find({name:courseName});
-                if(course.instructors.includes(userId)){
-                    var user=await staffMember.findOne({id: idToAssign});
-                    if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
-                        var slotsV=await slot.findOne({id:slotId});
-                        if(slotsV){
-                            if(slotsV.course==courseName){
-                                if(slotsV.instructor){
-                                    
-                                        return res.status(400).send("Slot assigned to another TA");
-        
+                var courseV=await course.findOne({name:courseName});
+                if(courseV){
+                    if(courseV.instructors){
+                        if(courseV.instructors.length>0){
+                            if(courseV.instructors.includes(userId)){
+                                var user=await staffMember.findOne({id: idToAssign});
+                                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
+                                    var slotsV=await slot.findOne({id:slotId});
+                                    if(slotsV){
+                                        if(slotsV.course==courseName){
+                                            if(slotsV.instructor){
+                                                
+                                                    return res.status(400).send("Slot assigned to another TA");
+                    
+                                            }else{
+                                                var slots=await slot.findOneAndUpdate({id:slotId},
+                                                    {instructor: idToAssign},{new:true});
+                                                return res.status(200).send(slots);
+                                                
+                                            }
+                    
+                                        }else{
+                                            return res.status(400).send("Slot assigned to another course");
+                    
+                                        }
+                    
+                                    }else{
+                                        return res.status(401).send("Invalid slot");
+                    
+                                    }
                                 }else{
-                                    var slots=await slot.findOneAndUpdate({id:slotId},
-                                        {instructor: idToAssign},{new:true});
-                                    return res.status(200).send(slots);
-                                    
+                                    return res.status(400).send("Id to assign must be an academic member");
                                 }
-        
+                
                             }else{
-                                return res.status(400).send("Slot assigned to another course");
-        
+                                return res.status(400).send("Can only assign in your course");
                             }
-        
+
                         }else{
-                            return res.status(401).send("Invalid slot");
-        
+                            return res.status(400).send("No instructors")
+
                         }
+
                     }else{
-                        return res.status(400).send("Id to assign must be an academic member");
+                        return res.status(400).send("No instructors")
+
                     }
-    
+
                 }else{
-                    return res.status(400).send("Can only assign in your course");
+                    return res.status(400).send("Invalid course")
+
                 }
+
             }
         }catch(error){
             return res.status(500).send(error.message);
@@ -71,47 +91,81 @@ router.post('/updateSlot',async(req,res)=>{
         var idToAssign=req.body.staffId;
         var courseName=req.body.courseName;
         var oldSlotId=req.body.oldSlotId;
-        var newSlotId=req.body.oldSlotId;
+        var newSlotId=req.body.newSlotId;
         if(!idToAssign||!courseName||!oldSlotId||!newSlotId){
             return res.status(400).send("Please provide course name and ta and slot id");
         }else{
-            var course=await course.find({name:courseName});
-            if(course.instructors.includes(userId)){
-                var user=await staffMember.findOne({id: idToAssign});
-                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
-                    var slotsV=await slot.findOneAndUpdate({id:oldSlotId},{instructor:null});
-                    if(slotsV){
-                        var newSlots=await slot.findOne({id:newSlotId});
-                        if(newSlots){
-                            if(newSlots.course==courseName){
-                                if(newslots.instructor){
-                                    return res.status(400).send("Slot assigned to another TA");       
+            var courseV=await course.findOne({name:courseName});
+            if(courseV){
+                console.log(courseV.instructors);
+                if(courseV.instructors){
+                    if(courseV.instructors.length>0){
+                        if(courseV.instructors.includes(userId)){
+                            var user=await staffMember.findOne({id: idToAssign});
+                            if(user){
+                                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
+                                    var slotsV=await slot.findOne({id:oldSlotId,instructor:idToAssign,course:courseName});
+                                    console.log(slotsV);
+                                    if(slotsV){
+                                        var newSlots=await slot.findOne({id:newSlotId});
+                                        if(newSlots){
+                                            if(newSlots.course==courseName){
+                                                if(newSlots.instructor){
+                                                    return res.status(400).send("Slot assigned to another TA");       
+                                                }else{
+                                                    var deleteSlot=await slot.findOneAndUpdate({id:oldSlotId},
+                                                        {instructor: null},{new:true})
+                                                    var slots=await slot.findOneAndUpdate({id:newSlotId},
+                                                        {instructor: idToAssign},{new:true});
+                                                        return res.status(200).send(slots);
+                                                    
+                                                }
+                        
+                                            }else{
+                                                return res.status(400).send("Slot assigned to another course");
+                        
+                                            }
+                
+                                        }else{
+                                            return res.status(404).send("New slot id not found");
+    
+                                        }
+                
+                    
+                                    }else{
+                                        return res.status(401).send("Invalid slot or input instructor does not teach chosen slot");
+                    
+                                    }
                                 }else{
-                                    var slots=await slot.findOneAndUpdate({id:slotId},
-                                        {instructor: idToAssign},{new:true});
-                                        return res.status(200).send(slots);
-                                    
+                                    return res.status(400).send("Id to assign must be an academic member");
                                 }
-        
+
                             }else{
-                                return res.status(400).send("Slot assigned to another course");
-        
+                                return res.status(401).send("Invalid id");
+
                             }
 
+            
+                        }else{
+                            return res.status(400).send("Can only assign in your course");
                         }
-
     
                     }else{
-                        return res.status(401).send("Invalid slot");
+                        return res.status(400).send("No instructors")
     
                     }
+
                 }else{
-                    return res.status(400).send("Id to assign must be an academic member");
+                    return res.status(400).send("Course has no instructors")
+
                 }
 
+
+
             }else{
-                return res.status(400).send("Can only assign in your course");
+                return res.status(400).send("Invalid course")
             }
+
         }
     }catch(error){
         return res.status(500).send(error.message);
@@ -128,27 +182,62 @@ router.delete('/deleteSlot/:course/:staffId/:oldSlotId',async(req,res)=>{
         if(!idToAssign||!courseName||!oldSlotId){
             return res.status(400).send("Please provide course name and ta and slot id");
         }else{
-            var course=await course.find({name:courseName});
-            if(course.instructors.includes(userId)){
-                var user=await staffMember.findOne({id: idToAssign});
-                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
-                    var slotsV=await slot.findOneAndUpdate({id:oldSlotId},{instructor:null});
-                    if(slotsV){
-                        return res.status(200).send(slotsV);
+            var courseV=await course.findOne({name:courseName});
+            if(courseV){
+                if(courseV.instructors){
+                    if(courseV.instructors.length>0){
+                        if(courseV.instructors.includes(userId)){
+                            var user=await staffMember.findOne({id: idToAssign});
+                            if(user){
+                                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
+                                    var slotX=await slot.findOne({id:oldSlotId,instructor:idToAssign,course:courseName});
+                                    console.log(slotX);
+                                    if(slotX){
+                                        var slotsV=await slot.findOneAndUpdate({id:oldSlotId,instructor:idToAssign},{instructor:null},{new:true});
+                                        if(slotsV){
+                                            return res.status(200).send(slotsV);
+                    
+                                        }else{
+                                            return res.status(401).send("Invalid slot");
+                    
+                                        }
+    
+                                    }else{
+                                        return res.status(401).send("Invalid slot or input instructor does not teach chosen slot");
+    
+                                    }
+    
+                                    
+                
+                                }else{
+                                    return res.status(400).send("Id to assign must be an academic member");
+                                }
+
+                            }else{
+                                return res.status(401).send("Invalid id");
+
+                            }
+
+            
+                        }else{
+                            return res.status(400).send("Can only assign in your course");
+                        }
 
                     }else{
-                        return res.status(401).send("Invalid slot");
+                        return res.status(400).send("No instructors")
 
                     }
-                    
 
                 }else{
-                    return res.status(400).send("Id to assign must be an academic member");
+                    return res.status(400).send("No instructors")
+
                 }
 
             }else{
-                return res.status(400).send("Can only assign in your course");
+                return res.status(400).send("Invalid course")
+                
             }
+
         }
     }catch(error){
         return res.status(500).send(error.message);
@@ -161,31 +250,75 @@ router.delete('/removeFromCourse/:course/:staffId',async(req,res)=>{
         var userId=req.headers.payload.id;
         var idToAssign=req.params.staffId;
         var courseName=req.params.course;
-        if(!idToAssign||!courseName||!oldSlotId){
+        if(!idToAssign||!courseName){
             return res.status(400).send("Please provide course name and ta and slot id");
         }else{
-            var course=await course.find({name:courseName});
-            if(course.instructors.includes(userId)){
-                var user=await staffMember.findOne({id: idToAssign});
-                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
-                    var slotsV=await slot.findAndUpdate({instructor:idToAssign},{instructor:null});
-                    var academicMemberDelete=await academicMemberDelete.findAndDelete({instructor:idToAssign,course:courseName});
-                    if(slotsV){
-                        return res.status(200).send(slotsV);
+            var courseV=await course.findOne({name:courseName});
+            if(courseV){
+                if(courseV.instructors){
+                    if(courseV.instructors.length>0){
+                        if(courseV.instructors.includes(userId)){
+                            var user=await staffMember.findOne({id: idToAssign});
+                            if(user){
+                                if(user.type=="TA"||user.type=="CI"||user.type=="CC"){
+                                    switch(user.type){
+                                        case "TA":{
+                                            var tas=courseV.TAs.filter(function(ta){
+                                                return ta!=idToAssign;
+                                            })
+                                            var updatedC=await course.findOneAndUpdate({name:courseName},{TAs:tas});
+    
+                                        };break;
+                                        case "CI":{
+                                            var tas=courseV.instructors.filter(function(ta){
+                                                return ta!=idToAssign;
+                                            })
+                                            var updatedC=await course.findOneAndUpdate({name:courseName},{instructors:tas});
+    
+                                        };break;
+                                        case "CC":{
+                                            var tas=courseV.TAs.filter(function(ta){
+                                                return ta!=idToAssign;
+                                            })
+                                            var updatedC=await course.findOneAndUpdate({name:courseName},{TAs:tas,coordinator:null});
+    
+    
+                                        };break;
+                                    }
+                                    var slotsV=await slot.updateMany({instructor:idToAssign,course:courseName},{instructor:null});
+                                    var academicMemberDelete=await academicMember.deleteMany({id:idToAssign,course:courseName});
+                                    return res.status(200).send("Successfully removed");                               
+                
+                                }else{
+                                    return res.status(400).send("Id to assign must be an academic member");
+                                }
+
+                            }else{
+                                return res.status(400).send("Invalid id");
+
+                            }
+
+            
+                        }else{
+                            return res.status(400).send("Can only assign in your course");
+                        }
 
                     }else{
-                        return res.status(401).send("Invalid slot");
-
+                        return res.status(400).send("No instructors")
+                        
                     }
-                    
 
                 }else{
-                    return res.status(400).send("Id to assign must be an academic member");
+                    return res.status(400).send("No instructors")
+
                 }
 
             }else{
-                return res.status(400).send("Can only assign in your course");
+
+                return res.status(400).send("Invalid course")
             }
+
+
         }
     }catch(error){
         return res.status(500).send(error.message);
@@ -196,27 +329,66 @@ router.delete('/removeFromCourse/:course/:staffId',async(req,res)=>{
 router.post('/assignCourseCordinator',async(req,res)=>{
         
         try{
-            var taId=req.body.id;
-            var courseName=req.body.courseName;
+            var userId=req.headers.payload.id;
+            var courseName=req.body.courseId;
+            var idToAssign=req.body.id;
             if(!idToAssign||!courseName){
                 return res.status(400).send("Please provide course name and ta id");
             }else{
-                var course=courses.find({name:courseName});
-                if(course.instructors.includes(userId)){
-                    var user=await staffMember.findOne({id: taId});
-                    if(user){
-                        if(user.type=="TA"){
-                            var course=await course.findOneAndUpdate({name:courseName},{coordinator: taId},{new:true});
-                            res.status(200).send(course);
+                var courseV=await course.findOne({name:courseName})
+                
+                if(courseV){
+                    if(courseV.instructors){
+                        if(courseV.instructors.length>0){
+                            if(courseV.instructors.includes(userId)){
+                                var user=await staffMember.findOne({id: idToAssign});
+                                if(user){
+                                    if(user.type=="TA"){
+                                        if(courseV.TAs){
+                                            if(courseV.TAs.length>0){
+                                                if(courseV.TAs.includes(idToAssign)){
+                                                    var courseV=await course.findOneAndUpdate({name:courseName},{coordinator: idToAssign},{new:true});
+                                                    return res.status(200).send(courseV);
+
+                                                }else{
+                                                    return res.status(400).send("Course coordinator must be a TA in chosen course");
+
+                                                }
+                                            }else{
+                                                return res.status(400).send("No TAs")
+
+                                            }
+                                        }else{
+                                            return res.status(400).send("No TAs")
+
+                                        }
+                 
+
+                                    }else{
+                                        return res.status(400).send("Course coordinator must be a TA");
+                                    }
+                                }else{
+                                    return res.status(401).send("Invalid id");
+                                }
+                            }else{
+                                return res.status(400).send("Can only assign in your course");
+                            }
+
                         }else{
-                            return res.status(400).send("Course coordinator must be a TA");
+                            return res.status(400).send("No instructors")
+
                         }
+
                     }else{
-                        return res.status(401).send("Invalid id");
+                        return res.status(400).send("No instructors")
+
                     }
+
                 }else{
-                    return res.status(400).send("Can only assign in your course");
+                    return res.status(400).send("Invalid course")
+
                 }
+
             }
         }catch(error){
             return res.status(500).send(error.message);

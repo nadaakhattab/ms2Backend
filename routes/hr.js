@@ -786,7 +786,7 @@ res.status(200).send(att);
      const listofAllCourse= await academicMember.find({id:req.params.id});
 if (listofAllCourse){
 // get each course --> loop on its ta/ instructor/ coordinator if ==req.para.id remove it
-listofAllCourse.forEach((mem)=>{
+listofAllCourse.forEach(async(mem)=>{
  const course= await course.findOne({name:mem.course});
  if(course){
 
