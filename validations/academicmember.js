@@ -28,4 +28,9 @@ module.exports= {
         leaveType:Joi.string().required()
         },
     ),
+    ReplyRequest:Joi.object({
+        requestId:Joi.string().required(),
+        accepted:Joi.boolean(),
+
+    }
 }    

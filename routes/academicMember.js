@@ -29,6 +29,8 @@ const validateBody =(req, res,next)  =>  { try{
     break;
     case '/sendLeaveRequest':result = validations.sendLeaveRequest.validate(req.body); 
     break;
+    case '/replyRequest':result = validations.ReplyRequest.validate(req.body); 
+    break;
    // case '/addCourse':result = validations.AddCourse.validate(req.body); 
    // break;
    // case '/signIn':result = validations.SignIn.validate(req.body); 
@@ -597,7 +599,7 @@ router.get('/notifications/:id',async(req,res)=>{
 
 
 
-router.post('/replyRequest',async(req,res)=>{
+router.post('/replyRequest',validateBody,async(req,res)=>{
     try{
         var requestId=req.body.id;
         if(requestId){
