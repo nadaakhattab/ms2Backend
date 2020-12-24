@@ -13,7 +13,7 @@ const validateBody =(req, res,next)  =>  { try{
   switch(req.path){
     case '/login':result = validations.Login.validate(req.body); 
     break;
-     case '/resetPassword':result = validations.ResetPassword.validate(req.body); 
+    case '/resetPassword':result = validations.ResetPassword.validate(req.body); 
     break;
      
   

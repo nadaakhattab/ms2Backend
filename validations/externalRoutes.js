@@ -8,7 +8,7 @@ module.exports= {
    ),
    ResetPassword:Joi.object({
     email:Joi.string().required(),
-    
+    password:Joi.string().required()
   },
 ),
 }
