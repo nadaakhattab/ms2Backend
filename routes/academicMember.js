@@ -230,6 +230,10 @@ router.get('/viewRequests/:status',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var reqStatus=req.params.status;
+        if(reqStatus==undefined){
+            
+                return  res.status(300).send("Undefined Request Status");
+        }
         if(reqStatus=="Accepted"||reqStatus=="Pending"||reqStatus=="Rejected"){
             var request=await requests.find({fromId:userId,status:reqStatus});
             if(request.length>0){
@@ -462,6 +466,11 @@ try{
 router.delete('/cancelRequest/:id',async(req,res)=>{
     try{
     var reqId=req.params.id;
+    if(reqId==undefined){
+       
+            return  res.status(300).send("Undefined ID");
+           
+    }
     var request=await requests.findOne({_id:reqId});
     if(request){
         var todayDate=new Date();
@@ -523,6 +532,9 @@ router.get('/schedule',async(req,res)=>{
 router.get('/notifications/:id',async(req,res)=>{
     try{
         var userId=req.params.id;
+        if(userId==undefined){
+            return  res.status(300).send("Undefined ID");
+           }
         var notify=await notification.find({to:userId});
         if(notify){
             if(notify.length>0){
