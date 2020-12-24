@@ -8,12 +8,53 @@ const staffMember= require('../models/staffMember');
 const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
+const validations = require('../validations/coordinator');
+const Joi = require('joi');
+
+
+
+
+const validateBody =(req, res,next)  =>  { try{ 
+  let result;
+switch(req.path){
+  case '/addSlot':result = validations.addSlot.validate(req.body); 
+  break;
+  case '/replyRequest':result = validations.replyRequest.validate(req.body); 
+  break;
+  // case '/assignCourseCordinator':result = validations.assignCourseCoordinator.validate(req.body); 
+  // break;
+  // case '/sendChangeDayOffRequest':result = validations.sendChangeDayOffRequest.validate(req.body); 
+  // break;
+  // case '/sendLeaveRequest':result = validations.sendLeaveRequest.validate(req.body); 
+  // break;
+ // case '/addCourse':result = validations.AddCourse.validate(req.body); 
+ // break;
+ // case '/signIn':result = validations.SignIn.validate(req.body); 
+ // break;
+ // case '/signOut':result = validations.SignOut.validate(req.body); 
+ // break;
+
+}
+
+  const { value, error } = result; 
+  const valid = error == null; 
+  if (!valid) { 
+    res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+  } else { 
+next();
+  }  
+}
+catch(err){
+  console.log(err);
+  res.status(405).send("Validation error: Please make sure all required fields are given");
+}}
+
 
 
 // Add 1 slot do we need another for many slots??
 
 //need to check that the instructor & location & course exists
-router.route('/addSlot').post( (req, res) => {
+router.route('/addSlot').post(validateBody, (req, res) => {
     if(req.body.slot==undefined ||  req.body.day==undefined || req.body.location==undefined||req.body.course==undefined || req.body.instructor==undefined){
         res.status(300).send("Error:Missing Fields");
     }
@@ -175,7 +216,7 @@ router.route('/slotRequests').get((req, res) => {
 });
 
 
-router.route('/replyRequest').post( (req, res) => {
+router.route('/replyRequest').post(validateBody, (req, res) => {
     if(req.body.slotId==undefined ||req.body.fromId==undefined|| req.body.status==undefined){
         res.status(301).send("ERROR: Incomplete Requiured fields");
     }
@@ -188,7 +229,6 @@ router.route('/replyRequest').post( (req, res) => {
       res.status(301).send("Error: Slot Request with the given fields doesn't exist ");
   }
 if(req.body.status=="Accepted"){
-  // check that the slot is not already assigned 
 slot.findOneAndUpdate({id: req.body.slotId},{$set:{instructor:result.fromId}}).then(slotRes =>{
     if(slotRes){
     res.status(200).send("Succesffuly linked");}

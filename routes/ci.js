@@ -10,12 +10,48 @@ const idDb = require('../models/id');
 const attendance = require('../models/attendance');
 const slot = require('../models/slot');
 const academicMember=require('../models/academicMember');
- 
+const validations = require('../validations/ci');
+const Joi = require('joi');
+
+
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+  switch(req.path){
+    case '/assignSlot':result = validations.assignSlot.validate(req.body); 
+    break;
+    case '/updateSlot':result = validations.updateSlot.validate(req.body); 
+    break;
+    case '/assignCourseCordinator':result = validations.assignCourseCoordinator.validate(req.body); 
+    break;
+    // case '/sendChangeDayOffRequest':result = validations.sendChangeDayOffRequest.validate(req.body); 
+    // break;
+    // case '/sendLeaveRequest':result = validations.sendLeaveRequest.validate(req.body); 
+    // break;
+   // case '/addCourse':result = validations.AddCourse.validate(req.body); 
+   // break;
+   // case '/signIn':result = validations.SignIn.validate(req.body); 
+   // break;
+   // case '/signOut':result = validations.SignOut.validate(req.body); 
+   // break;
+  
+  }
+  
+    const { value, error } = result; 
+    const valid = error == null; 
+    if (!valid) { 
+      res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+    } else { 
+  next();
+    }  
+  }
+  catch(err){
+    console.log(err);
+    res.status(405).send("Validation error: Please make sure all required fields are given");
+  }}
 
 
 
-
-router.post('/assignSlot',async(req,res)=>{
+router.post('/assignSlot',async(validateBody,(req,res)=>{
         try{
             var userId=req.headers.payload.id;
             var idToAssign=req.body.staffId;
@@ -83,9 +119,9 @@ router.post('/assignSlot',async(req,res)=>{
         }
     
     
-    });
+    }));
 
-router.post('/updateSlot',async(req,res)=>{
+router.post('/updateSlot',async(validateBody,(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var idToAssign=req.body.staffId;
@@ -171,7 +207,7 @@ router.post('/updateSlot',async(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-});
+}));
 
 router.delete('/deleteSlot/:course/:staffId/:oldSlotId',async(req,res)=>{
     try{
@@ -326,7 +362,7 @@ router.delete('/removeFromCourse/:course/:staffId',async(req,res)=>{
 
 })
 
-router.post('/assignCourseCordinator',async(req,res)=>{
+router.post('/assignCourseCordinator',async(validateBody,(req,res)=>{
         
         try{
             var userId=req.headers.payload.id;
@@ -395,7 +431,7 @@ router.post('/assignCourseCordinator',async(req,res)=>{
         }
     
     
-    })
+    }))
 
     let assignedCourse=0;
     function checkSlots(slot,i){
