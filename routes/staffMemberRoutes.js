@@ -40,7 +40,7 @@ catch(err){
 router.post('/logout', (req, res) => {
     try{
         const refreshToken=req.body.token;
-        if(!refreshToken){
+        if(refreshToken){
             global.refreshTokens = global.refreshTokens.filter(t => t !== refreshToken);
             return res.status(200).send("Logout successful");
         }else{
@@ -78,7 +78,7 @@ router.post('/updateProfile',validateBody,async(req,res)=>{
         // var inputOfficeLocation=req.body.officeLocation;
         var inputEmail=req.body.email;
         var fieldsToUpdate={};
-        if(!inputMobile && !inputOfficeLocation && !inputEmail){
+        if(!inputMobile  && !inputEmail){
             return res.status(400).send("No data to update");
         }else{
             if(inputMobile){
