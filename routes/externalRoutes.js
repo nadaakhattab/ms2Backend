@@ -4,7 +4,7 @@ const staffMembers=require('../models/staffMember');
 const bcryptjs=require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
-const validations = require('../validations/staffmember');
+const validations = require('../validations/externalRoutes');
 const Joi = require('joi');
 
 
@@ -129,7 +129,7 @@ router.post('/resetPassword',validateBody,async(req,res)=>{
                     return res.status(200).send("Successfull Reset");
                 }
                 else{
-                    return res.status(300).send("This is not your first Login Please hed to update password");
+                    return res.status(300).send("This is not your first Login Please head to update password");
                 }
                 
             }
