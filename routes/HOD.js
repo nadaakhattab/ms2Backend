@@ -110,73 +110,44 @@ router.route('/addInstructor').post( async(validateBody,(req, res) => {
 
 router.route('/updateInstructor').post(async(validateBody,(req, res) => {
     try{
-        var myId=req.headers.payload.id;
+        var myId=req.body.instructor;
+        const newCourse = req.body.course;
         var inputCourse=req.body.course;
-        var oldInstructor=req.body.oldInstructor;
-        var newInstructor=req.body.newInstructor;
-        if(!inputCourse||!oldInstructor||!newInstructor){
+        if(!inputCourse||!newCourse){
             return res.status(400).send("Please provide id of old instructor,new instructor and course id");
         }else{
-            var dep=await department.findOne({HOD: myId});
-            if(dep){
-                var oldInst=await staffMember.findOne({id:oldInstructor,type:"CI"});
-                if(oldInst){
-                    var newInst=await staffMember.findOne({id:newInstructor,type:"CI"});
-                    if(newInst){
-                        var vCourse=await course.findOne({name:inputCourse});
-                        if(vCourse){
-                            var newInstructors=vCourse.instructors;
-                            newInstructors=newInstructors.filter(function(input){
-                                return input!=oldInstructor;
-                            });
-                            newInstructors.push(newInstructor);
-                            var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
-                            if(updated){
-
-                                var academicMembersRemove=await academicMember.findOneAndDelete({
-                                    id:oldInstructor,
-                                    course:inputCourse,
-                                    department:dep.name,
-                                    faculty:dep.faculty
-                                })
-                                var academicMemberAdd=await academicMember.create({
-                                    id:newInstructor,
-                                    course:inputCourse,
-                                    department:dep.name,
-                                    faculty: dep.faculty
-                                });
-                                return res.status(200).send(updated);
-   
-                            }else{
-                                return res.status(500).send("Error adding course instructor");
-    
-                            }
-
-                        }else{
-                            return res.status(400).send("Invalid course");
-
-                        }
-
-
-
-                    }else{
-                        return res.status(400).send("Invalid new instructor");
-                    }
-
-                }else{
-                    return res.status(400).send("Invalid old instructor");
-
-                }
-
-
-            }else{
-                return res.status(404).send("Cannot find department");
-
-            }
-
+            let oldCourse;
+academicMember.findOne({id:myId}).then ((member)=>{
+    oldCourse= member.course;
+    // delete it from instruction list in old course
+course.findOne({name:oldCourse}).then ((oldC)=>{
+    const instList = oldC.instructors;
+    const updatedInst =[];
+    instList.forEach(element => {
+        if (element!=myId){
+updatedInst.push(element);
         }
+        
+    });
+    course.findOneAndUpdate({name:oldCourse},{$set:{instructors:updatedInst}}).then ((updatedOld)=>{
+        course.findOne({name:newCourse}).then ((newCou)=>{  
+              // add it to instruction list in new course
+const updatedNewInst= newCou.instructors;
+updatedNewInst.push(myId);
+course.findOneAndUpdate({name:newCourse},{$set:{instructors:updatedNewInst}},{new:true}).then((newUp)=>{
+    // update academic member to be equal to old course && its dept && its faculty 
+    academicMember.findOneAndUpdate({id:myId},{$set:{faculty:newUp.faculty, course:newUp.name, department:newUp.department}}).then ((updMem)=>{
+        res.status(200).send("Updated succesffully");
+
+    })
+})
+        });
+    });
+});
 
 
+});
+        }
     }catch(error){
         return res.status(500).send(error.message);
     }
