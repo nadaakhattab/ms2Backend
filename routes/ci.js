@@ -51,7 +51,7 @@ const validateBody =(req, res,next)  =>  { try{
 
 
 
-router.post('/assignSlot',async(validateBody,(req,res)=>{
+router.post('/assignSlot',validateBody,async(req,res)=>{
         try{
             var userId=req.headers.payload.id;
             var idToAssign=req.body.staffId;
@@ -119,9 +119,9 @@ router.post('/assignSlot',async(validateBody,(req,res)=>{
         }
     
     
-    }));
+    });
 
-router.post('/updateSlot',async(validateBody,(req,res)=>{
+router.post('/updateSlot',validateBody,async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var idToAssign=req.body.staffId;
@@ -207,7 +207,7 @@ router.post('/updateSlot',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-}));
+});
 
 router.delete('/deleteSlot/:course/:staffId/:oldSlotId',async(req,res)=>{
     try{
@@ -362,7 +362,7 @@ router.delete('/removeFromCourse/:course/:staffId',async(req,res)=>{
 
 })
 
-router.post('/assignCourseCordinator',async(validateBody,(req,res)=>{
+router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
         
         try{
             var userId=req.headers.payload.id;
@@ -431,7 +431,7 @@ router.post('/assignCourseCordinator',async(validateBody,(req,res)=>{
         }
     
     
-    }))
+    });
 
     let assignedCourse=0;
     function checkSlots(slot,i){

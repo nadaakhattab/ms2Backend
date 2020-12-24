@@ -19,7 +19,7 @@ module.exports= {
 
     sendChangeDayOffRequest:Joi.object({
         reqReason:Joi.string().required(),
-        dayToChange:oi.number().required()
+        dayToChange:Joi.number().required()
         },
 
     ),
@@ -32,5 +32,5 @@ module.exports= {
         requestId:Joi.string().required(),
         accepted:Joi.boolean(),
 
-    }
+    })
 }    

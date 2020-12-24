@@ -52,7 +52,7 @@ const validateBody =(req, res,next)  =>  { try{
 
 
 
-router.route('/addInstructor').post( async(validateBody,(req, res) => {
+router.route('/addInstructor').post(validateBody,async(req, res) => {
     try{
         var myId=req.headers.payload.id;
         var inputCourse=req.body.course;
@@ -60,7 +60,7 @@ router.route('/addInstructor').post( async(validateBody,(req, res) => {
         if(!inputCourse||!inputInstructor){
             return res.status(400).send("Please provide instructor and course id");
         }else{
-            var dep=await department.findOne({HOD: myId});
+            var dep= await department.findOne({HOD: myId});
             if(dep){
                 var instructor=await staffMember.findOne({id:inputInstructor,type:"CI"});
                 if(instructor){
@@ -106,9 +106,9 @@ router.route('/addInstructor').post( async(validateBody,(req, res) => {
     }
 
 
-}));
+});
 
-router.route('/updateInstructor').post(async(validateBody,(req, res) => {
+router.route('/updateInstructor').post(validateBody,async(req, res) => {
     try{
         var myId=req.body.instructor;
         const newCourse = req.body.course;
@@ -152,7 +152,7 @@ course.findOneAndUpdate({name:newCourse},{$set:{instructors:updatedNewInst}},{ne
         return res.status(500).send(error.message);
     }
 
-    }));
+    });
 
 router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => {
     try{
@@ -213,7 +213,7 @@ router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => 
 
     });
 
-router.route('/addTA').post( async(validateBody,(req, res) => {
+router.route('/addTA').post( validateBody,async(req, res) => {
             try{
                 var myId=req.headers.payload.id;
                 var inputCourse=req.body.course;
@@ -267,7 +267,7 @@ router.route('/addTA').post( async(validateBody,(req, res) => {
             }
         
         
-    })); 
+    }); 
     
 router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
         try{
@@ -404,7 +404,7 @@ router.post('/acceptRequest',async(req,res)=>{
 
 });   
 
-router.post('/rejectRequest',async(validateBody,(req,res)=>{
+router.post('/rejectRequest',validateBody,async(req,res)=>{
     try{
         var requestId=req.body.id;
         var rejectReason=req.body.reason;
@@ -436,7 +436,7 @@ router.post('/rejectRequest',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }       
 
-}));
+});
 
 let saveRes={};
 function addStaff(members,i){
