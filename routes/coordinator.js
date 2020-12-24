@@ -154,8 +154,8 @@ else {
  });
 
 
-router.route('/deleteSlot').delete((req, res) => {
- slot.deleteOne({id:req.body.id}).then(result => {
+router.route('/deleteSlot/:id').delete((req, res) => {
+ slot.deleteOne({id:req.params.id}).then(result => {
    res.send("Slot successfuly deleted");
  }).catch (err=>{
    res.send(err);
