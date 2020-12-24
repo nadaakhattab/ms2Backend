@@ -156,6 +156,11 @@ else {
 
 router.route('/deleteSlot/:id').delete((req, res) => {
  slot.deleteOne({id:req.params.id}).then(result => {
+   if(res.params.id==undefined){
+    
+      return  res.status(300).send("Undefined ID");
+     
+   }
    res.send("Slot successfuly deleted");
  }).catch (err=>{
    res.send(err);
