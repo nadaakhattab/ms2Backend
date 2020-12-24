@@ -6,6 +6,26 @@ const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
 const requests=require('../models/requests');
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+switch(req.path){
+    case '/updateProfile':result = validations.UpdateProfile.validate(req.body); 
+    break;
+     case '/changePassword':result = validations.ChangePassword.validate(req.body); 
+    break; 
+  }
+  const { value, error } = result; 
+  const valid = error == null; 
+  if (!valid) { 
+    res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+  } else { 
+next();
+  }  
+}
+catch(err){
+  console.log(err);
+  res.status(405).send("Validation error: Please make sure all required fields are given");
+}}
 
 
 router.post('/logout', (req, res) => {
@@ -23,18 +43,23 @@ router.post('/logout', (req, res) => {
 router.get('/viewProfile',async (req,res)=>{
     try{
         var userId=req.headers.payload.id;
+        if(userId== undefined){
+          return  res.status(300).send("Undefined user");
+        }
+        else{
         var user=await staffMembers.findOne({id: userId})
         if(!user){
             return res.status(404).send("User not found");
         }else{
             return res.status(200).send(user);
-        }
+        }}
     }catch(error){
         return res.status(500).send(error.message);
     }
+
 });
 
-router.post('/updateProfile',async(req,res)=>{
+router.post('/updateProfile',async(validateBody, (req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputMobile=req.body.mobileNumber;
@@ -59,7 +84,7 @@ router.post('/updateProfile',async(req,res)=>{
     }catch(error){
         return res.status(500).send(error.message);       
     }
-});
+}));
 
 router.post('/changePassword',async(req,res)=>{
     try{
@@ -137,8 +162,13 @@ router.post('/signOut',async(req,res)=>{
 });
 
 router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
+    
     try{
     var userId=req.headers.payload.id;
+    if(userId==undefined){
+        return  res.status(300).send("Undefined user");
+    }
+    else{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
     if(!yearToView||!monthToView){
@@ -158,7 +188,7 @@ router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
             return date>=monthDate && date<nextMonthDate
         })
         return res.status(200).send(recordsToSend);
-    }
+    }}
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -169,9 +199,13 @@ router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
 router.get('/viewAllAttendance',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
+        if(userId==undefined){
+            return  res.status(300).send("Undefined user");
+        }
+        else{
         var records=await attendance.find({id: userId});
         return res.status(200).send(records);
-    }catch(error){
+    }}catch(error){
         return res.status(500).send(error.message);
     }
 });
@@ -185,6 +219,10 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
             return res.status(400).send("No dates provided");
         }else{
             var userId=req.headers.payload.id;
+            if(userId==undefined){
+                return  res.status(300).send("Undefined user");
+            }
+            else{
             var user=await staffMembers.findOne({id: userId});
             if(user){
                 var startDate=new Date(yearToView,monthToView,11);
@@ -235,7 +273,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
             }else{
                 return res.status(404).send("User not found");   
             }
-        }
+        }}
 
     }catch(error){
         return res.status(500).send(error.message);
@@ -251,6 +289,11 @@ router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
             return res.status(400).send("No dates provided");
         }else{
             var userId=req.headers.payload.id;
+            var userId=req.headers.payload.id;
+            if(userId==undefined){
+                return  res.status(300).send("Undefined user");
+            }
+            else{
             var user=await staffMembers.findOne({id: userId});
             if(user){
                 var startDate=new Date(yearToView,monthToView,11);
@@ -345,7 +388,7 @@ router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
             }else{
                 return res.status(404).send("User not found");   
             }
-        }
+        }}
 
     }catch(error){
         return res.status(500).send(error.message);
