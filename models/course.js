@@ -7,7 +7,8 @@ coordinator: String, //Must be one of the TAs --> RESPRESENTS THE ID
 instructors :[String], //ID
 TAs: [String], //id
 department: String,
-faculty: String
+faculty: String,
+teachingSlots:Number
 }
 );
 module.exports=mongoose.model('course',courseSchema)

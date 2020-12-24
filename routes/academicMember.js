@@ -308,11 +308,11 @@ try{
         if(hod){
             switch(leaveType){
             case 'Annual':
-                if(date>leaveStartDate){
+                if(todayDate<leaveStartDate){
                      res.status(301).send("Can't submit request: Deadline passed"); 
                 }
                 else{
-                    request.findOne({ fromId: sendingId,type:"Replacement", status:"Accepted",leaveStartDate,leaveEndDate}).then ((acceptedRequest=>{
+                    request.findOne({ fromId: sendingId,type:"replacement", status:"Accepted",leaveStartDate,leaveEndDate}).then ((acceptedRequest=>{
                         academicMember.findOne({id:acceptedRequest.instructor}).then (replacement=>{
                             //look if there is a replacement for his slots in this day & instructor teaches same course that is accepted if true {
                             if(replacement){
@@ -321,12 +321,14 @@ try{
                                 if(currUser.course==replacement.course){
                                requests.create({
                                                 fromId: sendingId,
-                                                toId:replacementId,
-                                                type: "Annual",
+                                                toId:hod,
+                                                type:"leave",
+                                                leaveType: "Annual",
                                                 reason: reqReason,
                                                 date:todayDate,
-                                                replacement:replacement.id
-                                        
+                                                replacement:replacement.id,
+                                                leaveEndDate,
+                                                leaveStartDate
                                             }).then((reques)=>{
                                                return res.status(200).send(reques); 
                                             })
@@ -341,11 +343,14 @@ try{
                          //send the request with request.replacement= instructor that accepted his request
 // }else { send without a replacement so HOD WILL DECIDE}
                         requests.create({
-                                                fromId: sendingId,
-                                                toId:replacementId,
-                                                type: "Annual",
+                                              fromId: sendingId,
+                                                toId:hod,
+                                                type:"leave",
+                                                leaveType: "Annual",
                                                 reason: reqReason,
                                                 date:todayDate,
+                                                leaveEndDate,
+                                                leaveStartDate
                                         
                                             }).then(reques=>{
                          res.status(200).json({
@@ -363,22 +368,24 @@ try{
                 staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
                    let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
                    duration= duration/(1000*3600*24);
-                if(member.annualLeaves-duration>0 && duration<=6){
+                   duration= Math.ceil(duration);
+                if(Math.floor(member.annualLeaves)-duration>0 && duration<=6){
                 const newLeaves= member.annualLeaves-duration;
-                    staffMember.findOneAndUpdate({id:req.headers.payload.id},{$set:{annualLeaves:newLeaves}}).then(updatedmem=>{
+                    // staffMember.findOneAndUpdate({id:req.headers.payload.id},{$set:{annualLeaves:newLeaves}}).then(updatedmem=>{
                         requests.create({
-                    fromId: sendingId,
-                    toId:replacementId,
-                    type: "Accidental",
-                    reason: reqReason,
-                    date:todayDate,
-                    leaveStartDate:req.body.leaveStartDate,
-                    leaveEndDate:req.body.leaveEndDate,
+                     fromId: sendingId,
+                                                toId:hod,
+                                                type:"leave",
+                                                leaveType: "Accidental",
+                                                reason: reqReason,
+                                                date:todayDate,
+                                                leaveEndDate,
+                                                leaveStartDate
                     //status = accepted?? since already etkhasamo men his leaves?
                 }).then(request=>{
                    return res.status(200).send(request);  
                 });
-                        });    
+                        // });    
                     }
                     else {
                         res.status(301).send("Can't Make leave request as number of leaves exceeded permited");
@@ -393,8 +400,9 @@ try{
             }else {
             requests.create({
                     fromId: sendingId,
-                    toId:replacementId,
-                    type: "Sick",
+                    toId:hod,
+                    type:"leave",
+                    leaveType: "Sick",
                     reason: reqReason,
                     date:todayDate,
                     leaveStartDate:req.body.leaveStartDate,
@@ -422,8 +430,9 @@ try{
             }else {
             requests.create({
                     fromId: sendingId,
-                    toId:replacementId,
-                    type: "Maternity",
+                    toId:hod,
+                    type:"leave",
+                    leaveType: "Maternity",
                     reason: reqReason,
                     date:todayDate,
                     leaveStartDate:req.body.leaveStartDate,
@@ -460,11 +469,31 @@ try{
                  }else{
                     endDate=new Date(leaveStartDate.getYear(),leaveStartDate.getMonth()+1,10);
                 }
-
+             var curDate=new Date();
+                var dateToday = new Date(curDate.setHours(0,0,0));
+                if(dateToday<endDate){
+                    endDate=dateToday;
+                }
                    var records=result.filter(function(record){
+                       
                             var newdate=new Date(Date.parse(record.date));
                             return newdate>=startDate && newdate<endDate
-                        })
+                        });
+                          records=records.filter(function(inputRecord){
+                        if(inputRecord.signOut){
+                            if(inputRecord.signOut.length>0){
+                                if(inputRecord.signIn){
+                                    if(inputRecord.signIn.length>0){
+                                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                                            return inputRecord;
+                                        }
+            
+                                    }
+                                }
+                            }
+                        }
+            
+                    });
 
                 for(let i=0;i<records.length;i++){
                        let day=new Date(Date.parse(records[i].date)).getDay();
@@ -472,8 +501,9 @@ try{
                           
                      requests.create({
                     fromId: sendingId,
-                    toId:replacementId,
-                    type: "Compensation",
+                    toId:hod,
+                    type:"leave",
+                    leaveType: "Compensation",
                     reason: reqReason,
                     date:todayDate,
                     leaveStartDate:req.body.leaveStartDate,
@@ -487,7 +517,7 @@ try{
                 }
              
                 }else{
-                    res.status(301).send("You didn't attend any extra day form your day off for compensation");
+                    res.status(301).send("You didn't attend any extra day yet form your day off for compensation, please atttend one and try again later");
 
                 }
             })
