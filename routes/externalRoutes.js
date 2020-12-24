@@ -95,6 +95,9 @@ router.post('/resetPassword',async(req,res)=>{
                 var generatedPassword=otpGenerator.generate(6);
                 var hashedPassword=await bcryptjs.hash(generatedPassword,salt);           
                 var updatedUser=await staffMembers.findOneAndUpdate({email:inputEmail},{password: hashedPassword},{new:true});
+                if(user.firstLogin==true){
+                    const updateUser=await staffMembers.findOneAndUpdate({email:inputEmail},{firstLogin:false});
+                }
                 return res.status(200).send(generatedPassword);
             }
         }
