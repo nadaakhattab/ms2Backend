@@ -6,6 +6,12 @@ const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
 const requests=require('../models/requests');
+switch(req.path){
+    case '/updateProfile':result = validations.UpdateProfile.validate(req.body); 
+    break;
+     case '/changePassword':result = validations.ChangePassword.validate(req.body); 
+    break; 
+  }
 
 
 router.post('/logout', (req, res) => {
