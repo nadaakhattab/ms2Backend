@@ -59,7 +59,7 @@ location.findOne({displayName:req.body.room}).then(result =>{
   else {
   idDb.findOne({name:"location"}).then(idSlot =>{
         newId= idSlot.count+1;
-      location.create({room:newId,displayName: req.body.room, type: req.body.type, maxCapacity: req.body.maxCapacity}).then(result => {
+      location.create({room:`location-${newId}`,displayName: req.body.room, type: req.body.type, maxCapacity: req.body.maxCapacity}).then(result => {
        return  res.status(200).send("Successfully Added");
      });
 
