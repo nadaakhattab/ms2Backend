@@ -101,11 +101,14 @@ AddStaffMember:Joi.object({
   type: Joi.string().required(),
   email: Joi.string()
     .required(),
-    officeLocation: Joi.string()
+    officeLocation: Joi.string().required()
     ,
   department: Joi.string()
-    .required(),
-  salary:Joi.number()
+    ,
+  salary:Joi.number(),
+  gender: Joi.string().required,
+  dayOff:Joi.string().required()
+
  
 },
 ),
