@@ -8,6 +8,7 @@ const attendance = require('../models/attendance');
 const requests=require('../models/requests');
 const validations = require('../validations/staffmember');
 const Joi = require('joi');
+const e = require('express');
 
 
 const validateBody =(req, res,next)  =>  { try{ 
@@ -38,9 +39,12 @@ catch(err){
 router.post('/logout', (req, res) => {
     try{
         const refreshToken=req.body.token;
-        global.refreshTokens = global.refreshTokens.filter(t => t !== refreshToken);
-        return res.status(200).send("Logout successful");
-
+        if(!refreshToken){
+            global.refreshTokens = global.refreshTokens.filter(t => t !== refreshToken);
+            return res.status(200).send("Logout successful");
+        }else{
+            return res.status(400).send("Please include refresh token");
+        }
     }catch(error){
         return res.status(500).send(error.message);
     }
