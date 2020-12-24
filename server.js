@@ -20,7 +20,9 @@ mongoose.connect(URL,connectionParams).then(async()=>{
     console.log("Connected to db");
 try{
 const ids= await iddb.find({});
-    if(!ids){
+console.log(ids);
+    if(ids.length==0){
+        console.log("da5al");
         const list=[
         "slot",
         "location",
