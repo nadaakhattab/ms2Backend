@@ -356,8 +356,7 @@ router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
         }
     
         });  
-
-router.post('/acceptRequest',async(validateBody,(req,res)=>{
+router.post('/acceptRequest',async(req,res)=>{
     try{
         var requestId=req.body.id;
         if(requestId){
@@ -432,7 +431,7 @@ router.post('/acceptRequest',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-}));   
+});   
 
 router.post('/rejectRequest',async(validateBody,(req,res)=>{
     try{

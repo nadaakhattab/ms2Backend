@@ -656,5 +656,124 @@ router.post('/assignCourseCordinator',async(validateBody,(req,res)=>{
 
 
 
+router.route('/addTA').post( async(req, res) => {
+            try{
+                var myId=req.headers.payload.id;
+                var inputCourse=req.body.course;
+                var inputInstructor=req.body.ta;
+                if(!inputCourse||!inputInstructor){
+                    return res.status(400).send("Please provide ta and course id");
+                }else{
+                    // var dep=await department.findOne({HOD: myId});
+                    var dep = await academicMember.findOne({id:myId, course:inputCourse});
+                    if(dep){
+                        var instructor=await staffMember.findOne({id:inputInstructor,type:"TA"});
+                        if(instructor){
+                            var vCourse=await course.findOne({name:inputCourse});
+                            if(vCourse){
+                                var newInstructors=vCourse.TAs;
+                                newInstructors.push(inputInstructor);
+                                var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+                                if(updated){
+                                    var academicMembers=await academicMember.create({
+                                        id:inputInstructor,
+                                        course:inputCourse,
+                                        department:dep.name,
+                                        faculty: dep.faculty
+                                    });
+                                  
+                                        return res.status(200).send(updated);
+        
+                                    
+        
+                                }else{
+                                    return res.status(500).send("Error adding course TA");
+        
+                                }
+          
+                            }else{
+                                return res.status(400).send("Invalid course");
+                                
+                            }
+        
+                        }else{
+                            return res.status(400).send("Invalid TA");
+                        }
+                    }else{
+                        return res.status(404).send("Cannot find department");
+        
+                    }
+        
+                }
+        
+            }catch(error){
+                return res.status(500).send(error.message);
+            }
+        
+        
+    }); 
+    
+router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
+        try{
+            var myId=req.headers.payload.id;
+            var inputCourse=req.params.course;
+            var inputInstructor=req.params.ta;
+            if(!inputCourse||!inputInstructor){
+                return res.status(400).send("Please provide instructor and course id");
+            }else{
+                // var dep=await department.findOne({HOD: myId});
+                 var dep = await academicMember.findOne({id:myId, course:inputCourse});
+                if(dep){
+                    var inputInst=await staffMember.findOne({id:inputInstructor,type:"TA"});
+                    if(inputInst){
+                        var vCourse=await course.findOne({name:inputCourse});
+                        if(vCourse){
+                            var newInstructors=vCourse.TAs;
+                            newInstructors=newInstructors.filter(function(input){
+                                return input!=inputInstructor;
+                            });
+                            var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+                            if(updated){
+    
+                                var academicMembersRemove=await academicMember.findOneAndDelete({
+                                    id:inputInstructor,
+                                    course:inputCourse,
+                                    department:dep.name,
+                                    faculty:dep.faculty
+                                })
+    
+                                return res.status(200).send(updated);
+    
+                            }else{
+                                return res.status(500).send("Error adding course ta");
+    
+                            }
+    
+                        }else{
+                            return res.status(400).send("Invalid course");
+    
+                        }
+                    }else{
+                        return res.status(400).send("Invalid ta");
+    
+                    }
+    
+    
+                }else{
+                    return res.status(404).send("Cannot find department");
+    
+                }
+    
+            }
+    
+    
+        }catch(error){
+            return res.status(500).send(error.message);
+        }
+    
+        });  
+
+
+
 
 module.exports=router;

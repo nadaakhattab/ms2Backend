@@ -104,14 +104,16 @@ res.status(501).send("Location doesn't exist");
 
 
 router.route('/deleteLocation/:room').delete((req, res) => {
- location.deleteOne({room: req.params.room}).then(result => {
-   if(req.params.room==undefined){
+     if(req.params.room==undefined){
     return  res.status(300).send("Undefined room");
    }
-  if(result.deletedCount==0){
+ location.deleteOne({room: req.params.room}).then(result => { 
+    if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
   }
-   res.status(200).send("location successfuly deleted");
+staffMember.findOneAndUpdate({officeLocation:req.params.room},{$set:{officeLocation:null}}).then(()=>{
+     res.status(200).send("location successfuly deleted");
+});
  }).catch (err=>{
    res.status(500).send("Database Error");
  })
@@ -706,8 +708,8 @@ n="HR"
     }
     idCount=result.count+1;
        let password= "123456";
-      //   const salt= await bcrypt.genSalt(10);
-      //  password= await bcrypt.hash(password,salt);
+        const salt= await bcrypt.genSalt(10);
+       password= await bcrypt.hash(password,salt);
         console.log("password",password);
        let dayyOffNumber;
        switch (req.body.dayOff){

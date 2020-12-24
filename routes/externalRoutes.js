@@ -33,7 +33,9 @@ router.post('/login',async(req,res)=>{
                                 type:user.type,
                                 id:user.id
                             }     
-                                const accessToken=jwt.sign(payload,global.accessKey,{expiresIn: "100m"});
+                                const accessToken=jwt.sign(payload,global.accessKey,
+                                    // {expiresIn: "100m"}
+                                );
                                 const refreshToken=jwt.sign(payload,global.refreshKey);
                                 global.refreshTokens.push(refreshToken);
                                 console.log(global.refreshTokens)
@@ -66,7 +68,9 @@ router.post('/refreshToken',(req,res)=>{
             return res.status(403).send("Invalid refresh token");
         }
         const payload=jwt.verify(refreshToken,global.refreshKey);
-        const accessToken=jwt.sign(payload,global.accessKey,{expiresIn: "10m"});
+        const accessToken=jwt.sign(payload,global.accessKey,
+            // {expiresIn: "10m"}
+            );
         return res.status(200).send({
             access: accessToken
         });
