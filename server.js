@@ -5,7 +5,6 @@ const staffMembers=require('./models/staffMember');
 const iddb = require('./models/id');
 const department = require('./models/department');
 const course = require('./models/course');
-const hr = require('./validations/hr');
 const URL = "mongodb+srv://nada:1234@aclproject.lz3yx.mongodb.net/GUCPortal?retryWrites=true&w=majority";
 global.accessKey="qfsgdbhcvkdlfgdfsdaksjaqfsvghbkshb";
 global.refreshKey="wghdkjfhl;gjlkuiopo23yorpiotpyhgf";
@@ -32,7 +31,24 @@ console.log(ids);
         "staff",
         "HR"];
         list.forEach(async(one)=>{
-          await  iddb.create({name:one,count:0}); 
+                if (one=="location"){
+                location.create({displayName:"c7-101", room:"location-1", type:"office", maxCapacity:5, capacity:1});
+                      await  iddb.create({name:one,count:1});
+            }
+            else{
+                if(one=="HR"){
+                   let password= "123456";
+        const salt= await bcrypt.genSalt(10);
+       password= await bcrypt.hash(password,salt);
+              staffMembers.create({name:"HR#1",email:"HR1@guc.edu.eg", id:"hr-1", gender:"female",salary:20000, password, officeLocation:"location-1", type:"HR", mobileNumber:0120000});
+                await  iddb.create({name:one,count:1});
+            }else{
+                  await  iddb.create({name:one,count:0});
+            }
+            }
+          
+        
+         
         })         
     }
 
