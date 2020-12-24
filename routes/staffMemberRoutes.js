@@ -6,14 +6,6 @@ const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
 const requests=require('../models/requests');
-<<<<<<< HEAD
-// switch(req.path){
-//     case '/updateProfile':result = validations.UpdateProfile.validate(req.body); 
-//     break;
-//      case '/changePassword':result = validations.ChangePassword.validate(req.body); 
-//     break; 
-//   }
-=======
 const validateBody =(req, res,next)  =>  { try{ 
     let result;
 switch(req.path){
@@ -34,7 +26,6 @@ catch(err){
   console.log(err);
   res.status(405).send("Validation error: Please make sure all required fields are given");
 }}
->>>>>>> 4293ac2fea3a4bf9981e6852bb05f56cc469cd8b
 
 
 router.post('/logout', (req, res) => {
