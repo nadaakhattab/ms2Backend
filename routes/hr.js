@@ -787,7 +787,23 @@ res.status(300).send("location not found");
      }
      if(result){
 attendance.find({id:req.params.id}).then((att)=>{
-res.status(200).send(att);
+
+  let filteredRecords=att.filter(function(inputRecord){
+    if(inputRecord.signOut){
+        if(inputRecord.signOut.length>0){
+            if(inputRecord.signIn){
+                if(inputRecord.signIn.length>0){
+                    if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                        return inputRecord;
+                    }
+
+                }
+            }
+        }
+    }
+
+});
+res.status(200).send(filteredRecords);
 })
      }
      else {
@@ -877,12 +893,32 @@ res.status(200).send(updated);
         }else{
             nextMonthDate=new Date(yearToView,monthToView+1,10);
         }
+        var curDate=new Date();
+        var dateToday = new Date(curDate.setHours(0,0,0));
+        if(dateToday<nextMonthDate){
+            nextMonthDate=dateToday;
+        }
         var records=await attendance.find({id: userId});
         var recordsToSend=records.filter(function(record){
             var date=new Date(Date.parse(record.date));
             return date>=monthDate && date<nextMonthDate
         })
-        return res.status(200).send(recordsToSend);
+        let filteredRecords=recordsToSend.filter(function(inputRecord){
+          if(inputRecord.signOut){
+              if(inputRecord.signOut.length>0){
+                  if(inputRecord.signIn){
+                      if(inputRecord.signIn.length>0){
+                          if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                              return inputRecord;
+                          }
+      
+                      }
+                  }
+              }
+          }
+      
+      });
+        return res.status(200).send(filteredRecords);
     }
     }catch(error){
         return res.status(500).send(error.message);
@@ -997,6 +1033,11 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
       }else{
           endDate=new Date(yearToView,monthToView+1,10);
       }
+      var curDate=new Date();
+      var dateToday = new Date(curDate.setHours(0,0,0));
+      if(dateToday<endDate){
+          endDate=dateToday;
+      }
       if(startDate<endDate){
         var usersToSend=[];
       for(var i=0;i<users.length;i++){
@@ -1009,6 +1050,21 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
           var date=new Date(Date.parse(record.date));
           return date>=startDate && date<endDate
       })
+      records=records.filter(function(inputRecord){
+        if(inputRecord.signOut){
+            if(inputRecord.signOut.length>0){
+                if(inputRecord.signIn){
+                    if(inputRecord.signIn.length>0){
+                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                            return inputRecord;
+                        }
+
+                    }
+                }
+            }
+        }
+
+    });
   var requiredHours=0;
   var workedHours=0;    
   for(var i=0;i<records.length;i++){
@@ -1097,6 +1153,11 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
       }else{
           endDate=new Date(yearToView,monthToView+1,10);
       }
+      var curDate=new Date();
+      var dateToday = new Date(curDate.setHours(0,0,0));
+      if(dateToday<endDate){
+          endDate=dateToday;
+      }
       if(startDate<endDate){
         var usersToSend=[];
       for(var i=0;i<users.length;i++){
@@ -1109,6 +1170,21 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
           var date=new Date(Date.parse(record.date));
           return date>=startDate && date<endDate
       })
+      records=records.filter(function(inputRecord){
+        if(inputRecord.signOut){
+            if(inputRecord.signOut.length>0){
+                if(inputRecord.signIn){
+                    if(inputRecord.signIn.length>0){
+                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                            return inputRecord;
+                        }
+
+                    }
+                }
+            }
+        }
+
+    });
       var missingDays=[];   
                     var d=startDate;
                     while(d<=endDate){
