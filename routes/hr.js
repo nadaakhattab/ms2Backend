@@ -523,7 +523,11 @@ department.findOne({name:req.body.department}).then(result =>{
 
  idDb.findOne({name:"course"}).then(idSlot =>{
         newId= idSlot.count+1;
-      return    course.create({name:newId,displayName:req.body.course, department:req.body.department, faculty:result.faculty}).then(courseNew =>{
+        const toupdate= {};
+        if (req.body.teachingSlots){
+          toupdate.teachingSlots= req.body.teachingSlots;
+        }
+      return    course.create({name:newId,displayName:req.body.course, department:req.body.department, faculty:result.faculty,...toupdate}).then(courseNew =>{
    res.status(200).send("course added");
     });
 
@@ -565,10 +569,14 @@ router.route('/editCourse').put(validateBody,(req, res) => {
      toUpdate.displayName=req.body.displayName;
 
    }
+   const toupdate= {};
+        if (req.body.teachingSlots){
+          toupdate.teachingSlots= req.body.teachingSlots;
+        }
    if(req.body.department!==undefined){
      department.findOne({name:req.body.department}).then (departmentres =>{
        if(departmentres){
-course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate}},{new:true}).then(result =>{
+course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate,...toupdate}},{new:true}).then(result =>{
   console.log(result);
  academicMember.updateMany({course:req.body.course},{faculty:result.faculty, department:result.department}).then(()=>{
  res.status(200).send("success");
