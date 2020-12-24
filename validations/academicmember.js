@@ -11,7 +11,7 @@ module.exports= {
 
     ),
 
-    sendSlotLinkingReques:Joi.object({
+    sendSlotLinkingRequest:Joi.object({
         courseId:Joi.string().required(),
         slotId:Joi.number().required()
         },

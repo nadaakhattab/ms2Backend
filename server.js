@@ -2,6 +2,10 @@ const mongoose=require('mongoose');
 const app=require('./app');
 const cron = require('node-cron');
 const staffMembers=require('./models/staffMember');
+const iddb = require('./models/id');
+const department = require('./models/department');
+const course = require('./models/course');
+const hr = require('./validations/hr');
 const URL = "mongodb+srv://nada:1234@aclproject.lz3yx.mongodb.net/GUCPortal?retryWrites=true&w=majority";
 global.accessKey="qfsgdbhcvkdlfgdfsdaksjaqfsvghbkshb";
 global.refreshKey="wghdkjfhl;gjlkuiopo23yorpiotpyhgf";
@@ -15,6 +19,22 @@ const connectionParams={
 mongoose.connect(URL,connectionParams).then(async()=>{
     console.log("Connected to db");
 try{
+const ids= await iddb.find({});
+    if(!ids){
+        const list=[
+        "slot",
+        "location",
+        "faculty",
+        "department",
+        "course",
+        "staff",
+        "HR"];
+        list.forEach(async(one)=>{
+          await  iddb.create({name:one,count:0}); 
+        })         
+    }
+
+
     cron.schedule('0 0 11 * *', async function() {
         console.log('---------------------');
         console.log('Running Cron Job');

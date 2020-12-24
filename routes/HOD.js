@@ -9,8 +9,50 @@ const slot=require('../models/slot');
 const academicMember=require('../models/academicMember');
 const request=require('../models/requests');
 const notification=require('../models/notification');
+const validations = require('../validations/HOD');
+const Joi = require('joi');
 
-router.route('/addInstructor').post( async(req, res) => {
+
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+  switch(req.path){
+    case '/addInstructor':result = validations.addInstructor.validate(req.body); 
+    break;
+     case '/updateInstructor':result = validations.updateInstructor.validate(req.body); 
+    break;
+    case '/addTA':result = validations.addTA.validate(req.body); 
+    break;
+    case '/acceptRequest':result = validations.acceptRequest.validate(req.body); 
+    break;
+    case '/rejectRequest':result = validations.rejectRequest.validate(req.body); 
+    break;
+   // case '/addCourse':result = validations.AddCourse.validate(req.body); 
+   // break;
+   // case '/signIn':result = validations.SignIn.validate(req.body); 
+   // break;
+   // case '/signOut':result = validations.SignOut.validate(req.body); 
+   // break;
+  
+  }
+  
+    const { value, error } = result; 
+    const valid = error == null; 
+    if (!valid) { 
+      res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+    } else { 
+  next();
+    }  
+  }
+  catch(err){
+    console.log(err);
+    res.status(405).send("Validation error: Please make sure all required fields are given");
+  }}
+
+
+
+
+
+router.route('/addInstructor').post( async(validateBody,(req, res) => {
     try{
         var myId=req.headers.payload.id;
         var inputCourse=req.body.course;
@@ -64,9 +106,9 @@ router.route('/addInstructor').post( async(req, res) => {
     }
 
 
-});
+}));
 
-router.route('/updateInstructor').post(async(req, res) => {
+router.route('/updateInstructor').post(async(validateBody,(req, res) => {
     try{
         var myId=req.headers.payload.id;
         var inputCourse=req.body.course;
@@ -139,7 +181,7 @@ router.route('/updateInstructor').post(async(req, res) => {
         return res.status(500).send(error.message);
     }
 
-    });
+    }));
 
 router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => {
     try{
@@ -200,7 +242,7 @@ router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => 
 
     });
 
-router.route('/addTA').post( async(req, res) => {
+router.route('/addTA').post( async(validateBody,(req, res) => {
             try{
                 var myId=req.headers.payload.id;
                 var inputCourse=req.body.course;
@@ -254,7 +296,7 @@ router.route('/addTA').post( async(req, res) => {
             }
         
         
-    }); 
+    })); 
     
 router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
         try{
@@ -315,7 +357,7 @@ router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
     
         });  
 
-router.post('/acceptRequest',async(req,res)=>{
+router.post('/acceptRequest',async(validateBody,(req,res)=>{
     try{
         var requestId=req.body.id;
         if(requestId){
@@ -390,9 +432,9 @@ router.post('/acceptRequest',async(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-});   
+}));   
 
-router.post('/rejectRequest',async(req,res)=>{
+router.post('/rejectRequest',async(validateBody,(req,res)=>{
     try{
         var requestId=req.body.id;
         var rejectReason=req.body.reason;
@@ -424,7 +466,7 @@ router.post('/rejectRequest',async(req,res)=>{
         return res.status(500).send(error.message);
     }       
 
-});
+}));
 
 let saveRes={};
 function addStaff(members,i){

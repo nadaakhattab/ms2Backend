@@ -9,10 +9,53 @@ const staffMember = require('../models/staffMember');
 const attendance = require('../models/attendance');
 const academicMember = require('../models/academicMember');
 const notification=require('../models/notification');
+const validations = require('../validations/academicmember');
+const Joi = require('joi');
 const { request } = require('express');
 const { date } = require('joi');
 
-router.post('/sendReplacementRequest',async(req,res)=>{
+
+
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+  switch(req.path){
+    case '/sendReplacementRequest':result = validations.sendReplacementRequest.validate(req.body); 
+    break;
+     //case '/viewReplacementRequests':result = validations.EditLocation.validate(req.body); 
+    //break;
+     case '/sendSlotLinkingRequest':result = validations.sendSlotLinkingRequest.validate(req.body); 
+    break;
+    case '/sendChangeDayOffRequest':result = validations.sendChangeDayOffRequest.validate(req.body); 
+    break;
+    case '/sendLeaveRequest':result = validations.sendLeaveRequest.validate(req.body); 
+    break;
+   // case '/addCourse':result = validations.AddCourse.validate(req.body); 
+   // break;
+   // case '/signIn':result = validations.SignIn.validate(req.body); 
+   // break;
+   // case '/signOut':result = validations.SignOut.validate(req.body); 
+   // break;
+  
+  }
+  
+    const { value, error } = result; 
+    const valid = error == null; 
+    if (!valid) { 
+      res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+    } else { 
+  next();
+    }  
+  }
+  catch(err){
+    console.log(err);
+    res.status(405).send("Validation error: Please make sure all required fields are given");
+  }}
+
+
+
+
+
+router.post('/sendReplacementRequest',async(validateBody,(req,res)=>{
     try{
         var replacementId=req.body.id;
         var courseId=req.body.course;
@@ -80,7 +123,7 @@ router.post('/sendReplacementRequest',async(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-});
+}));
 
 router.get('/viewReplacementRequests',async(req,res)=>{
     try{
@@ -98,7 +141,7 @@ router.get('/viewReplacementRequests',async(req,res)=>{
 
 });
 
-router.post('/sendSlotLinkingRequest',async(req,res)=>{
+router.post('/sendSlotLinkingRequest',async(validateBody,(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var courseId=req.body.course;
@@ -142,9 +185,9 @@ router.post('/sendSlotLinkingRequest',async(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-});
+}));
 
-router.post('/sendChangeDayOffRequest',async(req,res)=>{
+router.post('/sendChangeDayOffRequest',async(validateBody,(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
@@ -200,7 +243,7 @@ router.post('/sendChangeDayOffRequest',async(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-});
+}));
 
 router.get('/viewRequests',async(req,res)=>{
     try{
@@ -222,6 +265,10 @@ router.get('/viewRequests/:status',async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var reqStatus=req.params.status;
+        if(reqStatus==undefined){
+            
+                return  res.status(300).send("Undefined Request Status");
+        }
         if(reqStatus=="Accepted"||reqStatus=="Pending"||reqStatus=="Rejected"){
             var request=await requests.find({fromId:userId,status:reqStatus});
             if(request.length>0){
@@ -241,7 +288,7 @@ router.get('/viewRequests/:status',async(req,res)=>{
 });
 
 //add code
-router.post('/sendLeaveRequest',async(req,res)=>{
+router.post('/sendLeaveRequest',async(validateBody,(req,res)=>{
 
 try{
     if(req.headers.payload.type=="HR"){
@@ -449,11 +496,16 @@ try{
 
 
 
-});
+}));
 
 router.delete('/cancelRequest/:id',async(req,res)=>{
     try{
     var reqId=req.params.id;
+    if(reqId==undefined){
+       
+            return  res.status(300).send("Undefined ID");
+           
+    }
     var request=await requests.findOne({_id:reqId});
     if(request){
         var todayDate=new Date();
@@ -515,6 +567,9 @@ router.get('/schedule',async(req,res)=>{
 router.get('/notifications/:id',async(req,res)=>{
     try{
         var userId=req.params.id;
+        if(userId==undefined){
+            return  res.status(300).send("Undefined ID");
+           }
         var notify=await notification.find({to:userId});
         if(notify){
             if(notify.length>0){

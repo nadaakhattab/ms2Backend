@@ -13,6 +13,7 @@ const academicMember = require('../models/academicMember');
 const validations = require('../validations/hr');
 const Joi = require('joi');
 const { findOneAndUpdate } = require('../models/location');
+const { response } = require('../app');
 
 const validateBody =(req, res,next)  =>  { try{ 
   let result;
@@ -104,6 +105,9 @@ res.status(501).send("Location doesn't exist");
 
 router.route('/deleteLocation/:room').delete((req, res) => {
  location.deleteOne({room: req.params.room}).then(result => {
+   if(req.params.room==undefined){
+    return  res.status(300).send("Undefined room");
+   }
   if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
   }
@@ -669,7 +673,7 @@ department.findOne({name:courseFound.department}).then(result =>{
  router.route('/addStaffMember').post(validateBody, (req, res) => {
 staffMember.findOne({email:req.body.email}).then(result =>{
   if(result){
-  res.send("Email already exists");
+  res.status(300).send("Email already exists");
   }
   else{
 
@@ -678,15 +682,23 @@ location.findOne({room:req.body.officeLocation}).then(result => {
   if (result){
     const locCapacity=result.capacity;
 if(result.capacity== result.maxCapacity){
-res.send("Can't assign the following office Location");
+res.status(300).send("Can't assign the following office Location");
 }else {
   // req.body lazm yekon fyha  name, email, salary and office location.
   let id= "";
   let dayoff= null;
   let idCount=null;
-    idDb.findOne({name:req.body.type}).then(async (result)=>{
+  let n;
+  if(req.body.type=="HR"){
+n="HR"
+  }
+  else {
+    n="staff"
+
+  }
+    idDb.findOne({name:n}).then(async (result)=>{
       if (result){
-        if(req.body.type=="HR"){
+        if(n){
       id=`hr-${result.count+1}`;
     dayoff="Saturday";}
     else{
@@ -723,22 +735,33 @@ staffMember.create({...data}).then(result=>{
 
     idDb.updateOne({name:req.body.type},{$set:{count:idCount}}).then((result)=>{
 location.updateOne({room:req.body.officeLocation},{$set:{capacity:locCapacity+1}}).then((result)=>{
-      res.send(" created done");  });
+  if(req.body.type=="HOD"){
+    department.findOneAndUpdate({name:req.body.name},{$set:{HOD:id}}).then ((depart)=>{
+academicMember.create({id:id, department:req.body.department, faculty:depart.faculty}).then (()=>{
+res.status(200).send("Successfully added");
+});
+    });
+
+  }
+  else{
+      res.status(200).send(" created done");
+  }
+      });
     });
 
 } ).catch (err =>{
   console.log(err);
-  res.send("user Couldn't be created");
+  res.status(300).send("user Couldn't be created");
 })
 
 }
 else {
-  res.send("id doesn't exist");
+  res.status(300).send("id doesn't exist");
 } 
     });
 }}
 else {
-res.send("location not found");
+res.status(300).send("location not found");
 } });
 
 }
@@ -748,11 +771,10 @@ res.send("location not found");
 
 
  router.route('/updateStaff').put((req, res) => {
-  //  id:req.body.id
    staffMember.updateOne({email: req.body.email},{$set:{...req.body}}).then(result => {
-     res.send(result);
+     res.status(200).send(result);
    }).catch(err => {
-     res.send(err);
+     res.status(300).send(err);
    })
 
  });
@@ -760,6 +782,9 @@ res.send("location not found");
  router.route('/attendanceRecord/:id').get( (req, res) => {
   
    staffMember.findOne({id:req.params.id}).then(result=>{
+    if(req.params.id==undefined){
+      return  res.status(300).send("Undefined ID");
+     }
      if(result){
 attendance.find({id:req.params.id}).then((att)=>{
 res.status(200).send(att);
@@ -825,10 +850,10 @@ res.status(200).send(updated);
   
 // check law mafysh haga bel id da a2ol invalid
    staffMember.findOneAndUpdate({id: req.body.id},{$set:{salary:req.body.salary}}).then(result => {
-     res.send(result);
+     res.status(200).send(result);
 
    }).catch(err => {
-     res.send(err);
+     res.status(300).send(err);
    })
 
  });
@@ -836,6 +861,9 @@ res.status(200).send(updated);
  router.get('/viewAttendance/:id/:yearToView/:monthToView',async(req,res)=>{
   try{
     var userId=req.params.id;
+    if(req.params.id==undefined){
+      return  res.status(300).send("Undefined ID");
+     }
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
     if(!yearToView||!monthToView){
