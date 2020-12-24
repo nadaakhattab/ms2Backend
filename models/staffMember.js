@@ -10,8 +10,8 @@ const staffMemberSchema=new schema({
     officeLocation: {type:String,required:true},
     type: {type:String,required:true},
     mobileNumber: String,
-    dayOff: {type:String, required:true, default:"Saturday"},
-    dayOffNumber:{type:Number,  required:true, default:6},
+    dayOff: {type:String,  default:"Saturday"},
+    dayOffNumber:{type:Number,   default:6},
     firstLogin: {type:Boolean,default:true},
     annualLeaves:{type:Number,default:0},
     gender:String
