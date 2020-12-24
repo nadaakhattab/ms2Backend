@@ -55,7 +55,7 @@ B)Functionalities:
 
         b)Log out from the system 
             Functionality: logout as a staff member from the system
-            Route: /logout
+            Route: /staffMember/logout
             Request type: POST
             RequestBody: includes refresh token which is sent as response from login
             {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0YWZmQGd1Yy5lZHUuZWciLCJ0eXBlIjoiSFIiLCJpZCI6IjEiLCJpYXQiOjE2MDg0NTgyNDB9.q6iEnOuD48Riiz_DuqdgofyPOyQD7lu-v9M7XbRHB9w""}
@@ -91,7 +91,7 @@ B)Functionalities:
 
         d)Update their profile 
             Functionality: update their mobile number or email.
-            Route: /updateProfile
+            Route: /staffMember/updateProfile
             Request type: POST
             RequestBody: can include only one of them 
             {"email":"staff@guc.edu.eg",
@@ -119,7 +119,7 @@ B)Functionalities:
         e)Reset their passwords
             i)reset password
                 Functionality: user can reset password in case forgotten 
-                Route: /resetPassword
+                Route: /staffMember/resetPassword
                 Request type: POST
                 RequestBody:
                 {"email":"staff@guc.edu.eg"}
@@ -259,12 +259,34 @@ B)Functionalities:
             Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
     3)HR Functionalities: /hr
-        a)
+        a)Location:
+            
+            i) add a location
+            Functionality: Adds a new location
+            Route:/hr/addLocation
+            Request type: POST
+            RequestBody: 
+            Response: 
+
+            ii) update a location
+            Functionality: can updated name or max capac
+            Route: /hr/editLocation
+            Request type: PUT
+            RequestBody:
+            Response: 
+
+            iii) Delete a location
+            Functionality: Deletes a location and sets the members with office location equal to this location to null
+            Route: /hr/deleteLocation/:room
+            Request type: DELETE
+            RequestBody:
+            Response:
+
 
         b)Faculty : 
             i) Add a Faculty
             Functionality: Adds a new Faculty
-            Route: /addFaculty
+            Route: /hr/addFaculty
             Request type: POST
             RequestBody: {"name":"FacultyNameExample"}
             Response: Info of Faculty as added to DB (_id is needed later for updating a Faculty)
@@ -280,7 +302,7 @@ B)Functionalities:
 
             ii) update a Faculty
             Functionality: Updated the Faculty Name
-            Route: /editFaculty
+            Route: /hr/editFaculty
             Request type: PUT
             RequestBody: {
                 "_id": "5fdf61b607779c12abf3e7b9",
@@ -298,7 +320,7 @@ B)Functionalities:
 
             iii) Delete a Faculty
             Functionality: Deletes a Faculty & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses, departments
-            Route: /deleteFaculty
+            Route: /hr/deleteFaculty/:name
             Request type: DELETE
             RequestBody: {
                 "name":"FacultyNameUpdated3"
@@ -308,7 +330,7 @@ B)Functionalities:
         c)Department:
         i) Add a Department
             Functionality: Adds a new Department & adds it to its corresponsing department if HOD is added will create an academic member for him/her with their corresponding faculty & department
-            Route: /addDepartment
+            Route: /hr/addDepartment
             Request type: POST
             RequestBody: {
                 "faculty":"FacTrial",
@@ -321,7 +343,7 @@ B)Functionalities:
 
             ii) update a Department
             Functionality: can update the Department HOD and/or Faculty 
-            Route: /editFaculty
+            Route: /hr/editDepartment
             Request type: PUT
             RequestBody: {
                 "faculty":"Engineering",
@@ -334,7 +356,7 @@ B)Functionalities:
 
             iii) Delete a Department
             Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses
-            Route: /deleteDepartment
+            Route: /hr/deleteDepartment/:faculty/:department
             Request type: DELETE
             RequestBody: {
                 "faculty":"Engineering",
@@ -345,7 +367,7 @@ B)Functionalities:
         d)Course:
         i) Add a Course
             Functionality: Adds a new Course & adds it to its corresponsing department
-            Route: /addCourse
+            Route: /hr/addCourse
             Request type: POST
             RequestBody: {
                 "course":"aNewCourse",
@@ -357,7 +379,7 @@ B)Functionalities:
 
             ii) update a Course
             Functionality: can update the Department of the course Only (which will automatically update its corresponding faculty too)
-            Route: /editCourse
+            Route: /hr/editCourse
             Request type: PUT
             RequestBody: {
             "course":"aNewCourse4",
@@ -369,24 +391,80 @@ B)Functionalities:
 
             iii) Delete a Course
             Functionality: Deletes a course & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this course), and its record in the department's courses list
-            Route: /deleteCourse
+            Route: /hr/deleteCourse/:course
             Request type: DELETE
             RequestBody:{
                     "course":"aNewCourse4"
                 }
             Response: Deleted successfully
             
-        e)
+        e)add Staff Member
+            Functionality: adds a new staff member
+            Route: /hr/addStaffMember
+            Request type: POST
+            RequestBody:
+            Response:
 
-        f)
+        f)Staff Member
+           i) update a staff member
+            Functionality: can update any info about the staff member(please refer to the database model)
+            Route: /hr/updateStaff
+            Request type: PUT
+            RequestBody:
+            Response:
+
+            iii) Delete a staff member
+            Functionality: Deletes staff member
+            Route: /hr/deleteStaff/:id
+            Request type: DELETE
+            RequestBody:
+            Response:
             
-        g)
+        g)Signin/Signout
+            i) add sign in
+            Functionality: adds a missing sign in
+            Route: /hr/signIn
+            Request type: POST
+            RequestBody:
+            Response:
 
-        h)
+            ii) add sign out
+            Functionality: adds a missing sign out
+            Route: /hr/signOut
+            Request type: POST
+            RequestBody:
+            Response:
 
-        i)
+        h) attendance record
+            Functionality: adds any staff member attendance record
+            Route: /hr/attendanceRecord/:id
+            Request type: GET
+            RequestBody:
+            Response:
 
-        j)
+        i) missing hours/days
+            i) view missing hours
+            Functionality: view staff members with missing hours
+            Route: /hr/missingHours/:yearToView/:monthToView
+            Request type: GET
+            RequestBody:
+            Response:
+
+            ii) view missing days
+            Functionality: view staff members with missing days
+            Route: /hr/missingDays/:yearToView/:monthToView
+            Request type: GET
+            RequestBody:
+            Response:
+
+        j)update Salary
+            Functionality: updates the salary of a staff member
+            Route: /hr/updateSalary
+            Request type: PUT
+            RequestBody:
+            Response:
+
+
 
     4)Academic member functionalities:
 
@@ -395,7 +473,7 @@ B)Functionalities:
             a)Assign/delete/update a course instructor for each course in his department
                 i)Add course instructor
                     Functionality: add course instructor to course
-                    Route: /hod/addInstructor
+                    Route: /HOD/addInstructor
                     Request type: POST
                     RequestBody:
                     {
@@ -422,7 +500,7 @@ B)Functionalities:
 
                 ii)update course instructor
                     Functionality: update course instructor by adding new one and removing old
-                    Route: /hod/updateInstructor
+                    Route: /HOD/updateInstructor
                     Request type: POST
                     RequestBody:
                     {
@@ -450,8 +528,8 @@ B)Functionalities:
 
                 iii)delete course instructor
                         Functionality: delete course instructor from list of course
-                        Route: /hod/deleteinstructor/:course/:instructor
-                        Request type: GET
+                        Route: /HOD/deleteinstructor/:course/:instructor
+                        Request type: DELETE
                         Parameters: course is course id i want to delete from and instructor is instructor id i want to delete
                         Example of how to call route: /hod/deleteInstructor/c1/15
                         Response:
@@ -471,15 +549,30 @@ B)Functionalities:
                         Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
 
-            b)
+            b)view Staff
+               Functionality: view Staff in his/her department
+                        Route: /HOD/viewStaff
+                        Request type: GET
+                        Parameters: 
+                        Response:
 
-            c)
+            c)view Dayoff
+            Functionality: view the day off of the staff
+                        Route: /HOD/viewdayoff
+                        Request type: GET
+                        Parameters: 
+                        Response:
 
-            d)
+            d)view requests
+            Functionality: view requests change day off/leave sent by staff members
+                        Route: /HOD/viewrequests
+                        Request type: GET
+                        Parameters: 
+                        Response:
             
             e)Accept request
                 Functionality: accept request sent 
-                Route: /hod/acceptRequest
+                Route: /HOD/acceptRequest
                 Request type: POST
                 RequestBody: id is mongoodb id for the request
                 {
@@ -502,7 +595,7 @@ B)Functionalities:
 
             f)reject request
                 Functionality: reject request sent 
-                Route: /hod/rejectRequest
+                Route: /HOD/rejectRequest
                 Request type: POST
                 RequestBody: id is mongoodb id for the request, reason is optional and is rejection reason provided
                 {
@@ -525,19 +618,43 @@ B)Functionalities:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
-            g)
+            g) view coverage
+            Functionality: view the coverage of each course
+                        Route: /HOD/viewCoverage
+                        Request type: GET
+                        Parameters: 
+                        Response:
 
-            h)
+            h) view assignments
+             Functionality: view teaching assignments of course offered by his department
+                        Route: /HOD/viewassignment
+                        Request type: GET
+                        Parameters: 
+                        Response:
 
         4.2)Course Instructor Functionalities
 
-            a)
+            a)view coverage
+            Functionality: view coverage of course he/she is assigned to
+                Route: /ci/viewCoverage
+                Request type: GET
+                RequestBody:
+                Response:
 
-    
 
-            b)
+            b)view slot's assignment
+             Functionality: view slot's assignment of course he/she is assigned to
+                Route: /ci/viewSlotsAssignment
+                Request type: GET
+                RequestBody:
+                Response:
 
-            c)
+            c)view all staff
+             Functionality: view all staff in his/her department along with their profiles
+                Route: /ci/viewStaff
+                Request type: GET
+                RequestBody:
+                Response:
 
             d)Assign an academic member to an unassigned slot
                 Functionality: assign academic member to slot
@@ -655,7 +772,11 @@ B)Functionalities:
 
         4.3)Course Coordinator Functionalities
 
-            a)
+            a)View slot linking requests
+                Functionality: view slot linking requests from academic member
+                Route: /coordinator/slotRequests
+                Request type: GET
+                Response:
 
             b)
 
