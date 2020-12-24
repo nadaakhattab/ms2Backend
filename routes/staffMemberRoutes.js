@@ -6,13 +6,20 @@ const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const attendance = require('../models/attendance');
 const requests=require('../models/requests');
+const validations = require('../validations/staffmember');
+const Joi = require('joi');
+
+
 const validateBody =(req, res,next)  =>  { try{ 
     let result;
 switch(req.path){
     case '/updateProfile':result = validations.UpdateProfile.validate(req.body); 
     break;
-     case '/changePassword':result = validations.ChangePassword.validate(req.body); 
+    case '/changePassword':result = validations.ChangePassword.validate(req.body); 
     break; 
+ 
+    
+
   }
   const { value, error } = result; 
   const valid = error == null; 
@@ -59,7 +66,7 @@ router.get('/viewProfile',async (req,res)=>{
 
 });
 
-router.post('/updateProfile',async(validateBody, (req,res)=>{
+router.post('/updateProfile',validateBody,async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputMobile=req.body.mobileNumber;
@@ -84,9 +91,9 @@ router.post('/updateProfile',async(validateBody, (req,res)=>{
     }catch(error){
         return res.status(500).send(error.message);       
     }
-}));
+});
 
-router.post('/changePassword',async(req,res)=>{
+router.post('/changePassword',validateBody,async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputPassword=req.body.password;

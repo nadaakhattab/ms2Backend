@@ -55,7 +55,7 @@ const validateBody =(req, res,next)  =>  { try{
 
 
 
-router.post('/sendReplacementRequest',async(validateBody,(req,res)=>{
+router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
     try{
         var replacementId=req.body.id;
         var courseId=req.body.course;
@@ -101,7 +101,7 @@ router.post('/sendReplacementRequest',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-}));
+});
 
 router.get('/viewReplacementRequests',async(req,res)=>{
     try{
@@ -119,7 +119,7 @@ router.get('/viewReplacementRequests',async(req,res)=>{
 
 });
 
-router.post('/sendSlotLinkingRequest',async(validateBody,(req,res)=>{
+router.post('/sendSlotLinkingRequest',validateBody,async(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var courseId=req.body.course;
@@ -163,9 +163,9 @@ router.post('/sendSlotLinkingRequest',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-}));
+});
 
-router.post('/sendChangeDayOffRequest',async(validateBody,(req,res)=>{
+router.post('/sendChangeDayOffRequest',validateBody,async(req,res)=>{
     try{
         var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
@@ -208,7 +208,7 @@ router.post('/sendChangeDayOffRequest',async(validateBody,(req,res)=>{
         return res.status(500).send(error.message);
     }
 
-}));
+});
 
 router.get('/viewRequests',async(req,res)=>{
     try{
@@ -253,7 +253,7 @@ router.get('/viewRequests/:status',async(req,res)=>{
 });
 
 //add code
-router.post('/sendLeaveRequest',async(validateBody,(req,res)=>{
+router.post('/sendLeaveRequest',validateBody,async(req,res)=>{
 
 try{
     if(req.headers.payload.type=="HR"){
@@ -461,7 +461,7 @@ try{
 
 
 
-}));
+});
 
 router.delete('/cancelRequest/:id',async(req,res)=>{
     try{
