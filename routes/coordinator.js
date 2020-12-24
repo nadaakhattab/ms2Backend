@@ -166,9 +166,7 @@ router.route('/deleteSlot/:id').delete((req, res) => {
 
 router.route('/slotRequests').get((req, res) => {
   request.find({ toId:req.headers.payload.id}).then(result =>{
-
-               res.status(200).send(result);
-       
+res.status(200).send(result);       
     }).catch(err=>{
         res.status(500).send("Database Error");
     });
@@ -188,14 +186,21 @@ router.route('/replyRequest').post( (req, res) => {
       res.status(301).send("Error: Slot Request with the given fields doesn't exist ");
   }
 if(req.body.status=="Accepted"){
-  // check that the slot is not already assigned 
-slot.findOneAndUpdate({id: req.body.slotId},{$set:{instructor:result.fromId}}).then(slotRes =>{
+  slot.findOne({id: req.body.slotId}).then((slott)=>{
+    if(slott.instructor){
+      res.status(300).send("ERROR: Slot already assigned to an instructor");
+
+    }
+    slot.findOneAndUpdate({id: req.body.slotId},{$set:{instructor:result.fromId}}).then(slotRes =>{
     if(slotRes){
     res.status(200).send("Succesffuly linked");}
     else {
          res.status(300).send("Slot not found");
     }
 });
+
+  })
+
 }
 else {
     res.status(200).send("Succesffuly Rejected the following request ");

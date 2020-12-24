@@ -283,7 +283,7 @@ try{
                 staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
                    let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
                    duration= duration/(1000*3600*24);
-                if(member.annualLeaves-duration>0.9 && duration<=6){
+                if(member.annualLeaves-duration>0 && duration<=6){
                 const newLeaves= member.annualLeaves-duration;
                     staffMember.findOneAndUpdate({id:req.headers.payload.id},{$set:{annualLeaves:newLeaves}}).then(updatedmem=>{
                         requests.create({
@@ -332,6 +332,9 @@ try{
 
 
             case"Maternity":
+                let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
+                   duration= duration/(1000*3600*24);
+                   if(duration<=90){
  staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
      if(member.gender=="female"){
  if(req.body.documents==undefined){
@@ -354,6 +357,7 @@ try{
                     res.status(301).send("ERROR: Maternity leaves are for Females only");
                 }
             });
+        }
             break;
 
             case"Compensation":
@@ -511,8 +515,47 @@ router.get('/notifications/:id',async(req,res)=>{
         return res.status(500).send(error.message);
 
     }
+});
 
 
-})
+
+router.post('/replyRequest',async(req,res)=>{
+    try{
+        var requestId=req.body.id;
+        if(requestId){
+            var requestToAccept=await request.findOne({_id:requestId,type:"replacement"});
+            if(requestToAccept){
+                if(requestToAccept.status=="Pending"){
+              
+                    var acceptedRequest=await request.findOneAndUpdate({_id:requestId,type:"replacement"},{status:req.body.accepted},{new:true});
+                    var notify=await notification.create({
+                        requestID: requestId,
+                        accepted: req.body.accepted,
+                        to:acceptedRequest.fromId
+                    });
+                    return res.status(200).send(acceptedRequest);
+
+                }else{
+                    return res.status(400).send("Cannot accept request that is not pending");
+
+                }
+
+
+            }else{
+                return res.status(404).send("Request not found");
+            }
+
+        }else{
+            return res.status(400).send("Please provide request id");
+
+        }
+
+
+    }catch(error){
+        return res.status(500).send(error.message);
+    }
+
+});   
+
 
 module.exports = router;
