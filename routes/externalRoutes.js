@@ -111,21 +111,27 @@ router.post('/refreshToken',validateBody,(req,res)=>{
 router.post('/resetPassword',validateBody,async(req,res)=>{
     try{
         const inputEmail=req.body.email;
-        if(!inputEmail){
+        const inputPass= req.body.password;
+        if(!inputEmail || !inputPass){
             return res.status(400).send("Please enter email");
         }else{
             const user= await staffMembers.findOne({email:inputEmail});
             if(!user){
                 return res.status(401).send("Invalid user")
             }else{
+                  if(user.firstLogin==true){
                 const salt=await bcryptjs.genSalt(10);
-                var generatedPassword=otpGenerator.generate(6);
-                var hashedPassword=await bcryptjs.hash(generatedPassword,salt);           
+                // var generatedPassword=otpGenerator.generate(6);
+                var hashedPassword=await bcryptjs.hash(inputPass,salt);           
                 var updatedUser=await staffMembers.findOneAndUpdate({email:inputEmail},{password: hashedPassword},{new:true});
-                if(user.firstLogin==true){
+              
                     const updateUser=await staffMembers.findOneAndUpdate({email:inputEmail},{firstLogin:false});
+                    return res.status(200).send("Successfull Reset");
                 }
-                return res.status(200).send(generatedPassword);
+                else{
+                    return res.status(300).send("This is not your first Login Please hed to update password");
+                }
+                
             }
         }
     }catch(error){

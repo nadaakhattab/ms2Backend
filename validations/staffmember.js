@@ -10,9 +10,9 @@ module.exports= {
    ),
 
    ChangePassword:Joi.object({
-       
-    password:Joi.string()
-   
+       email:Joi.string().required(),
+    password:Joi.string().required() ,
+    oldPassword:Joi.string().required(),
   },
 ),
 
