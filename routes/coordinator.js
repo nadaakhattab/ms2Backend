@@ -188,6 +188,7 @@ router.route('/replyRequest').post( (req, res) => {
       res.status(301).send("Error: Slot Request with the given fields doesn't exist ");
   }
 if(req.body.status=="Accepted"){
+  // check that the slot is not already assigned 
 slot.findOneAndUpdate({id: req.body.slotId},{$set:{instructor:result.fromId}}).then(slotRes =>{
     if(slotRes){
     res.status(200).send("Succesffuly linked");}

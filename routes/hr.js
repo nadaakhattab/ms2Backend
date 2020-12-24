@@ -684,9 +684,17 @@ res.send("Can't assign the following office Location");
   let id= "";
   let dayoff= null;
   let idCount=null;
-    idDb.findOne({name:req.body.type}).then(async (result)=>{
+  let n;
+  if(req.body.type=="HR"){
+n="HR"
+  }
+  else {
+    n="staff"
+
+  }
+    idDb.findOne({name:n}).then(async (result)=>{
       if (result){
-        if(req.body.type=="HR"){
+        if(n){
       id=`hr-${result.count+1}`;
     dayoff="Saturday";}
     else{
