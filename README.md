@@ -778,9 +778,36 @@ B)Functionalities:
                 Request type: GET
                 Response:
 
-            b)
+            b)Accept/reject requests
+                Functionality: accept/reject slot linking requests from academic members linked to his course
+                Route: /coordinator/replyRequest
+                Request type: POST
+                Response:
 
-            c)
+            c)Add/delete/update course slot 
+                i)Add course slot
+                    Functionality: add course slot in his/her course
+                    Route: /coordinator/addSlot
+                    Request type: POST
+                    RequestBody:
+                    Response: 
+                    
+
+                ii)update course slot
+                    Functionality: update course slot in his/her course
+                    Route: /coordinator/editSlot
+                    Request type: PUT
+                    RequestBody:
+                    Response:
+                
+
+                iii)delete course slot
+                        Functionality: delete course slot in his/her course
+                        Route: /coordinator/deleteSlot/:id
+                        Request type: DELETE
+                        Parameters: 
+                        Response:
+                      
 
         4.4)Academic Member Functionalities 
 
@@ -849,7 +876,7 @@ B)Functionalities:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member 
 
-                ii)  
+                ii) view Replacement Request
                     Functionality: view replacement requests sent to me
                     Route: /academicMember/viewReplacementRequests
                     Request type: GET
