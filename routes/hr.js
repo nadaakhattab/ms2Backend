@@ -13,6 +13,7 @@ const academicMember = require('../models/academicMember');
 const validations = require('../validations/hr');
 const Joi = require('joi');
 const { findOneAndUpdate } = require('../models/location');
+const { response } = require('../app');
 
 const validateBody =(req, res,next)  =>  { try{ 
   let result;
@@ -672,7 +673,7 @@ department.findOne({name:courseFound.department}).then(result =>{
  router.route('/addStaffMember').post(validateBody, (req, res) => {
 staffMember.findOne({email:req.body.email}).then(result =>{
   if(result){
-  res.send("Email already exists");
+  res.status(300).send("Email already exists");
   }
   else{
 
@@ -681,7 +682,7 @@ location.findOne({room:req.body.officeLocation}).then(result => {
   if (result){
     const locCapacity=result.capacity;
 if(result.capacity== result.maxCapacity){
-res.send("Can't assign the following office Location");
+res.status(300).send("Can't assign the following office Location");
 }else {
   // req.body lazm yekon fyha  name, email, salary and office location.
   let id= "";
@@ -734,22 +735,33 @@ staffMember.create({...data}).then(result=>{
 
     idDb.updateOne({name:req.body.type},{$set:{count:idCount}}).then((result)=>{
 location.updateOne({room:req.body.officeLocation},{$set:{capacity:locCapacity+1}}).then((result)=>{
-      res.send(" created done");  });
+  if(req.body.type=="HOD"){
+    department.findOneAndUpdate({name:req.body.name},{$set:{HOD:id}}).then ((depart)=>{
+academicMember.create({id:id, department:req.body.department, faculty:depart.faculty}).then (()=>{
+res.status(200).send("Successfully added");
+});
+    });
+
+  }
+  else{
+      res.status(200).send(" created done");
+  }
+      });
     });
 
 } ).catch (err =>{
   console.log(err);
-  res.send("user Couldn't be created");
+  res.status(300).send("user Couldn't be created");
 })
 
 }
 else {
-  res.send("id doesn't exist");
+  res.status(300).send("id doesn't exist");
 } 
     });
 }}
 else {
-res.send("location not found");
+res.status(300).send("location not found");
 } });
 
 }
@@ -759,11 +771,10 @@ res.send("location not found");
 
 
  router.route('/updateStaff').put((req, res) => {
-  //  id:req.body.id
    staffMember.updateOne({email: req.body.email},{$set:{...req.body}}).then(result => {
-     res.send(result);
+     res.status(200).send(result);
    }).catch(err => {
-     res.send(err);
+     res.status(300).send(err);
    })
 
  });
@@ -839,10 +850,10 @@ res.status(200).send(updated);
   
 // check law mafysh haga bel id da a2ol invalid
    staffMember.findOneAndUpdate({id: req.body.id},{$set:{salary:req.body.salary}}).then(result => {
-     res.send(result);
+     res.status(200).send(result);
 
    }).catch(err => {
-     res.send(err);
+     res.status(300).send(err);
    })
 
  });
