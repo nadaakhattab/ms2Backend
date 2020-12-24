@@ -104,6 +104,9 @@ res.status(501).send("Location doesn't exist");
 
 router.route('/deleteLocation/:room').delete((req, res) => {
  location.deleteOne({room: req.params.room}).then(result => {
+   if(req.params.room==undefined){
+    return  res.status(300).send("Undefined room");
+   }
   if(result.deletedCount==0){
     res.status(301).send("Location doesn't exist");
   }
@@ -760,6 +763,9 @@ res.send("location not found");
  router.route('/attendanceRecord/:id').get( (req, res) => {
   
    staffMember.findOne({id:req.params.id}).then(result=>{
+    if(req.params.id==undefined){
+      return  res.status(300).send("Undefined ID");
+     }
      if(result){
 attendance.find({id:req.params.id}).then((att)=>{
 res.status(200).send(att);
@@ -836,6 +842,9 @@ res.status(200).send(updated);
  router.get('/viewAttendance/:id/:yearToView/:monthToView',async(req,res)=>{
   try{
     var userId=req.params.id;
+    if(req.params.id==undefined){
+      return  res.status(300).send("Undefined ID");
+     }
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
     if(!yearToView||!monthToView){
