@@ -24,13 +24,13 @@ module.exports= {
 ), 
 
     acceptRequest:Joi.object({
-    id: Joi.number().required(),
+    id: Joi.string().required(),
     
 },
 ),
 
     rejectRequest:Joi.object({
-    id: Joi.number().required(),
+    id: Joi.string().required(),
     reason: Joi.string(),
 },
 ),
