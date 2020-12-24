@@ -4,6 +4,33 @@ const staffMembers=require('../models/staffMember');
 const bcryptjs=require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
+const validations = require('../validations/staffmember');
+const Joi = require('joi');
+
+
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+  switch(req.path){
+    case '/login':result = validations.Login.validate(req.body); 
+    break;
+     case '/resetPassword':result = validations.ResetPassword.validate(req.body); 
+    break;
+     
+  
+  }
+  
+    const { value, error } = result; 
+    const valid = error == null; 
+    if (!valid) { 
+      res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+    } else { 
+  next();
+    }  
+  }
+  catch(err){
+    console.log(err);
+    res.status(405).send("Validation error: Please make sure all required fields are given");
+  }}
 
 router.post('/login',async(req,res)=>{
     try{
@@ -55,7 +82,7 @@ router.post('/login',async(req,res)=>{
     }
 });
 
-router.post('/refreshToken',(req,res)=>{
+router.post('/refreshToken',validateBody,(req,res)=>{
     try{
         const refreshToken=req.headers.authorization;
         //console.log(refreshToken);
@@ -81,7 +108,7 @@ router.post('/refreshToken',(req,res)=>{
 
 })
 
-router.post('/resetPassword',async(req,res)=>{
+router.post('/resetPassword',validateBody,async(req,res)=>{
     try{
         const inputEmail=req.body.email;
         if(!inputEmail){
