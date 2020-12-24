@@ -15,7 +15,7 @@ const validateBody =(req, res,next)  =>  { try{
 switch(req.path){
     case '/updateProfile':result = validations.UpdateProfile.validate(req.body); 
     break;
-    case '/changePassword':result = validations.ChangePassword.validate(req.body); 
+    case '/updatePassword':result = validations.ChangePassword.validate(req.body); 
     break; 
  
     
@@ -24,6 +24,7 @@ switch(req.path){
   const { value, error } = result; 
   const valid = error == null; 
   if (!valid) { 
+      console.log(error);
     res.status(422).send( 'Validation error: Please make sure all required fields are given') 
   } else { 
 next();
@@ -93,17 +94,26 @@ router.post('/updateProfile',validateBody,async(req,res)=>{
     }
 });
 
-router.post('/changePassword',validateBody,async(req,res)=>{
+router.post('/updatePassword',validateBody,async(req,res)=>{
     try{
         var userId=req.headers.payload.id;
         var inputPassword=req.body.password;
-        if(!inputPassword){
+        var oldPass= req.body.oldPassword;
+        if(!inputPassword|| !oldPass){
             return res.status(400).send("No password to update");
-        }else{
-            const salt=await bcryptjs.genSalt(10);
+        }else{    
+              const user= await staffMembers.findOne({email:req.body.email});
+             const correctPassword=await bcryptjs.compare(oldPass,user.password);
+             if(correctPassword){
+                   const salt=await bcryptjs.genSalt(10);
             var hashedPassword=await bcryptjs.hash(inputPassword,salt);           
-            var user=await staffMembers.findOneAndUpdate({id:userId},{password: hashedPassword},{new:true});
-            res.status(200).send("Password changed successfully");
+           const userup=await staffMembers.findOneAndUpdate({id:userId},{password: hashedPassword},{new:true});
+            res.status(200).send("Password changed successfully"); 
+             }
+             else {
+                 res.status(300).send("ERROR: Incorrect Old Pasword");
+             }
+         
         }
     }catch(error){
         return res.status(500).send(error.message);
