@@ -533,17 +533,125 @@ B)Functionalities:
 
             a)
 
+    
+
             b)
 
             c)
 
-            d)
+            d)Assign an academic member to an unassigned slot
+                Functionality: assign academic member to slot
+                Route: /ci/assignSlot
+                Request type: POST
+                RequestBody:
+                {
+                    "courseName":"c1",
+                    "staffId":"12",
+                    "slotId":"12"
+                }
+                Response: updated slot with instructor assigned to it
+                {
+                    "_id": "5fdf98693caedd19ebc5c744",
+                    "id": 12,
+                    "course": "c1",
+                    "slot": "5",
+                    "day": "Thursday",
+                    "instructor": "12",
+                    "location": "c7.202",
+                    "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
-            e)
+            e)Update/delete assignment of academic member
+                i)Update
+                    Functionality: update assignment of an academic member from one slot to another
+                    Route: /ci/updateSlot
+                    Request type: POST
+                    RequestBody:
+                    {
+                        "courseName":"c1",
+                        "oldSlotId":"1",
+                        "newSlotId":"3",
+                        "staffId":"12"
 
-            f)
+                    }
+                    Response: updated slot with instructor assigned to it
+                    {
+                        "_id": "5fde48ba97fdb6097746b1e0",
+                        "id": 3,
+                        "course": "c1",
+                        "slot": "5",
+                        "day": "teysday",
+                        "__v": 0,
+                        "instructor": "12",
+                        "location": "c7.202"
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+                ii)Delete
+                    Functionality: delete assignment of an academic member from one slot to another
+                    Route: ci/deleteSlot/:course/:staffId/:oldSlotId
+                    Request type: DELETE
+                    Parameters: course is name of course I want to remove assignment from, staff Id is the academic member that I want to delete his/her assignment, oldSlotId is the slot id of the slot that I want to remove the academic member from
+                    Example of how to call route: ci/deleteSlot/c1/12/1
+                    Response: slot with instructor set to null indicating assignment is deleted 
+                    {
+                        "_id": "5fdfacf52e200aca12fee9ca",
+                        "id": 1,
+                        "course": "CS",
+                        "slot": "5",
+                        "day": "teysday",
+                        "__v": 0,
+                        "location": "c7.202",
+                        "instructor": null
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+            f)Remove an assigned academic from course
+                Functionality: remove academic member completely from course
+                    Route: /removeFromCourse/:course/:staffId
+                    Request type: DELETE
+                    Parameters: course is name of course I want to remove assignment from, staff Id is the academic member that I want to remove from course
+                    Example of how to call route: ci/removeFromCourse/c1/12
+                    Response: 
+                    Successfully removed
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
-            g)
+            g)Assign an academic member to be course coordinator
+                Functionality: assign a academic member as course coordinator in a course
+                Route: /ci/assignCourseCordinator
+                Request type: POST
+                RequestBody:
+                {
+                    "courseId":"c1",
+                    "id":"12"
+                }
+                Response: updated slot with coordinator assigned to it
+                {
+                    "instructors": [
+                        "1"
+                    ],
+                    "TAs": [
+                        "walid",
+                        "ahmed",
+                        "12"
+                    ],
+                    "_id": "5fdfac852e200aca12fee9c9",
+                    "name": "c1",
+                    "coordinator": "12",
+                    "__v": 0
+                }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
         4.3)Course Coordinator Functionalities
 
