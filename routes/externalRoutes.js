@@ -4,6 +4,33 @@ const staffMembers=require('../models/staffMember');
 const bcryptjs=require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
+const validations = require('../validations/externalRoutes');
+const Joi = require('joi');
+
+
+const validateBody =(req, res,next)  =>  { try{ 
+    let result;
+  switch(req.path){
+    case '/login':result = validations.Login.validate(req.body); 
+    break;
+    case '/resetPassword':result = validations.ResetPassword.validate(req.body); 
+    break;
+     
+  
+  }
+  
+    const { value, error } = result; 
+    const valid = error == null; 
+    if (!valid) { 
+      res.status(422).send( 'Validation error: Please make sure all required fields are given') 
+    } else { 
+  next();
+    }  
+  }
+  catch(err){
+    console.log(err);
+    res.status(405).send("Validation error: Please make sure all required fields are given");
+  }}
 
 router.post('/login',async(req,res)=>{
     try{
@@ -55,7 +82,7 @@ router.post('/login',async(req,res)=>{
     }
 });
 
-router.post('/refreshToken',(req,res)=>{
+router.post('/refreshToken',validateBody,(req,res)=>{
     try{
         const refreshToken=req.headers.authorization;
         //console.log(refreshToken);
@@ -81,24 +108,30 @@ router.post('/refreshToken',(req,res)=>{
 
 })
 
-router.post('/resetPassword',async(req,res)=>{
+router.post('/resetPassword',validateBody,async(req,res)=>{
     try{
         const inputEmail=req.body.email;
-        if(!inputEmail){
+        const inputPass= req.body.password;
+        if(!inputEmail || !inputPass){
             return res.status(400).send("Please enter email");
         }else{
             const user= await staffMembers.findOne({email:inputEmail});
             if(!user){
                 return res.status(401).send("Invalid user")
             }else{
+                  if(user.firstLogin==true){
                 const salt=await bcryptjs.genSalt(10);
-                var generatedPassword=otpGenerator.generate(6);
-                var hashedPassword=await bcryptjs.hash(generatedPassword,salt);           
+                // var generatedPassword=otpGenerator.generate(6);
+                var hashedPassword=await bcryptjs.hash(inputPass,salt);           
                 var updatedUser=await staffMembers.findOneAndUpdate({email:inputEmail},{password: hashedPassword},{new:true});
-                if(user.firstLogin==true){
+              
                     const updateUser=await staffMembers.findOneAndUpdate({email:inputEmail},{firstLogin:false});
+                    return res.status(200).send("Successfull Reset");
                 }
-                return res.status(200).send(generatedPassword);
+                else{
+                    return res.status(300).send("This is not your first Login Please head to update password");
+                }
+                
             }
         }
     }catch(error){
