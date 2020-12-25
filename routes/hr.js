@@ -880,7 +880,7 @@ staffMember.findOne({id:req.body.id}).then((mem)=>{
              case 'Thursday': dayyOffNumber=4; break;
               case 'Friday': dayyOffNumber=5; break;
                case 'Saturday': dayyOffNumber=6; break; 
-       } toUpdate.dayyOffNumber= dayyOffNumber;
+       } toUpdate.dayOffNumber= dayyOffNumber;
    }
  
        
@@ -936,49 +936,98 @@ Promise.all(arrayofPromises).then(()=>{
 //    })
 //  });
 
- 
 
  router.route('/deleteStaff/:id').delete(async (req, res) => {
    if(req.params.id==undefined){
      res.status(300).send("Error: Please add required paramters");
    }
-   const result =await staffMember.deleteOne({id:req.params.id});
+   const result =await staffMember.findOne({id:req.params.id});
 
 
    if(result){
      const listofAllCourse= await academicMember.find({id:req.params.id});
+     if(result.type=="HOD"){
+       academicMember.findOne({id:req.params.id}).then((acMme)=>{
+         department.findOneAndUpdate({name:acMme.department},{$set:{HOD:null}},{new:true}).then((dep)=>{
+           console.log(dep);
+   academicMember.deleteOne({id:req.params.id}).then(()=>{
+ staffMember.deleteOne({id:req.params.id}).then((result)=>{
+    res.status(200).send("successfully deleted");
+  })});
+         })
+  
+
+       });
+    
+     }
+     else{
 if (listofAllCourse){
+  console.log(listofAllCourse);
 // get each course --> loop on its ta/ instructor/ coordinator if ==req.para.id remove it
 listofAllCourse.forEach(async(mem)=>{
- const course= await course.findOne({name:mem.course});
- if(course){
-
+ let coursen;
+ coursen= await course.findOne({name:mem.course});
+ if(coursen){
+   let InstDel;
+   let  cDel;
+const arrayofPromises=[cDel, InstDel];
 const courseTas= [];
-course.TAs.forEach((ta)=>{
-  if(ta!==req.params.id){
-    courseTas.push(ta);
+
+ cDel= new Promise((resolve, reject) => {
+    coursen.TAs.forEach((ta, index, array) => {
+        if(ta!==req.params.id){
+ courseTas.push(ta);
   }
+        if (index === array.length -1) resolve();
+    });
 });
+
 const courseInst= [];
-course.instructors.forEach((inst)=>{
-  if(inst!==req.params.id){
+
+InstDel= new Promise((resolve, reject) => {
+   coursen.instructors.forEach((inst, index, array) => {
+     if(inst!==req.params.id){
     courseInst.push(inst);
   }
+        if (index === array.length -1) resolve();
+    });
 });
+
 const coord= null;
-if(course.coordinator!==req.params.id){
-coord= course.coordinator;
+if(coursen.coordinator!==req.params.id){
+coord= coursen.coordinator;
 }
-const toUpdate={TAs:courseTas,
+
+
+Promise.all(arrayofPromises).then (()=>{
+  const toUpdate={TAs:courseTas,
 instructors: courseInst,
 coordinator:coord};
-
-course.findOneAndUpdate({name:mem.name},{...toUpdate},{new:true}).then ((updated)=>{
-res.status(200).send(updated);
+console.log(toUpdate);
+console.log(mem.course);
+course.findOneAndUpdate({name:mem.course},{$set:{...toUpdate}},{new:true}).then ((updated)=>{
+  academicMember.deleteOne({id:req.params.id}).then(()=>{
+ staffMember.deleteOne({id:req.params.id}).then((result)=>{
+    res.status(200).send("successfully deleted");
+  })})
 });
+}).catch((err)=>{
+    res.status(300).send("Error occured");
+})
+
   }
 });
 }
+else{
+  academicMember.deleteOne({id:req.params.id}).then(()=>{
+ staffMember.deleteOne({id:req.params.id}).then((result)=>{
+    res.status(200).send("successfully deleted");
+  })})
+}
+   }
+   }
+   else{
+     res.status(300).send("staff member doesn't exist");
    }
 });
 

@@ -487,18 +487,42 @@ B)Functionalities:
 
         f)Staff Member
            i) update a staff member
-            Functionality: can update any info about the staff member(please refer to the database model), if it updates a location it decerements the current capacity of the old location and increments the new one (note: capacity is the number of staff in this room)
+            Functionality: can update dayOff,email,name,officeLocation & mobileNumber of the staff member, if it updates a location it decerements the current capacity of the old location and increments the new one (note: capacity is the number of staff in this room)
             Route: /hr/updateStaff
             Request type: PUT
-            RequestBody:
-            Response:
+            RequestBody:{
+                "id":"as-2",
+                "officeLocation":"location-3",
+                "email":"CIup@guc.edu.eg",
+                "dayOff":"Monday",
+                "name":"CI-Updated",
+                "mobileNumber":"01111"
+            }
+            Response:{
+                "dayOff": "Monday",
+                "dayOffNumber": 1,
+                "firstLogin": false,
+                "annualLeaves": 0,
+                "_id": "5fe55063dcba28369003fff8",
+                "password": "$2a$10$NtoH59lN5Kv0pJCOtpNTsuRcIbxdSLauI.WASMHe9eMFq26FUWdS6",
+                "id": "as-2",
+                "name": "CI-Updated",
+                "email": "CIup@guc.edu.eg",
+                "salary": 10000,
+                "officeLocation": "location-3",
+                "gender": "male",
+                "type": "CI",
+                "__v": 0,
+                "mobileNumber": "01111"
+            }
 
             iii) Delete a staff member
-            Functionality: Deletes staff member
+            Functionality: Deletes staff member, its coressponding record in academic members (where we store his/her department & course & faculty), and its record as a ta/instructor/ coordinator in its corresponding course
             Route: /hr/deleteStaff/:id
             Request type: DELETE
-            RequestBody:
-            Response:
+            Params:/hr/deleteStaff/as-6
+            Response: successfully deleted
+            *Note: if the deleted staff is HOD it sets its department HOD field to null
             
         g)Signin/Signout
             i) add sign in
