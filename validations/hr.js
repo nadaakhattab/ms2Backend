@@ -116,5 +116,16 @@ SignOut:Joi.object({
 },
 ),
 
+UpdateStaff:Joi.object({
+  id: Joi.string().required(),
+ dayOff:Joi.string(),
+name:Joi.string(),
+email:Joi.string(),
+officeLocation: Joi.string(),
+mobileNumber: Joi.string()
+
+},
+),
+
 
 }

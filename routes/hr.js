@@ -42,6 +42,8 @@ switch(req.path){
   break;
   case '/addStaffMember':result = validations.AddStaffMember.validate(req.body); 
   break;
+   case '/updateStaff':result = validations.UpdateStaff.validate(req.body); 
+  break;
 
 }
 
@@ -610,14 +612,11 @@ router.route('/editCourse').put(validateBody,(req, res) => {
      toUpdate.displayName=req.body.displayName;
 
    }
-   const toupdate= {};
-        if (req.body.teachingSlots){
-          toupdate.teachingSlots= req.body.teachingSlots;
-        }
+
    if(req.body.department!==undefined){
      department.findOne({name:req.body.department}).then (departmentres =>{
        if(departmentres){
-course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate,...toupdate}},{new:true}).then(result =>{
+course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate}},{new:true}).then(result =>{
   console.log(result);
  academicMember.updateMany({course:req.body.course},{faculty:result.faculty, department:result.department}).then(()=>{
  res.status(200).send("success");
@@ -675,7 +674,13 @@ department.findOne({name:courseFound.department}).then(result =>{
 
  }
  else { 
-  res.status(300).send("course doesn't exist under this department");
+  // res.status(300).send("Error:course no longer exists under its this department");
+          course.deleteOne({name:req.params.course}).then(deletedCourse =>{
+ academicMember.deleteMany({course:req.params.course},{faculty:result.faculty, department:result.department}).then(()=>{
+  res.status(200).send("Deleted successfully");
+  });
+ 
+     })
  }
 
   }
@@ -822,14 +827,79 @@ res.status(300).send("location not found");
 
 
 
- router.route('/updateStaff').put((req, res) => {
-   staffMember.updateOne({email: req.body.email},{$set:{...req.body}}).then(result => {
+
+
+function upLoc(loc,newLoc){
+  return new Promise((resolve, reject) => {
+  location.findOne({room:loc}).then(result => {
+    console.log("OLD:",result);
+       if(result){
+       return  location.findOneAndUpdate({room:loc},{$set:{capacity:result.capacity-1}});
+       }
+       else{ return }
+      
+     }).then (()=>{
+         location.findOne({room:newLoc}).then(result => {
+           console.log(result);
+       if(result){
+      location.findOneAndUpdate({room:newLoc},{$set:{capacity:result.capacity+1}}).then(()=>{
+        resolve();
+      })
+       }
+       else{reject();}
+      
+      
+     });
+
+     })
+    })};
+
+
+ router.route('/updateStaff').put(validateBody,(req, res) => {
+staffMember.findOne({id:req.body.id}).then((mem)=>{
+  if(!mem){
+    return res.status(300).send("Staff member doesnt exist");
+  }
+  else{  
+     const toUpdate={}
+     const arrayofPromises=[];
+       if(req.body.officeLocation){
+       arrayofPromises.push(  upLoc(mem.officeLocation,req.body.officeLocation));
+         toUpdate.officeLocation=req.body.officeLocation;
+   }
+  
+
+// });  
+   if(req.body.dayOff){
+ let dayyOffNumber;
+       switch (req.body.dayOff){
+         case 'Sunday': dayyOffNumber=0; break;
+          case 'Monday': dayyOffNumber=1; break;
+          case 'Teusday': dayyOffNumber=2; break;
+            case 'Wednesday': dayyOffNumber=3; break;
+             case 'Thursday': dayyOffNumber=4; break;
+              case 'Friday': dayyOffNumber=5; break;
+               case 'Saturday': dayyOffNumber=6; break; 
+       } toUpdate.dayyOffNumber= dayyOffNumber;
+   }
+ 
+       
+Promise.all(arrayofPromises).then(()=>{
+   staffMember.findOneAndUpdate({id: req.body.id},{$set:{...req.body,...toUpdate}},{new:true}).then(result => {
      res.status(200).send(result);
    }).catch(err => {
      res.status(300).send(err);
-   })
+   });
+}).catch((err)=>{
+  res.status(300).send("ERROR: please check that the location exists")
+})
 
- });
+
+
+  }
+  
+
+ });});
 
  router.route('/attendanceRecord/:id').get( (req, res) => {
   

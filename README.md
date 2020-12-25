@@ -322,9 +322,7 @@ B)Functionalities:
             Functionality: Deletes a Faculty & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses, departments
             Route: /hr/deleteFaculty/:name
             Request type: DELETE
-            RequestBody: {
-                "name":"FacultyNameUpdated3"
-                }
+            Params: /hr/deleteFaculty/faculty-2
             Response: Faculty successfuly deleted
 
         c)Department:
@@ -355,14 +353,11 @@ B)Functionalities:
             *Note: Faculty & department are required (if no updates are going to happen for the faculty, place its current faculty name)
 
             iii) Delete a Department
-            Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses
+            Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty),and its courses courses and removes it from its coresponding faculty
             Route: /hr/deleteDepartment/:faculty/:department
             Request type: DELETE
-            RequestBody: {
-                "faculty":"Engineering",
-                "department":"Media03"
-                }
-            Response: Faculty successfuly deleted
+            Params: /hr/faculty-2/department-3
+            Response: Department successfuly deleted
             *Note: faculty & department are a must
         d)Course:
         i) Add a Course
@@ -378,24 +373,22 @@ B)Functionalities:
             *Note: course & department are required
 
             ii) update a Course
-            Functionality: can update the Department of the course Only (which will automatically update its corresponding faculty too)
+            Functionality: can update the Department of the course (which will automatically update its corresponding faculty too) and its display name 
             Route: /hr/editCourse
             Request type: PUT
             RequestBody: {
-            "course":"aNewCourse4",
-            "department":"FarahDeptNew"
-
+                "department":"department-1",
+                "course":"course-6",
+                "displayName":"networksup"
             }
-            Response: success
-            *Note: Faculty & department are required 
+            Response: successfully added
+            *Note: "course" is required
 
             iii) Delete a Course
             Functionality: Deletes a course & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this course), and its record in the department's courses list
             Route: /hr/deleteCourse/:course
             Request type: DELETE
-            RequestBody:{
-                    "course":"aNewCourse4"
-                }
+            Params: /hr/deleteCourse/course-1
             Response: Deleted successfully
             
         e)add Staff Member
