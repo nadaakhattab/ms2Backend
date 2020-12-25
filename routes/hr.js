@@ -316,7 +316,7 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
         newId= idSlot.count+1;
 
 
-      return   department.create({name:newId,displayName: req.body.department,...toAdd}).then(newDept=>{
+      return   department.create({name:`department-${newId}`,displayName: req.body.department,...toAdd}).then(newDept=>{
         faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
      idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
        res.status(200).json({
@@ -477,11 +477,16 @@ faculty.findOne({name:req.params.faculty}).then(result =>{
    });
    faculty.updateOne({name:req.params.faculty},{$set:{departments}}).then (result => {
      department.deleteOne({name:req.params.department}).then(deletedDept =>{
+       if(deletedDept){
+       console.log("dep",deletedDept);
 course.deleteMany({department:req.params.department}).then(courses=>{
   academicMember.deleteMany({department:req.params.department}).then(()=>{
 res.status(200).send("Deleted successfully");
-  })
-})
+  });
+});}
+else {
+  res.status(300).send("department doesn't exist");
+}
    
      })
 
