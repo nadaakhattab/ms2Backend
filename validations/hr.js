@@ -58,8 +58,8 @@ EditDepartment:Joi.object({
     .required(),
     faculty: Joi.string()
     .required(),
-    HOD:Joi.string()
-    
+    HOD:Joi.string(),
+    department:Joi.string()
   
 },
 ),
@@ -101,7 +101,7 @@ AddStaffMember:Joi.object({
     ,
   salary:Joi.number(),
   gender: Joi.string().required,
-  dayOff:Joi.string().required()
+  dayOff:Joi.string()
 
  
 },

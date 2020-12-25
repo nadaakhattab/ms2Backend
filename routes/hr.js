@@ -346,6 +346,19 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
 })
  });
 
+
+ function updatCourse(courseIN, faculty){
+    return new Promise((resolve, reject) => {
+      course.findOneAndUpdate({name:courseIN},{$set:{faculty:faculty}},{new:true}).then((resul)=>{
+        console.log(result);
+resolve();
+      }).catch((err)=>{
+        reject();
+      })
+    });
+
+ }
+
 function checkFaculty (dept,fac){
   return new Promise((resolve, reject) => {
     console.log(dept);
@@ -429,6 +442,14 @@ router.route('/editDepartment').put(validateBody,(req, res) => {
   if(req.body.faculty){
 toUpdate.faculty=req.body.faculty;
   arrayofPromises.push(checkFaculty(req.body.department,req.body.faculty));
+  department.findOne({name:req.body.department}).then((dep)=>{
+dep.courses.forEach((course)=>{
+  console.log("COURSEE HEREEE",course);
+  arrayofPromises.push(updatCourse(course, req.body.faculty));
+})
+  
+  })
+
   }
 
 
@@ -525,27 +546,35 @@ course.findOne({name:req.body.course}).then((co)=>{
 department.findOne({name:req.body.department}).then(result =>{
   if (result){
  const courses =result.courses;
- if(courses.includes(req.body.course)){
-   res.status(300).send("course already exists under this department");
- }
- else {   // update db with new courses array
-   courses.push(req.body.course); 
-   department.findOneAndUpdate({name:req.body.department},{$set:{courses}},{new:true}).then (result => {
-     console.log("Deaprtment res: ",result);
 
+   // update db with new courses array
+   courses.push(req.body.course); 
+   department.findOne({name:req.body.department}).then (result => {
+     console.log("Deaprtment res: ",result);
+let newId;
  idDb.findOne({name:"course"}).then(idSlot =>{
         newId= idSlot.count+1;
         const toupdate= {};
-        if (req.body.teachingSlots){
-          toupdate.teachingSlots= req.body.teachingSlots;
-        }
-      return    course.create({name:newId,displayName:req.body.course, department:req.body.department, faculty:result.faculty,...toupdate}).then(courseNew =>{
+        // if (req.body.teachingSlots){
+        //   toupdate.teachingSlots= req.body.teachingSlots;
+        // }
+      return    course.create({name:`course-${newId}`,displayName:req.body.course, department:req.body.department, faculty:result.faculty,...toupdate}).then(courseNew =>{
    res.status(200).send("course added");
-    });
+    }).catch((err)=>{
+      res.status(300).send("Can't create course, a similar one exists")
+    })
 
     }).then(()=>{
         idDb.updateOne({name:"course"},{$set:{count:newId}}).then(()=>{
+           if(courses.includes(`course-${newId}`)){
+   res.status(300).send("course already exists under this department");
+ }
+ else{ courses.push(`course-${newId}`);
+            department.findOneAndUpdate({name:req.body.department},{$set:{courses}},{new:true}).then (result => {
             res.status(200).send("Successfully created");
+             }).catch (err =>{
+     res.status(300).send("course not added in Department");
+   });}
         })
     });
 
@@ -555,7 +584,7 @@ department.findOne({name:req.body.department}).then(result =>{
      res.status(300).send("course not added in Department");
    })
 
- }
+
 
   }
   else {
@@ -884,10 +913,7 @@ res.status(200).send(updated);
 
 
  router.route('/updateSalary').put((req, res) => {
-  //  id:req.body.id
-  
-// check law mafysh haga bel id da a2ol invalid
-   staffMember.findOneAndUpdate({id: req.body.id},{$set:{salary:req.body.salary}}).then(result => {
+   staffMember.findOneAndUpdate({id: req.body.id},{$set:{salary:req.body.salary}},{new:true}).then(result => {
      res.status(200).send(result);
 
    }).catch(err => {
