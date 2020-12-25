@@ -3,7 +3,29 @@ A)Running Information:
     Folder to run: server.js
     Port: 3000
 
-B)Functionalities:
+B) Assumptions: -The database is initially seeded with an HR Member with (ID: hr-1, email:HR1@guc.edu.eg, password:123456). We will use this user to populate the rest of the database:  
+    1) Login: Route: http://localhost:3000/login
+                                                Body:{  "email:HR1@guc.edu.eg", 
+                                                        "password":"123456"
+
+                                                     }
+     2)Reset Password: Route: http://localhost:3000/resetPassword
+                                                          Body: { "email"HR1@gucedu.eg",
+                                                                    "password":"up1"
+
+                                                                }
+                                                          Response: Successful Reset
+                -Slots start & end at the same time so we used number of slot instead of time.
+
+                -We did not add Friday as a dayOff since all staff members do not come on Friday.
+
+                -When we delete a course/department, we remove them completly from database( we do not assign their values with null).
+
+                -We accept a compensation request only if the staff member attended extra hours in his dayOff.
+
+                -Same courses in different faculties/departments can have different names.
+
+C)Functionalities:
 
     2)GUC Staff Member Functionalities:
 
