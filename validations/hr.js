@@ -30,11 +30,7 @@ module.exports= {
 
  AddFaculty:Joi.object({
   displayName: Joi.string()
-    .required(),
-    name: Joi.string()
-    .required(),
-  
-  
+    .required(),  
 },
 ),
 
@@ -43,8 +39,6 @@ EditFaculty:Joi.object({
     .required(),
     name: Joi.string()
     .required(),
-    
-  
 },
 ),
 
