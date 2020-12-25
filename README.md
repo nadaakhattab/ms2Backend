@@ -1176,24 +1176,51 @@ B)Functionalities:
         4.3)Course Coordinator Functionalities
 
             a)View slot linking requests
-                Functionality: view slot linking requests from academic member
+                Functionality: view slot linking requests from academic members linked to his/her course
                 Route: /coordinator/slotRequests
                 Request type: GET
-                Response:
+                Response:[
+                        {
+                            "status": "Accepted",
+                            "_id": "5fe61a9e7bbdbe224791a549",
+                            "fromId": "as-7",
+                            "toId": "as-10",
+                            "type": "slotLinking",
+                            "course": "course-2",
+                            "replacementDate": "2020-12-27T22:00:00.000Z",
+                            "date": "2020-12-24T22:00:00.373Z",
+                            "slotId": 2,
+                            "__v": 0
+                        }
+                    ]
+                     *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
             b)Accept/reject requests
                 Functionality: accept/reject slot linking requests from academic members linked to his course
                 Route: /coordinator/replyRequest
                 Request type: POST
-                Response:
+                Body:{
+                "slotId":"2",
+                "fromId":"as-7",
+                "status":"Accepted"
+                }
+                Response: Succesffuly linked
 
             c)Add/delete/update course slot 
                 i)Add course slot
-                    Functionality: add course slot in his/her course
+                    Functionality: create a course slot in his/her course
                     Route: /coordinator/addSlot
                     Request type: POST
-                    RequestBody:
-                    Response: 
+                    RequestBody:{
+                    "course":"course-4",
+                    "slot":"5",
+                    "day":"Thursday",
+                    "location":"location-2",
+                     "instructor":"as-2"
+                    }
+                    Response: Succesfully created
                     
 
                 ii)update course slot
@@ -1201,15 +1228,24 @@ B)Functionalities:
                     Route: /coordinator/editSlot
                     Request type: PUT
                     RequestBody:
-                    Response:
+                        {
+                        "id":"3", 
+                        "course":"course-2",
+                        "slot":"4",
+                        "day":"Monday",
+                        "location":"location-2",
+                        "instructor":"as-1"
+                        }
+                    Response: success
+                    
                 
 
                 iii)delete course slot
-                        Functionality: delete course slot in his/her course
+                        Functionality: deletes a slot in his/her course
                         Route: /coordinator/deleteSlot/:id
                         Request type: DELETE
-                        Parameters: 
-                        Response:
+                        Parameters: /coordinator/deleteSlot/3
+                        Response: Slot successfuly deleted
                       
 
         4.4)Academic Member Functionalities 
