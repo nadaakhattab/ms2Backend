@@ -828,57 +828,72 @@ B)Functionalities:
                           "as-2": "Saturday"
                         }         
 
-            d)view requests
-            Functionality: view requests change day off/leave sent by staff members
-                        Route: /hod/viewrequests
-                        Request type: GET
-                        Parameters: 
-                        Response:
+            d)View all requets changeDayOff/Leave
+                Functionality: 
+                Route: /hod/viewrequests
+                Request type: GET
+                Response: returns all change day off/leave requests sent by staff in his department 
+                {
+                        "status": "Pending",
+                        "_id": "5fe60c6891b78a2e30e61d6e",
+                        "fromId": "as-6",
+                        "toId": "as-1",
+                        "type": "changeDayOff",
+                        "reason": "reason",
+                        "date": "2020-12-24T22:00:00.599Z",
+                        "dayToChange": 2,
+                        "__v": 0
+                }               
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
             e)Accept request
-                Functionality: accept request sent 
+                Functionality: accept request
                 Route: /hod/acceptRequest
                 Request type: POST
-                RequestBody: id is mongoodb id for the request
+                Request body:
                 {
-                    "id":"5fdfb1799e83011954fd2596"
+                    "id":"5fe60c6891b78a2e30e61d6e"
                 }
-                Response: request with updted status and appropriate logic handled
+                Response: returns request with status changed to accepted and day off is changed in staffMembers schema
                 {
                     "status": "Accepted",
-                    "_id": "5fdfb1799e83011954fd2596",
-                    "fromId": "12",
-                    "toId": "1",
+                    "_id": "5fe60c6891b78a2e30e61d6e",
+                    "fromId": "as-6",
+                    "toId": "as-1",
                     "type": "changeDayOff",
-                    "date": "2020-12-19T22:00:00.888Z",
-                    "__v": 0,
-                    "dayToChange": 6
-                }
+                    "reason": "reason",
+                    "date": "2020-12-24T22:00:00.599Z",
+                    "dayToChange": 2,
+                    "__v": 0
+                }             
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-            f)reject request
-                Functionality: reject request sent 
+           f)Reject request
+                Functionality: accept request
                 Route: /hod/rejectRequest
                 Request type: POST
-                RequestBody: id is mongoodb id for the request, reason is optional and is rejection reason provided
+                Request body:
                 {
-                    "id":"5fdfb1799e83011954fd2596",
-                    "reason":"rejection reason"
+                    "id":"5fe60c6891b78a2e30e61d6e",
+                    "reason":"reason"
                 }
-                Response: request with updted status 
+                Response: returns request with status changed to rejected with optional reason 
                 {
                     "status": "Rejected",
-                    "_id": "5fdfb1799e83011954fd2596",
-                    "fromId": "12",
-                    "toId": "1",
+                    "_id": "5fe60c6891b78a2e30e61d6e",
+                    "fromId": "as-6",
+                    "toId": "as-1",
                     "type": "changeDayOff",
-                    "date": "2020-12-19T22:00:00.888Z",
+                    "reason": "reason",
+                    "date": "2020-12-24T22:00:00.599Z",
+                    "dayToChange": 2,
                     "__v": 0,
-                    "dayToChange": 6,
-                    "rejectionReason": "rejection reason"
-                }
+                    "rejectionReason": "reason"
+                }           
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
@@ -1021,117 +1036,115 @@ B)Functionalities:
                         }
                     }
                 }
-
-            d)Assign an academic member to an unassigned slot
+d)Assign an academic member to an unassigned slot
                 Functionality: assign academic member to slot
                 Route: /ci/assignSlot
                 Request type: POST
                 RequestBody:
-                {
-                    "courseName":"c1",
-                    "staffId":"12",
-                    "slotId":"12"
-                }
+    	        {
+    		"staffId":"as-3",
+    		"courseName":"course-1",
+    		"slotId":2
+		}
                 Response: updated slot with instructor assigned to it
                 {
-                    "_id": "5fdf98693caedd19ebc5c744",
-                    "id": 12,
-                    "course": "c1",
-                    "slot": "5",
-                    "day": "Thursday",
-                    "instructor": "12",
-                    "location": "c7.202",
-                    "__v": 0
-                }
+    		"_id": "5fe5cc98ce7883399c82d443",
+   		 "id": 2,
+   		 "course": "course-1",
+    		"slot": "4",
+    		"day": "Monday",
+    		"instructor": "as-3",
+    		"location": "location-3",
+    		"__v": 0
+		}
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
-            
-            e)Update/delete assignment of academic member
+
+e)Update/delete assignment of academic member
                 i)Update
                     Functionality: update assignment of an academic member from one slot to another
                     Route: /ci/updateSlot
                     Request type: POST
                     RequestBody:
-                    {
-                        "courseName":"c1",
-                        "oldSlotId":"1",
-                        "newSlotId":"3",
-                        "staffId":"12"
-
-                    }
+                   {
+		    	"staffId":"as-3",
+    			"courseName":"course-1",
+   			"oldSlotId":2,
+    			"newSlotId":1
+		   }
                     Response: updated slot with instructor assigned to it
                     {
-                        "_id": "5fde48ba97fdb6097746b1e0",
-                        "id": 3,
-                        "course": "c1",
-                        "slot": "5",
-                        "day": "teysday",
-                        "__v": 0,
-                        "instructor": "12",
-                        "location": "c7.202"
-                    }
+    			"_id": "5fe610b9ea87e768f3bd04f1",
+   			 "id": 1,
+   			 "course": "course-1",
+  			  "slot": "1",
+  			  "day": "Wednesday",
+   			 "instructor": "as-3",
+   			 "location": "location-3"
+		    }
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-                ii)Delete
+		ii)Delete
                     Functionality: delete assignment of an academic member from one slot to another
                     Route: ci/deleteSlot/:course/:staffId/:oldSlotId
                     Request type: DELETE
                     Parameters: course is name of course I want to remove assignment from, staff Id is the academic member that I want to delete his/her assignment, oldSlotId is the slot id of the slot that I want to remove the academic member from
-                    Example of how to call route: ci/deleteSlot/c1/12/1
+                    Example of how to call route: ci/deleteSlot/course-1/as-3/1
                     Response: slot with instructor set to null indicating assignment is deleted 
                     {
-                        "_id": "5fdfacf52e200aca12fee9ca",
-                        "id": 1,
-                        "course": "CS",
-                        "slot": "5",
-                        "day": "teysday",
-                        "__v": 0,
-                        "location": "c7.202",
-                        "instructor": null
-                    }
+    			"_id": "5fe610b9ea87e768f3bd04f1",
+  			  "id": 1,
+   			 "course": "course-1",
+   			 "slot": "1",
+   			 "day": "Wednesday",
+ 			   "instructor": null,
+   			 "location": "location-3"
+			}
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-            f)Remove an assigned academic from course
+	f)Remove an assigned academic from course
                 Functionality: remove academic member completely from course
                     Route: /removeFromCourse/:course/:staffId
                     Request type: DELETE
                     Parameters: course is name of course I want to remove assignment from, staff Id is the academic member that I want to remove from course
-                    Example of how to call route: ci/removeFromCourse/c1/12
+                    Example of how to call route: ci/removeFromCourse/course-1/as-3
                     Response: 
                     Successfully removed
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
-            
-            g)Assign an academic member to be course coordinator
+
+	g)Assign an academic member to be course coordinator
                 Functionality: assign a academic member as course coordinator in a course
                 Route: /ci/assignCourseCordinator
                 Request type: POST
                 RequestBody:
-                {
-                    "courseId":"c1",
-                    "id":"12"
-                }
+		{
+    		"courseId":"course-1",
+  		  "id":"as-3"
+		}
                 Response: updated slot with coordinator assigned to it
                 {
-                    "instructors": [
-                        "1"
-                    ],
-                    "TAs": [
-                        "walid",
-                        "ahmed",
-                        "12"
-                    ],
-                    "_id": "5fdfac852e200aca12fee9c9",
-                    "name": "c1",
-                    "coordinator": "12",
-                    "__v": 0
-                }
+   		 "instructors": [
+     		   "as-2"
+				],
+  		  "TAs": [
+        		"as-1",
+      			 "as-3"
+ 			 ],
+ 		   "_id": "5fe548807bba283f164f3da7",
+   		 "name": "course-1",
+   		 "displayName": "NewCourse",
+    		"department": "department-1",
+  		"faculty": "faculty-1",
+   		 "__v": 0,
+    		"coordinator": "as-3"
+		}
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
@@ -1258,7 +1271,7 @@ B)Functionalities:
                         Response: Slot successfuly deleted
                       
 
-        4.4)Academic Member Functionalities 
+  4.4)Academic Member Functionalities 
 
             a)View their own including all teaching activities and replacements
                 Functionality: view schedule
@@ -1268,27 +1281,31 @@ B)Functionalities:
                 {
                     "slots": [
                         {
-                            "_id": "5fde48ba97fdb6097746b1e0",
-                            "id": 3,
-                            "course": "advanced",
-                            "slot": "3",
-                            "day": "Friday",
-                            "__v": 0,
-                            "instructor": "1"
+                            "_id": "5fe5cc98ce7883399c82d443",
+                            "id": 2,
+                            "course": "course-2",
+                            "slot": "4",
+                            "day": "Monday",
+                            "instructor": "as-6",
+                            "location": "location-3",
+                            "__v": 0
                         }
                     ],
                     "replacements": [
                         {
                             "status": "Accepted",
-                            "_id": "5fdf9aded403214ebd266ca9",
+                            "_id": "5fe5fd4da77a352738adcce8",
+                            "fromId": "CC-1",
+                            "toId": "as-6",
                             "type": "replacement",
-                            "fromId": "1",
-                            "toId": "1",
-                            "date": "2020-12-25T22:00:00.000Z",
-                            "slotId": 3
+                            "course": "course-2",
+                            "replacementDate": "2020-12-27T22:00:00.000Z",
+                            "date": "2020-12-24T22:00:00.373Z",
+                            "slotId": 2,
+                            "__v": 0
                         }
                     ]
-                }               
+                }              
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                
@@ -1298,49 +1315,71 @@ B)Functionalities:
                     Functionality: send replacement request
                     Route: /academicMember/sendReplacementRequest
                     Request type: POST
-                    RequestBody: 
+                    RequestBody:
                     {
-                        "id":"12",
-                        "course":"c1",
-                        "slot": "1",
-                        "day":"sunday",
-                        "location":"c7.204",
-                        "date":"12/25/2020"
-                    }                    
+                        "id":"as-6",
+                        "course":"course-2",
+                        "slot":2,
+                        "date":"12/27/2020"
+                    }                   
                     Response: returns creates request with status as pending
                     {
                         "status": "Pending",
-                        "_id": "5fdfa935d6361919d8df027c",
-                        "fromId": "1",
-                        "toId": "12",
+                        "_id": "5fe5fd4da77a352738adcce8",
+                        "fromId": "CC-1",
+                        "toId": "as-6",
                         "type": "replacement",
-                        "slot": "1",
-                        "location": "c7.204",
-                        "course": "c1",
-                        "day": "sunday",
-                        "date": "2020-12-24T22:00:00.000Z",
+                        "course": "course-2",
+                        "replacementDate": "2020-12-26T22:00:00.000Z",
+                        "date": "2020-12-24T22:00:00.373Z",
+                        "slotId": 2,
                         "__v": 0
-                    }                    
+                    }                  
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member 
 
-                ii) view Replacement Request
+                ii)View replacement requests 
                     Functionality: view replacement requests sent to me
                     Route: /academicMember/viewReplacementRequests
                     Request type: GET
                     Response: array of replacement requests sent to me each like the following
                     {
                         "status": "Pending",
-                        "_id": "5fdfa4dc5164763108a0a268",
-                        "fromId": "12",
-                        "toId": "1",
+                        "_id": "5fe5fd4da77a352738adcce8",
+                        "fromId": "CC-1",
+                        "toId": "as-6",
                         "type": "replacement",
-                        "slot": "1",
-                        "location": "c7.204",
-                        "course": "c1",
-                        "day": "sunday",
-                        "date": "2020-12-24T22:00:00.000Z",
+                        "course": "course-2",
+                        "replacementDate": "2020-12-26T22:00:00.000Z",
+                        "date": "2020-12-24T22:00:00.373Z",
+                        "slotId": 2,
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member  
+
+                iii)Reply replacement requests  
+                    Functionality: accept/reject replacement requests sent to me
+                    Route: /academicMember/viewReplacementRequests
+                    Request type: POST
+                    Request Body:
+                    {
+                        "id":"5fe5fd4da77a352738adcce8",
+                        "status":"Accepted"
+                    }
+                    Response: array of replacement requests sent to me each like the following
+                    {
+                        "status": "Accepted",
+                        "_id": "5fe5fd4da77a352738adcce8",
+                        "fromId": "CC-1",
+                        "toId": "as-6",
+                        "type": "replacement",
+                        "course": "course-2",
+                        "replacementDate": "2020-12-26T22:00:00.000Z",
+                        "date": "2020-12-24T22:00:00.373Z",
+                        "slotId": 2,
                         "__v": 0
                     }
                     *Note:
@@ -1351,20 +1390,21 @@ B)Functionalities:
                 Functionality: send slot linking request to course coordinator
                 Route: /academicMember/sendSlotLinkingRequest
                 Request type: POST
-                RequestBody: 
+                RequestBody:
                 {
-                    "course":"c1",
-                    "slot":1
+                    "course":"course-2",
+                    "slot":2
                 }
                 Response: returns created slot linking request
                 {
                     "status": "Pending",
-                    "_id": "5fdfad9284dfad32489e3cd0",
-                    "fromId": "1",
-                    "toId": "as-2",
+                    "_id": "5fe608469075f718e03442bc",
+                    "fromId": "as-6",
+                    "toId": "as-7",
                     "type": "slotLinking",
-                    "course": "c1",
-                    "date": "2020-12-19T22:00:00.434Z",
+                    "slotId": 2,
+                    "course": "course-2",
+                    "date": "2020-12-24T22:00:00.115Z",
                     "__v": 0
                 }
                 *Note:
@@ -1377,26 +1417,69 @@ B)Functionalities:
                 Request type: POST
                 RequestBody: reason is optional can also send an empty body
                 {
-                    "reason":"req"
+                    "reason":"reason",
+                    "day":"Tuesday"
                 }
                 Response: returns created change day off request
                 {
                     "status": "Pending",
-                    "_id": "5fdfb1f1375893216869af34",
-                    "fromId": "1",
-                    "toId": "1",
+                    "_id": "5fe60c6891b78a2e30e61d6e",
+                    "fromId": "as-6",
+                    "toId": "as-1",
                     "type": "changeDayOff",
-                    "reason": "req",
-                    "date": "2020-12-19T22:00:00.170Z",
+                    "reason": "reason",
+                    "date": "2020-12-24T22:00:00.599Z",
+                    "dayToChange": 2,
                     "__v": 0
                 }
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
             
-            e)
+            e)Submit leave request
+                Functionality: send leave request to HOD
+                Route: /academicMember/sendLeaveRequest
+                Request type: POST
+                RequestBody: reason is optional can also send an empty body
+                {
+                    "leave":"Sick",
+                    "startDate":"12/26/2020",
+                    "endDate":"12/29/2020",
+                    "documents":"documents"
+                }
+                Response: returns created leave request
+                {
+                    "status": "Pending",
+                    "_id": "5fe63b6a78378c1d10763339",
+                    "fromId": "as-6",
+                    "toId": "as-1",
+                    "type": "leave",
+                    "leaveType": "Sick",
+                    "date": "2020-12-24T22:00:00.485Z",
+                    "leaveStartDate": "2020-12-25T22:00:00.000Z",
+                    "leaveEndDate": "2020-12-28T22:00:00.000Z",
+                    "documents": "documents",
+                    "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+          
 
-            f)
+            f)Get notified when requests are accepted/rejected
+                Functionality: view notifications indicating acceptance/rejection of requests
+                Route: /academicMember/notifications
+                Request type: GET
+                Response: returns array of notifications showing id of requests each like the following
+                {
+                        "_id": "5fe60046ade6ea043824582d",
+                        "requestID": "5fe5fd4da77a352738adcce8",
+                        "to": "as-7",
+                        "__v": 0
+                }
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member  
             
             g)View submitted requests
                 i)View all submitted requests
@@ -1405,16 +1488,15 @@ B)Functionalities:
                     Request type: GET
                     Response: array of requests each of the following format
                     {
-                        "status": "Pending",
-                        "_id": "5fdfa54626a6a437e04a4213",
-                        "fromId": "1",
-                        "toId": "12",
+                        "status": "Accepted",
+                        "_id": "5fe5fd4da77a352738adcce8",
+                        "fromId": "as-7",
+                        "toId": "as-6",
                         "type": "replacement",
-                        "slot": "1",
-                        "location": "c7.204",
-                        "course": "c1",
-                        "day": "sunday",
-                        "date": "2020-12-24T22:00:00.000Z",
+                        "course": "course-2",
+                        "replacementDate": "2020-12-27T22:00:00.000Z",
+                        "date": "2020-12-24T22:00:00.373Z",
+                        "slotId": 2,
                         "__v": 0
                     }
                     *Note:
@@ -1423,18 +1505,21 @@ B)Functionalities:
 
                 ii)View submitted requests with specific status 
                     Functionality: get all Accepted/Pending/Rejected requests sent by me
-                    Route: /academicMember/:status
+                    Route: /academicMember/viewRequests/:status
                     Request type: GET
                     Parameters: status is Accepted/Pending/Rejected based on request status criteria I want to view
-                    Example of how to call route: /academicMember/viewRequests/Rejected
+                    Example of how to call route: /academicMember/viewRequests/Accepted
                     Response: array of requests sent by me with provided status in parameters each of the following format
                     {
-                        "status": "Rejected",
-                        "_id": "5fdfb1799e83011954fd2596",
-                        "fromId": "1",
-                        "toId": "1",
-                        "type": "changeDayOff",
-                        "date": "2020-12-19T22:00:00.888Z",
+                        "status": "Accepted",
+                        "_id": "5fe5fd4da77a352738adcce8",
+                        "fromId": "as-7",
+                        "toId": "as-6",
+                        "type": "replacement",
+                        "course": "course-2",
+                        "replacementDate": "2020-12-27T22:00:00.000Z",
+                        "date": "2020-12-24T22:00:00.373Z",
+                        "slotId": 2,
                         "__v": 0
                     }
                     *Note:
@@ -1446,92 +1531,22 @@ B)Functionalities:
                 Route: /academicMember/cancelRequest/:id
                 Request type: DELETE
                 Parameters: id is the mongodb id of the request I want to cancel
-                Example of how to call route: /academicMember/cancelRequest/5fdfb1f1375893216869af34
+                Example of how to call route: /academicMember/cancelRequest/5fe608469075f718e03442bc
                 Response: returns deleted request
                 {
                     "status": "Pending",
-                    "_id": "5fdfb1f1375893216869af34",
-                    "fromId": "1",
-                    "toId": "1",
-                    "type": "changeDayOff",
-                    "reason": "req",
-                    "date": "2020-12-25T22:00:00.170Z",
+                    "_id": "5fe608469075f718e03442bc",
+                    "fromId": "as-6",
+                    "toId": "as-7",
+                    "type": "slotLinking",
+                    "slotId": 2,
+                    "course": "course-2",
+                    "date": "2020-12-24T22:00:00.115Z",
                     "__v": 0
                 }
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
-                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                       
-        
-
-
-                      
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-HR
-
-Add Location:
-Inputs Ex:
-"room":"c7.202",
-"type":"tutorial",
-"maxCapacity":0
-
-DELETE Location:
-Must input room
-"room":"c7.202",
-don't need haga tanya
-...................................
-/AddFaculty must have faculty name:
-"name"
-returns success & data of faculty (we need _id for updating)
-
-
-/addDepratment:
-takes :
-    "name":"Media Dept",
-    "courses":["mass","applied"],
-    "HOD":"as-20",
-    "faculty":"Engineering"
-
-/editDepartment shouls take name & only the edited fields
-
-
-
-.........Coordinator
-
-Body of addSlot
-{
-    "course":"advanced",
-    "day":"Thursday",
-    "slot":"5",
-    "instructor":"as-20",
-    "location":"c7.202"
-
-}
-result successfully created
-
-
-Body of editSlot
-{"id":3,
-    "course":"advanced",
-    "day":"teysday",
-    "slot":"5",
-    "instructor":"as-20",
-    "location":"c7.22"
-
-}
-result success message
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
 
 
