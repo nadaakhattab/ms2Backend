@@ -24,8 +24,11 @@ module.exports= {
 
     ),
     sendLeaveRequest:Joi.object({
-        reqReason:Joi.string().required(),
-        leaveType:Joi.string().required()
+        reason:Joi.string(),
+        leave:Joi.string().required(),
+        startDate:Joi.date().required(),
+        endDate:Joi.date().required(),
+        documents:Joi.string()
         },
     ),
     ReplyRequest:Joi.object({

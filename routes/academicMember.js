@@ -332,10 +332,14 @@ try{
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
         var departmentReq=sending.department;
+        var leaveStartDate=new Date(Date.parse(req.body.startDate));
+        var leaveEndDate=new Date(Date.parse(req.body.endDate));
+        console.log(new Date(leaveStartDate));
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
-        var dept=await departments.find({_id:departmentReq});
+        var dept=await departments.findOne({name:departmentReq});
         const hod= dept.HOD;
+        console.log(hod);
         if(hod){
             switch(leaveType){
             case 'Annual':
@@ -397,7 +401,7 @@ try{
 
             case'Accidental':
                 staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
-                   let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
+                   let duration= leaveEndDate.getTime()-leaveStartDate.getTime();
                    duration= duration/(1000*3600*24);
                    duration= Math.ceil(duration);
                 if(Math.floor(member.annualLeaves)-duration>0 && duration<=6){
@@ -423,7 +427,7 @@ try{
                     }});
                     break;
             case"Sick":
-            let dif= date.getTime()-leaveStartDate.getTime();
+            let dif= todayDate.getTime()-leaveStartDate.getTime();
             dif= dif/(1000*3600*24);
             if(dif<=3){
             if(req.body.documents==undefined){
@@ -436,8 +440,8 @@ try{
                     leaveType: "Sick",
                     reason: reqReason,
                     date:todayDate,
-                    leaveStartDate:req.body.leaveStartDate,
-                    leaveEndDate:req.body.leaveEndDate,
+                    leaveStartDate,
+                    leaveEndDate,
                     documents:req.body.documents
                 }).then(request=>{
                    return res.status(200).send(request);  
