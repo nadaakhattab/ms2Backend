@@ -512,7 +512,7 @@ try{
                     endDate=dateToday;
                 }
                 console.log("RECORDS",new Date(Date.parse(startDate)));
-                 console.log("RECORDS",Date.parse(endDate));
+                 console.log("RECORDS",endDate);
                
                    var records=result.filter(function(record){
                        
@@ -526,7 +526,7 @@ try{
                             if(inputRecord.signOut.length>0){
                                 if(inputRecord.signIn){
                                     if(inputRecord.signIn.length>0){
-                                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                                     if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
                                             return inputRecord;
                                         }
             
@@ -557,6 +557,9 @@ try{
                 });
 
                         }
+                }
+                if(records.length==0){
+                    res.status(200).send("looking for a compensation");
                 }
              
                 }else{
