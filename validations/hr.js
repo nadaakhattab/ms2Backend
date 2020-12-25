@@ -58,8 +58,8 @@ EditDepartment:Joi.object({
     .required(),
     faculty: Joi.string()
     .required(),
-    HOD:Joi.string()
-    
+    HOD:Joi.string(),
+    department:Joi.string()
   
 },
 ),
@@ -93,29 +93,37 @@ EditCourse:Joi.object({
 AddStaffMember:Joi.object({
   name: Joi.string().required(),
   type: Joi.string().required(),
-  email: Joi.string()
-    .required(),
-    officeLocation: Joi.string().required()
-    ,
-  department: Joi.string()
-    ,
+  email: Joi.string().required(),
+  officeLocation: Joi.string().required(),
+  department: Joi.string(),
   salary:Joi.number(),
-  gender: Joi.string().required,
-  dayOff:Joi.string().required()
+  gender: Joi.string().required(),
+  dayOff:Joi.string()
 
  
 },
 ),
 
 SignIn:Joi.object({
-  id: Joi.number().required(),
+  id: Joi.string().required(),
   date: Joi.date().required(),
 },
 ),
 
 SignOut:Joi.object({
-  id: Joi.number().required(),
+  id: Joi.string().required(),
   date: Joi.date().required(),
+},
+),
+
+UpdateStaff:Joi.object({
+  id: Joi.string().required(),
+ dayOff:Joi.string(),
+name:Joi.string(),
+email:Joi.string(),
+officeLocation: Joi.string(),
+mobileNumber: Joi.string()
+
 },
 ),
 

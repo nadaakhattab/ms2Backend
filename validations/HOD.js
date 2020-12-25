@@ -10,8 +10,8 @@ module.exports= {
 
     updateInstructor:Joi.object({
     instructor:Joi.string().required(),
-    course: Joi.string(),
-    course:Joi.string(),
+    course: Joi.string().required(),
+    newCourse:Joi.string().required(),
 
    
   },
