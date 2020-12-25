@@ -491,8 +491,11 @@ try{
                  } 
 
                   //find a day in this month 
-            attendance.findMany({id:fromId}).then(result=>{
-                if(result){
+                  console.log(sendingId);
+            attendance.find({id:sendingId}).then(result=>{
+                console.log("result",result);
+                if(result.length>0){
+                      console.log("result",result);
 //filter el result bel day w el month
 
    var startDate=new Date(leaveStartDate.getYear(),leaveStartDate.getMonth(),11);
@@ -508,11 +511,14 @@ try{
                 if(dateToday<endDate){
                     endDate=dateToday;
                 }
+                console.log("RECORDS",startDate);
+                 console.log("RECORDS",endDate);
                    var records=result.filter(function(record){
                        
                             var newdate=new Date(Date.parse(record.date));
                             return newdate>=startDate && newdate<endDate
                         });
+                         console.log("RECORDS",records);
                           records=records.filter(function(inputRecord){
                         if(inputRecord.signOut){
                             if(inputRecord.signOut.length>0){
@@ -528,6 +534,7 @@ try{
                         }
             
                     });
+                    console.log("RECORDS",records);
 
                 for(let i=0;i<records.length;i++){
                        let day=new Date(Date.parse(records[i].date)).getDay();
