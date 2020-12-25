@@ -61,6 +61,7 @@ router.route('/addInstructor').post(validateBody,async(req, res) => {
             return res.status(400).send("Please provide instructor and course id");
         }else{
             var dep= await department.findOne({HOD: myId});
+            console.log(dep.faculty);
             if(dep){
                 var instructor=await staffMember.findOne({id:inputInstructor,type:"CI"});
                 if(instructor){
@@ -136,7 +137,7 @@ const updatedNewInst= newCou.instructors;
 updatedNewInst.push(myId);
 course.findOneAndUpdate({name:newCourse},{$set:{instructors:updatedNewInst}},{new:true}).then((newUp)=>{
     // update academic member to be equal to old course && its dept && its faculty 
-    academicMember.findOneAndUpdate({id:myId},{$set:{faculty:newUp.faculty, course:newUp.name, department:newUp.department}}).then ((updMem)=>{
+    academicMember.findOneAndUpdate({id:myId,course:oldCourse},{$set:{faculty:newUp.faculty, course:newUp.name, department:newUp.department}}).then ((updMem)=>{
         res.status(200).send("Updated succesffully");
 
     })
@@ -213,120 +214,120 @@ router.route('/deleteinstructor/:course/:instructor').delete(async(req, res) => 
 
     });
 
-router.route('/addTA').post( validateBody,async(req, res) => {
-            try{
-                var myId=req.headers.payload.id;
-                var inputCourse=req.body.course;
-                var inputInstructor=req.body.ta;
-                if(!inputCourse||!inputInstructor){
-                    return res.status(400).send("Please provide ta and course id");
-                }else{
-                    var dep=await department.findOne({HOD: myId});
-                    if(dep){
-                        var instructor=await staffMember.findOne({id:inputInstructor,type:"TA"});
-                        if(instructor){
-                            var vCourse=await course.findOne({name:inputCourse});
-                            if(vCourse){
-                                var newInstructors=vCourse.TAs;
-                                newInstructors.push(inputInstructor);
-                                var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
-                                if(updated){
-                                    var academicMembers=await academicMember.create({
-                                        id:inputInstructor,
-                                        course:inputCourse,
-                                        department:dep.name,
-                                        faculty: dep.faculty
-                                    });
+// router.route('/addTA').post( validateBody,async(req, res) => {
+//             try{
+//                 var myId=req.headers.payload.id;
+//                 var inputCourse=req.body.course;
+//                 var inputInstructor=req.body.ta;
+//                 if(!inputCourse||!inputInstructor){
+//                     return res.status(400).send("Please provide ta and course id");
+//                 }else{
+//                     var dep=await department.findOne({HOD: myId});
+//                     if(dep){
+//                         var instructor=await staffMember.findOne({id:inputInstructor,type:"TA"});
+//                         if(instructor){
+//                             var vCourse=await course.findOne({name:inputCourse});
+//                             if(vCourse){
+//                                 var newInstructors=vCourse.TAs;
+//                                 newInstructors.push(inputInstructor);
+//                                 var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+//                                 if(updated){
+//                                     var academicMembers=await academicMember.create({
+//                                         id:inputInstructor,
+//                                         course:inputCourse,
+//                                         department:dep.name,
+//                                         faculty: dep.faculty
+//                                     });
                                   
-                                        return res.status(200).send(updated);
+//                                         return res.status(200).send(updated);
         
                                     
         
-                                }else{
-                                    return res.status(500).send("Error adding course TA");
+//                                 }else{
+//                                     return res.status(500).send("Error adding course TA");
         
-                                }
+//                                 }
           
-                            }else{
-                                return res.status(400).send("Invalid course");
+//                             }else{
+//                                 return res.status(400).send("Invalid course");
                                 
-                            }
+//                             }
         
-                        }else{
-                            return res.status(400).send("Invalid TA");
-                        }
-                    }else{
-                        return res.status(404).send("Cannot find department");
+//                         }else{
+//                             return res.status(400).send("Invalid TA");
+//                         }
+//                     }else{
+//                         return res.status(404).send("Cannot find department");
         
-                    }
+//                     }
         
-                }
+//                 }
         
-            }catch(error){
-                return res.status(500).send(error.message);
-            }
+//             }catch(error){
+//                 return res.status(500).send(error.message);
+//             }
         
         
-    }); 
+//     }); 
     
-router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
-        try{
-            var myId=req.headers.payload.id;
-            var inputCourse=req.params.course;
-            var inputInstructor=req.params.ta;
-            if(!inputCourse||!inputInstructor){
-                return res.status(400).send("Please provide instructor and course id");
-            }else{
-                var dep=await department.findOne({HOD: myId});
-                if(dep){
-                    var inputInst=await staffMember.findOne({id:inputInstructor,type:"TA"});
-                    if(inputInst){
-                        var vCourse=await course.findOne({name:inputCourse});
-                        if(vCourse){
-                            var newInstructors=vCourse.TAs;
-                            newInstructors=newInstructors.filter(function(input){
-                                return input!=inputInstructor;
-                            });
-                            var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
-                            if(updated){
+// router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
+//         try{
+//             var myId=req.headers.payload.id;
+//             var inputCourse=req.params.course;
+//             var inputInstructor=req.params.ta;
+//             if(!inputCourse||!inputInstructor){
+//                 return res.status(400).send("Please provide instructor and course id");
+//             }else{
+//                 var dep=await department.findOne({HOD: myId});
+//                 if(dep){
+//                     var inputInst=await staffMember.findOne({id:inputInstructor,type:"TA"});
+//                     if(inputInst){
+//                         var vCourse=await course.findOne({name:inputCourse});
+//                         if(vCourse){
+//                             var newInstructors=vCourse.TAs;
+//                             newInstructors=newInstructors.filter(function(input){
+//                                 return input!=inputInstructor;
+//                             });
+//                             var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+//                             if(updated){
     
-                                var academicMembersRemove=await academicMember.findOneAndDelete({
-                                    id:inputInstructor,
-                                    course:inputCourse,
-                                    department:dep.name,
-                                    faculty:dep.faculty
-                                })
+//                                 var academicMembersRemove=await academicMember.findOneAndDelete({
+//                                     id:inputInstructor,
+//                                     course:inputCourse,
+//                                     department:dep.name,
+//                                     faculty:dep.faculty
+//                                 })
     
-                                return res.status(200).send(updated);
+//                                 return res.status(200).send(updated);
     
-                            }else{
-                                return res.status(500).send("Error adding course ta");
+//                             }else{
+//                                 return res.status(500).send("Error adding course ta");
     
-                            }
+//                             }
     
-                        }else{
-                            return res.status(400).send("Invalid course");
+//                         }else{
+//                             return res.status(400).send("Invalid course");
     
-                        }
-                    }else{
-                        return res.status(400).send("Invalid ta");
+//                         }
+//                     }else{
+//                         return res.status(400).send("Invalid ta");
     
-                    }
-    
-    
-                }else{
-                    return res.status(404).send("Cannot find department");
-    
-                }
-    
-            }
+//                     }
     
     
-        }catch(error){
-            return res.status(500).send(error.message);
-        }
+//                 }else{
+//                     return res.status(404).send("Cannot find department");
     
-        });  
+//                 }
+    
+//             }
+    
+    
+//         }catch(error){
+//             return res.status(500).send(error.message);
+//         }
+    
+//         });  
 router.post('/acceptRequest',async(req,res)=>{
     try{
         var requestId=req.body.id;
@@ -714,6 +715,144 @@ router.get('/viewassignment',async (req, res) => {
          return res.status(500).send(error.message);       
      }
     });
+
+    router.get('/viewStaff/:courseId',(req, res) => {
+        try{
+            if(req.params.courseId){
+                saveRes={};
+                console.log(req.headers.payload.id);
+                department.findOne({HOD: req.headers.payload.id}).then( (department)=>{
+                    console.log("dept:  ",department);
+                    if(department){
+                        if(department.courses.includes(req.params.courseId)){
+                            academicMember.find({department:department.name,course:req.params.courseId}).then(members =>{
+                                let resultProf={};
+                              const arrayofPromises=[];
+                            for (let i=0; i<members.length;i++){
+                         console.log("members: ",members[i]);
+                         arrayofPromises.push( addStaff(members[i],i));
+                            }
+                         
+                         
+                            Promise.all(arrayofPromises).then(()=>{
+                                console.log(saveRes);
+                                res.status(200).send(saveRes);
+                            }).catch(err=>{
+                                res.status(500).send("Server Error");
+                            })
+                            });
+
+                        }else{
+                            return res.status(400).send("Course does not belong to your department");
+
+                        }
+                          
+
+               
+               
+                    }
+                    else {
+                        return res.status(300).send("ERROR:NO Department belongs to Current HOD ");  
+                    }
+                    
+               
+                });
+
+            }else{
+                return res.status(400).send("Please include courseId in params");
+
+            }
+
+        }
+        catch(error){
+            return res.status(500).send(error.message);       
+        }
+       });
+
+    router.route('/viewdayoff').get((req, res) => {
+ try{
+     saveResDay={};
+ console.log(req.headers.payload.id);
+ department.findOne({HOD: req.headers.payload.id}).then( (department)=>{
+     console.log("dept:  ",department);
+     if(department){
+           
+   academicMember.find({department:department.name}).then(members =>{
+       let resultProf={};
+     const arrayofPromises=[];
+   for (let i=0; i<members.length;i++){
+console.log("members: ",members[i]);
+arrayofPromises.push( addStaffDay(members[i],i));
+   }
+
+
+   Promise.all(arrayofPromises).then(()=>{
+       console.log(saveResDay);
+       res.status(200).send(saveResDay);
+   }).catch(err=>{
+       res.status(500).send("Server Error");
+   })
+   });
+
+
+     }
+     else {
+         return res.status(300).send("ERROR:NO Department belongs to Current HOD ");  
+     }
+     
+
+ });
+ }
+ catch(error){
+     return res.status(500).send(error.message);       
+ }
+});
+
+router.route('/viewdayoff/:staffId').get((req, res) => {
+    try{
+        if(req.params.staffId){
+            saveResDay={};
+            console.log(req.headers.payload.id);
+            department.findOne({HOD: req.headers.payload.id}).then( (department)=>{
+                console.log("dept:  ",department);
+                if(department){
+                      
+              academicMember.find({department:department.name,id:req.params.staffId}).then(members =>{
+                  let resultProf={};
+                const arrayofPromises=[];
+              for (let i=0; i<members.length;i++){
+           console.log("members: ",members[i]);
+           arrayofPromises.push( addStaffDay(members[i],i));
+              }
+           
+           
+              Promise.all(arrayofPromises).then(()=>{
+                  console.log(saveResDay);
+                  res.status(200).send(saveResDay);
+              }).catch(err=>{
+                  res.status(500).send("Server Error");
+              })
+              });
+           
+           
+                }
+                else {
+                    return res.status(300).send("ERROR:NO Department belongs to Current HOD ");  
+                }
+                
+           
+            });
+
+        }else{
+            return res.status(400).send("Please include staffId in params");
+
+        }
+
+    }
+    catch(error){
+        return res.status(500).send(error.message);       
+    }
+   });
   
 module.exports=router;
 

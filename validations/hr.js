@@ -97,7 +97,7 @@ AddStaffMember:Joi.object({
   officeLocation: Joi.string().required(),
   department: Joi.string(),
   salary:Joi.number(),
-  gender: Joi.string().required,
+  gender: Joi.string().required(),
   dayOff:Joi.string()
 
  
@@ -105,13 +105,13 @@ AddStaffMember:Joi.object({
 ),
 
 SignIn:Joi.object({
-  id: Joi.number().required(),
+  id: Joi.string().required(),
   date: Joi.date().required(),
 },
 ),
 
 SignOut:Joi.object({
-  id: Joi.number().required(),
+  id: Joi.string().required(),
   date: Joi.date().required(),
 },
 ),

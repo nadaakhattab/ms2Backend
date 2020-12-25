@@ -831,40 +831,40 @@ res.status(300).send("location not found");
 
  });
 
- router.route('/attendanceRecord/:id').get( (req, res) => {
+//  router.route('/attendanceRecord/:id').get( (req, res) => {
   
-   staffMember.findOne({id:req.params.id}).then(result=>{
-    if(req.params.id==undefined){
-      return  res.status(300).send("Undefined ID");
-     }
-     if(result){
-attendance.find({id:req.params.id}).then((att)=>{
+//    staffMember.findOne({id:req.params.id}).then(result=>{
+//     if(req.params.id==undefined){
+//       return  res.status(300).send("Undefined ID");
+//      }
+//      if(result){
+// attendance.find({id:req.params.id}).then((att)=>{
 
-  let filteredRecords=att.filter(function(inputRecord){
-    if(inputRecord.signOut){
-        if(inputRecord.signOut.length>0){
-            if(inputRecord.signIn){
-                if(inputRecord.signIn.length>0){
-                    if(inputRecord.signIn[0]<inputRecord.signOut[0]){
-                        return inputRecord;
-                    }
+//   let filteredRecords=att.filter(function(inputRecord){
+//     if(inputRecord.signOut){
+//         if(inputRecord.signOut.length>0){
+//             if(inputRecord.signIn){
+//                 if(inputRecord.signIn.length>0){
+//                     if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+//                         return inputRecord;
+//                     }
 
-                }
-            }
-        }
-    }
+//                 }
+//             }
+//         }
+//     }
 
-});
-res.status(200).send(filteredRecords);
-})
-     }
-     else {
-       res.status(300).send("Member doesnt exist");
-     }
+// });
+// res.status(200).send(filteredRecords);
+// })
+//      }
+//      else {
+//        res.status(300).send("Member doesnt exist");
+//      }
     
 
-   })
- });
+//    })
+//  });
 
  
 
@@ -935,6 +935,7 @@ res.status(200).send(updated);
         return res.status(400).send("Please enter month and year") 
 
     }else{
+      if(monthToView<=11){
         var monthDate=new Date(yearToView,monthToView,11);
         var nextMonthDate;
         if(monthToView==11){
@@ -957,7 +958,7 @@ res.status(200).send(updated);
               if(inputRecord.signOut.length>0){
                   if(inputRecord.signIn){
                       if(inputRecord.signIn.length>0){
-                          if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                          if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
                               return inputRecord;
                           }
       
@@ -968,6 +969,11 @@ res.status(200).send(updated);
       
       });
         return res.status(200).send(filteredRecords);
+
+      }else{
+        return res.status(400).send("Please enter month between 1 and 12")
+      }
+
     }
     }catch(error){
         return res.status(500).send(error.message);
@@ -1073,109 +1079,124 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
         //start or end not provided in body
         return res.status(400).send("No dates provided");
     }else{
-      var users=await staffMember.find({});
-      var startDate=new Date(yearToView,monthToView,11);
-      var endDate;
-      if(monthToView==11){
-          endDate=new Date(yearToView+1,0,10);
-      
-      }else{
-          endDate=new Date(yearToView,monthToView+1,10);
-      }
-      var curDate=new Date();
-      var dateToday = new Date(curDate.setHours(0,0,0));
-      if(dateToday<endDate){
-          endDate=dateToday;
-      }
-      if(startDate<endDate){
-        var usersToSend=[];
-      for(var i=0;i<users.length;i++){
-        var user=users[i];
-        var userId=user.id;
-        var allRecords=users.filter(function(record){
-          return record.id==userId;
+      if(monthToView<=11){
+        var users=await staffMember.find({});
+        var startDate=new Date(yearToView,monthToView,11);
+        var endDate;
+        if(monthToView==11){
+            endDate=new Date(yearToView+1,0,10);
+        
+        }else{
+            endDate=new Date(yearToView,monthToView+1,10);
+        }
+        var curDate=new Date();
+        var dateToday = new Date(curDate.setHours(0,0,0));
+        if(dateToday<endDate){
+            endDate=dateToday;
+        }
+        if(startDate<endDate){
+          var usersToSend=[];
+          var allUserRecords=await attendance.find({});
+          // console.log(allUserRecords);
+          // console.log(users.length);
+        for(var i=0;i<users.length;i++){
+          var user=users[i];
+          var userId=user.id;
+          var allRecords=allUserRecords.filter(function(record){
+            return record.id==userId;
+          })
+          var records=allRecords.filter(function(record){
+            var date=new Date(Date.parse(record.date));
+            return date>=startDate && date<endDate
         })
-        var records=allRecords.filter(function(record){
-          var date=new Date(Date.parse(record.date));
-          return date>=startDate && date<endDate
-      })
-      records=records.filter(function(inputRecord){
-        if(inputRecord.signOut){
-            if(inputRecord.signOut.length>0){
-                if(inputRecord.signIn){
-                    if(inputRecord.signIn.length>0){
-                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
-                            return inputRecord;
-                        }
-
-                    }
-                }
-            }
-        }
-
-    });
-  var requiredHours=0;
-  var workedHours=0;    
-  for(var i=0;i<records.length;i++){
-    var day=new Date(Date.parse(records[i].date)).getDay();
-    //console.log("Day"+day);
-    if(day!=5 && day!=user.dayOffNumber){
-        requiredHours+=8.24
-    }
-    var signIn=records[i].signIn;
-    if(signIn.length>0){
-        var minSignIn=signIn[0];
-        var minSigninHours=minSignIn.getHours();
-        console.log("Sign in hour"+minSigninHours);
-        if(minSigninHours<7){ 
-            //add sign at 7 before 7
-            minSignIn.setHours(7,0,0);
-        }
-        //remove sign ins not between 7 and 7 
-        signIn=signIn.filter(function(timeRecord){
-            return timeRecord.getHours()>=7 && timeRecord.getHours()<19;
-        }) 
-
-    }
-    var signOut=records[i].signOut;
-    if(signOut.length>0){
-        var maxSignOut=signOut[signOut.length-1];
-        var maxSignOutHours=maxSignOut.getHours();
-        console.log("Sign in hour"+maxSignOutHours);
-        if(maxSignOutHours>15){
-            //add sign out at 7
-            maxSignOut.setHours(19,0,0);
-            // signOut.push(maxSignOut);
+        records=records.filter(function(inputRecord){
+          if(inputRecord.signOut){
+              if(inputRecord.signOut.length>0){
+                  if(inputRecord.signIn){
+                      if(inputRecord.signIn.length>0){
+                          if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
+                              return inputRecord;
+                          }
+  
+                      }
+                  }
+              }
+          }
+  
+      });
+      // console.log("REC "+records);
+    var requiredHours=0;
+    var workedHours=0;    
+    for(var k=0;k<records.length;k++){
+      var day=new Date(Date.parse(records[k].date)).getDay();
+      //console.log("Day"+day);
+      if(day!=5 && day!=user.dayOffNumber){
+        console.log("here");
+          requiredHours+=8.24
+      }
+      var signIn=records[k].signIn;
+      if(signIn.length>0){
+          var minSignIn=signIn[0];
+          var minSigninHours=minSignIn.getHours();
+          console.log("Sign in hour"+minSigninHours);
+          if(minSigninHours<7){ 
+              //add sign at 7 before 7
+              minSignIn.setHours(7,0,0);
+          }
+          //remove sign ins not between 7 and 7 
+          signIn=signIn.filter(function(timeRecord){
+              return timeRecord.getHours()>=7 && timeRecord.getHours()<19;
+          }) 
+  
+      }
+      var signOut=records[k].signOut;
+      if(signOut.length>0){
+          var maxSignOut=signOut[signOut.length-1];
+          var maxSignOutHours=maxSignOut.getHours();
+          console.log("Sign in hour"+maxSignOutHours);
+          if(maxSignOutHours>19){
+              //add sign out at 7
+              maxSignOut.setHours(19,0,0);
+              // signOut.push(maxSignOut);
+          }
+          
+          //remove sign ins not between 7 and 7 
+          signOut=signOut.filter(function(timeRecord){
+              return timeRecord.getHours()>7 && timeRecord.getHours()<=19;
+          }) 
+  
+  
+      }
+      for(var j=0;j<signOut.length&&signIn.length>0;j++){
+          //console.log(signIn);
+          var min=signIn[0];
+          if(signOut[j]>min){
+              signIn=signIn.filter(function(timeRecord){
+                  return timeRecord>min;
+              })
+              workedHours+=(signOut[j].getTime()-min.getTime())/(1000*3600);
+          }
+      }
+  } 
+    var missingHours=requiredHours-workedHours;
+    if(missingHours>0){
+      usersToSend.push(user);
+  
+    }  
+  console.log("HEREE");      
         }
         
-        //remove sign ins not between 7 and 7 
-        signOut=signOut.filter(function(timeRecord){
-            return timeRecord.getHours()>7 && timeRecord.getHours()<=19;
-        }) 
-
-
+        return res.status(200).send(usersToSend);
+      }else{
+        return res.status(400).send("Invalid dates");
     }
-    for(var j=0;j<signOut.length&&signIn.length>0;j++){
-        //console.log(signIn);
-        var min=signIn[0];
-        if(signOut[j]>min){
-            signIn=signIn.filter(function(timeRecord){
-                return timeRecord>min;
-            })
-            workedHours+=(signOut[j].getTime()-min.getTime())/(1000*3600);
-        }
-    }
-} 
-  var missingHours=requiredHours-workedHours;
-  if(missingHours>0){
-    usersToSend.push(user);
+    
 
-  }        
+      }else{
+        return res.status(400).send("Please enter month between 1 and 12")
+
       }
-    }else{
-      return res.status(400).send("Invalid dates");
-  }
-  res.status(200).send(usersToSend);
+
       
     }
 
@@ -1193,82 +1214,93 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
         //start or end not provided in body
         return res.status(400).send("No dates provided");
     }else{
-      var users=await staffMember.find({});
-      var startDate=new Date(yearToView,monthToView,11);
-      var endDate;
-      if(monthToView==11){
-          endDate=new Date(yearToView+1,0,10);
-      
-      }else{
-          endDate=new Date(yearToView,monthToView+1,10);
-      }
-      var curDate=new Date();
-      var dateToday = new Date(curDate.setHours(0,0,0));
-      if(dateToday<endDate){
-          endDate=dateToday;
-      }
-      if(startDate<endDate){
-        var usersToSend=[];
-      for(var i=0;i<users.length;i++){
-        var user=users[i];
-        var userId=user.id;
-        var allRecords=users.filter(function(record){
-          return record.id==userId;
-        })
-        var records=allRecords.filter(function(record){
-          var date=new Date(Date.parse(record.date));
-          return date>=startDate && date<endDate
-      })
-      records=records.filter(function(inputRecord){
-        if(inputRecord.signOut){
-            if(inputRecord.signOut.length>0){
-                if(inputRecord.signIn){
-                    if(inputRecord.signIn.length>0){
-                        if(inputRecord.signIn[0]<inputRecord.signOut[0]){
-                            return inputRecord;
-                        }
-
-                    }
-                }
-            }
+      if(monthToView<=11){
+        var users=await staffMember.find({});
+        var startDate=new Date(yearToView,monthToView,11);
+        var endDate;
+        if(monthToView==11){
+            endDate=new Date(yearToView+1,0,10);
+        
+        }else{
+            endDate=new Date(yearToView,monthToView+1,10);
         }
-
-    });
-      var missingDays=[];   
-                    var d=startDate;
-                    while(d<=endDate){
-                        //loop over days from start to end 
-                       var day=d.getDay();
-                       if(day!==5 && day!==user.dayOffNumber){
-                        var leaves= await requests.find({fromId:userId,type:"leave",
-                        leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
-                        if(!leaves){
-                          if(leaves.length>0){
-                            var check= records.filter(function(record){
-                              return record.date==d;
-                          })
-                          if(check<1){
-                              //if no records found then add to missing 
-                              missingDays.push(d);
+        var curDate=new Date();
+        var dateToday = new Date(curDate.setHours(0,0,0));
+        if(dateToday<endDate){
+            endDate=dateToday;
+        }
+        if(startDate<endDate){
+          var usersToSend=[];
+          var allUserRecords=await attendance.find({});
+        for(var i=0;i<users.length;i++){
+          var user=users[i];
+          var userId=user.id;
+          
+          var allRecords=allUserRecords.filter(function(record){
+            return record.id==userId;
+          })
+          var records=allRecords.filter(function(record){
+            var date=new Date(Date.parse(record.date));
+            return date>=startDate && date<endDate
+        })
+        records=records.filter(function(inputRecord){
+          if(inputRecord.signOut){
+              if(inputRecord.signOut.length>0){
+                  if(inputRecord.signIn){
+                      if(inputRecord.signIn.length>0){
+                          if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
+                              return inputRecord;
                           }
-
+  
+                      }
+                  }
+              }
+          }
+  
+      });
+        var missingDays=[];   
+                      var d=startDate;
+                      while(d<=endDate){
+                          //loop over days from start to end 
+                         var day=d.getDay();
+                         if(day!==5 && day!==user.dayOffNumber){
+                           let check=[];
+                           check=records.filter(function(record){
+                             return d.getTime()==new Date(record.date).getTime();
+                           })
+                           if(check.length>0){
+                             console.log("here")
+                           }else{
+                           var leaves= await requests.find({fromId:userId,type:"leave",
+                          leaveStartDate:{$lte:d},leaveEndDate:{$gte:d},status:"Accepted"});
+                          if(leaves){
+                            if(!(leaves.length>0)){
+                              missingDays.push(new Date(d));
+                              
+  
+                            }
+                          }else{
+                            missingDays.push(new Date(d));
+  
                           }
+                             
+                           }
+                         }
+                         d=new Date (d.setDate(d.getDate()+1));
+                      } 
+                      if(missingDays.length>0){
+                        usersToSend.push(user);
+                      }
+        }
+      }else{
+        return res.status(400).send("Invalid dates");
+    }
+    return res.status(200).send(usersToSend);
 
-
-                        }
-                       }
-                       d=new Date (d.setDate(d.getDate()+1));
-                    } 
-                    if(missingDays.length>0){
-                      usersToSend.push(user);
-                    }
-
-
+      }else{
+        return res.status(400).send("Please enter month between 1 and 12")
       }
-    }else{
-      return res.status(400).send("Invalid dates");
-  }
-  res.status(200).send(usersToSend);
+
       
     }
 
