@@ -11,7 +11,7 @@ module.exports= {
     updateInstructor:Joi.object({
     instructor:Joi.string().required(),
     course: Joi.string().required(),
-    newCourse:Joi.string().required(),
+    // newCourse:Joi.string().required(),
 
    
   },

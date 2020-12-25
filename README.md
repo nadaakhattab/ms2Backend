@@ -384,9 +384,7 @@ B)Functionalities:
             Functionality: Deletes a Faculty & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses, departments
             Route: /hr/deleteFaculty/:name
             Request type: DELETE
-            RequestBody: {
-                "name":"FacultyNameUpdated3"
-                }
+             Params: /hr/deleteFaculty/faculty-2
             Response: Faculty successfuly deleted
 
         c)Department:
@@ -427,12 +425,11 @@ B)Functionalities:
             *Note: Faculty & department are required (if no updates are going to happen for the faculty, place its current faculty name)
 
             iii) Delete a Department
-            Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses
+             Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty),and its courses courses and removes it from its coresponding faculty
             Route: /hr/deleteDepartment/:faculty/:department
             Request type: DELETE
-            Params:
-            /hr/deleteDepartment/faculty-2/department-3
-            Response: SUCCESSFULLY DELETED
+             Params: /hr/deleteDepartment/faculty-2/department-3
+            Response: Department successfuly deleted
             *Note: faculty & department are a must
         d)Course:
         i) Add a Course
@@ -449,16 +446,17 @@ B)Functionalities:
             *Note: course & department are required
 
             ii) update a Course
-            Functionality: can update the Department of the course Only (which will automatically update its corresponding faculty too)
+            Functionality: can update the Department of the course (which will automatically update its corresponding faculty too) and its display name 
             Route: /hr/editCourse
             Request type: PUT
             RequestBody: {
-            "course":"aNewCourse4",
-            "department":"FarahDeptNew"
+               "department":"department-1",
+                "course":"course-6",
+                "displayName":"networksup"
 
             }
             Response: success
-            *Note: Faculty & department are required 
+            *Note: "course" is required
 
             iii) Delete a Course
             Functionality: Deletes a course & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this course), and its record in the department's courses list
@@ -489,18 +487,42 @@ B)Functionalities:
 
         f)Staff Member
            i) update a staff member
-            Functionality: can update any info about the staff member(please refer to the database model)
+              Functionality: can update dayOff,email,name,officeLocation & mobileNumber of the staff member, if it updates a location it decerements the current capacity of the old location and increments the new one (note: capacity is the number of staff in this room)
             Route: /hr/updateStaff
             Request type: PUT
-            RequestBody:
-            Response:
+              RequestBody:{
+                "id":"as-2",
+                "officeLocation":"location-3",
+                "email":"CIup@guc.edu.eg",
+                "dayOff":"Monday",
+                "name":"CI-Updated",
+                "mobileNumber":"01111"
+            }
+            Response:{
+                "dayOff": "Monday",
+                "dayOffNumber": 1,
+                "firstLogin": false,
+                "annualLeaves": 0,
+                "_id": "5fe55063dcba28369003fff8",
+                "password": "$2a$10$NtoH59lN5Kv0pJCOtpNTsuRcIbxdSLauI.WASMHe9eMFq26FUWdS6",
+                "id": "as-2",
+                "name": "CI-Updated",
+                "email": "CIup@guc.edu.eg",
+                "salary": 10000,
+                "officeLocation": "location-3",
+                "gender": "male",
+                "type": "CI",
+                "__v": 0,
+                "mobileNumber": "01111"
+            }
 
             iii) Delete a staff member
-            Functionality: Deletes staff member
+            Functionality: Functionality: Deletes staff member, its coressponding record in academic members (where we store his/her department & course & faculty), and its record as a ta/instructor/ coordinator in its corresponding course
             Route: /hr/deleteStaff/:id
             Request type: DELETE
-            RequestBody:
-            Response:
+            Params:/hr/deleteStaff/as-6
+            Response: successfully deleted
+            *Note: if the deleted staff is HOD it sets its department HOD field to null
             
         g)Signin/Signout
             i) add sign in
@@ -687,18 +709,18 @@ B)Functionalities:
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
                 ii)update course instructor
-                    Functionality: update course instructor by adding new one and removing old
+                    Functionality: updates course instructor by taking as an input the course instructor and assigning him/her to a another course (the system removes him/her from the old course and adds him/her to the new course instantly)
                     Route: /hod/updateInstructor
                     Request type: POST
-                    RequestBody:
-                    {
-                        "instructor":"as-2",
-                        "course":"course-1",
-                        "newCourse":"course-2"
-                    }  
+                    RequestBody:{
+                        "instructor":"as-1",
+                        "course":"course-1"
+
+                        }
                     Response:
                     Updated succesfully  
                     *Note:
+                    "course" represents the new course to get assigned to
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
@@ -855,15 +877,34 @@ B)Functionalities:
             Functionality: view the coverage of each course
                         Route: /hod/viewCoverage
                         Request type: GET
-                        Parameters: 
-                        Response:
+                        Response:{
+                        "course-3": 0,
+                        "course-2": 25
+                    }
+                    Note: number is output in percentage,
+                     no input is needed as the id of the currently logged in HOD is saved in the payload
 
             h) view assignments
              Functionality: view teaching assignments of course offered by his department
-                        Route: /hod/viewassignment
-                        Request type: GET
-                        Parameters: 
+                        Route: /hod/viewassignment/:course'
+                        Request type: GET 
+                        Params:/viewassignment/course-2
                         Response:
+                        [
+                            {
+                                "_id": "5fe5cc98ce7883399c82d443",
+                                "id": 2,
+                                "course": "course-2",
+                                "slot": "4",
+                                "day": "Monday",
+                                "instructor": "as-3",
+                                "location": "location-3",
+                                "__v": 0
+                            }
+                        ]
+                *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
         4.2)Course Instructor Functionalities
 
@@ -871,9 +912,12 @@ B)Functionalities:
             Functionality: view coverage of course he/she is assigned to
                 Route: /ci/viewCoverage
                 Request type: GET
-                RequestBody:
-                Response:
-
+                Response:{
+                    "course-2": 25
+                }
+                 *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
             b)view slot's assignment
              Functionality: view slot's assignment of course he/she is assigned to
@@ -881,13 +925,92 @@ B)Functionalities:
                 Request type: GET
                 RequestBody:
                 Response:
+                {
+                    "course-2": [
+                        {
+                            "_id": "5fe5cc98ce7883399c82d443",
+                            "id": 2,
+                            "course": "course-2",
+                            "slot": "4",
+                            "day": "Monday",
+                            "instructor": "as-2",
+                            "location": "location-3",
+                            "__v": 0
+                        }
+                    ]
+                }
+                  *Note:
+                Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
-            c)view all staff
+            c)
+            i)view all staff in his department
              Functionality: view all staff in his/her department along with their profiles
                 Route: /ci/viewStaff
                 Request type: GET
-                RequestBody:
-                Response:
+                Response:{
+    "department-1": {
+                "0": {
+                    "dayOff": "Wednesday",
+                    "dayOffNumber": 3,
+                    "firstLogin": false,
+                    "annualLeaves": 0,
+                    "_id": "5fe57579e965c51c882f79bb",
+                    "password": "$2a$10$5C.dLv13sDbshTblD/xLNeSp5z9bNxneqUL3lzkt9leb/4MwvkThm",
+                    "id": "as-3",
+                    "name": "TA#1",
+                    "email": "TA@guc.edu.eg",
+                    "salary": 2000,
+                    "officeLocation": "location-2",
+                    "gender": "male",
+                    "type": "TA",
+                    "__v": 0
+                },
+                "1": {
+                    "dayOff": "Wednesday",
+                    "dayOffNumber": 3,
+                    "firstLogin": false,
+                    "annualLeaves": 0,
+                    "_id": "5fe5d0ad7bbdbe224791a526",
+                    "password": "$2a$10$5C.dLv13sDbshTblD/xLNeSp5z9bNxneqUL3lzkt9leb/4MwvkThm",
+                    "id": "as-6",
+                    "name": "TA#1",
+                    "email": "TAkh@guc.edu.eg",
+                    "salary": 2000,
+                    "officeLocation": "location-2",
+                    "gender": "male",
+                    "type": "TA",
+                    "__v": 0
+                },
+                
+            }
+
+               ii)view all staff per course in his department
+             Functionality: view all staff in his/her department in a specific course along with their profiles
+                Route: /ci/viewStaff/:course
+                Request type: GET
+                Params: /ci/viewStaff/course-5
+                Response:{
+                    "course-5": {
+                        "0": {
+                            "dayOff": "Saturday",
+                            "dayOffNumber": 2,
+                            "firstLogin": false,
+                            "annualLeaves": 0,
+                            "_id": "5fe5ca45ea87e768f3bd04ee",
+                            "firstlogin": false,
+                            "name": "CC1",
+                            "email": "CC1@guc.edu.eg",
+                            "id": "as-7",
+                            "gender": "male",
+                            "salary": 20000,
+                            "password": "$2a$10$9z8gYrEar.Z.iX6Xh2KfLuzv8u.iml08tFIXzDQNkQZjJKCKSX/zG",
+                            "officeLocation": null,
+                            "type": "CC",
+                            "mobileNumber": "013435"
+                        }
+                    }
+                }
 
             d)Assign an academic member to an unassigned slot
                 Functionality: assign academic member to slot
