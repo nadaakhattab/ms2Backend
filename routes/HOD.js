@@ -356,16 +356,17 @@ router.post('/acceptRequest',async(req,res)=>{
                         return res.status(200).send(acceptedRequest);                 
                     }
                     if(requestToAccept.type=="leave"){
+                        var user=await staffMember.findOne({id:requestToAccept.fromId});
                         if(requestToAccept.leaveType=="Annual"||requestToAccept.leaveType=="Accidental"){
                             var days=Math.ceil((
                                 (requestToAccept.leaveEndDate).getTime()-
                                 (requestToAccept.leaveStartDate).getTime()
-                                )/(1000*3600*24));
-                            
-                            console.log("days",days);
-                            if((Math.floor(staffMember.annualLeaves))>=days){
-                                var updatedLeaves=days-(Math.floor(staffMember.annualLeaves));
-                                var updatedStaff=findOneAndUpdate({id:academicMember},{annualLeaves:updatedLeaves});
+                                )/(1000*3600*24));  
+                                                        
+
+                            if((Math.floor(user.annualLeaves))>=days){
+                                var updatedLeaves=days-(Math.floor(user.annualLeaves));
+                                var updatedStaff=await staffMember.findOneAndUpdate({id:academicMember},{annualLeaves:updatedLeaves});
                                 var acceptedRequest=await request.findOneAndUpdate({_id:requestId},{status:"Accepted"},{new:true});
                                 var notify=await notification.create({
                                     requestID: requestId,
@@ -864,13 +865,3 @@ router.route('/viewdayoff/:staffId').get((req, res) => {
    });
   
 module.exports=router;
-
-// HOD ACCEPTS ACCIDENTAL
-
-//  staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
-//                    let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
-//                    duration= duration/(1000*3600*24);
-//                    duration= Math.ceil(duration);
-//                 if(Math.floor(member.annualLeaves)-duration>0 && duration<=6){
-//                 const newLeaves= member.annualLeaves-duration;
-//                     staffMember.findOneAndUpdate({id:req.headers.payload.id},{$set:{annualLeaves:newLeaves}}).then(updatedmem=>{

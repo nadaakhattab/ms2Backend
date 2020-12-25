@@ -511,11 +511,13 @@ try{
                 if(dateToday<endDate){
                     endDate=dateToday;
                 }
-                console.log("RECORDS",startDate);
-                 console.log("RECORDS",endDate);
+                console.log("RECORDS",new Date(Date.parse(startDate)));
+                 console.log("RECORDS",Date.parse(endDate));
+               
                    var records=result.filter(function(record){
                        
                             var newdate=new Date(Date.parse(record.date));
+                              console.log("NEW DATE",newdate);
                             return newdate>=startDate && newdate<endDate
                         });
                          console.log("RECORDS",records);
