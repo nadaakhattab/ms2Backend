@@ -18,6 +18,7 @@ location: {type:String},
 slotId: {type:Number},
 documents: {type:Object},
 replacement: {type:String}, // id of the replacement person
+replacementDate:{type:Date},
 dayToChange: {type:Number},
 rejectionReason:{type:String}
 }

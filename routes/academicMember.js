@@ -11,7 +11,7 @@ const academicMember = require('../models/academicMember');
 const notification=require('../models/notification');
 const validations = require('../validations/academicmember');
 const Joi = require('joi');
-const { request } = require('express');
+const request=require('../models/requests');
 const { date } = require('joi');
 
 
@@ -53,62 +53,68 @@ const validateBody =(req, res,next)  =>  { try{
     res.status(405).send("Validation error: Please make sure all required fields are given");
   }}
 
-
-
-
-
 router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
     try{
         var replacementId=req.body.id;
         var courseId=req.body.course;
-        var reqSlot=req.body.slot;
-        var reqDay=req.body.day;
-        var reqLocation=req.body.location;
+        // var reqSlot=req.body.slot;
+        // var reqDay=req.body.day;
+        // var reqLocation=req.body.location;
+        var reqSlotId=req.body.slot;
         var sendingId=req.headers.payload.id;
         var reqDate=req.body.date;
         var myId=req.headers.payload.id;
 
-        if(!replacementId||!courseId||!reqLocation||!reqSlot||!reqDay||!reqDate){
+        if(!replacementId||!courseId||!reqDate||!reqSlotId){
             return res.status(400).send("Please provide id of replacement");
         }else{
             var myType=await staffMember.findOne({id:myId});
             var replacementType=await staffMember.findOne({id:replacementId});
-            if(myType&&replacementType || myType=="CC"&& replacementType=="TA"||myType=="TA"&&replacementType=="CC"){
-                if(myType=="HOD"||replacementType=="HOD"){
-                    if(myType.type==replacementType.type){
-                        var sending=await academicMembers.findOne({id:sendingId,course:courseId});
-                        if(sending){
-                            var departmentReq=sending.department;
-                            var valid=await academicMembers.findOne({id:replacementId,department:departmentReq,course:courseId});
-                            console.log(sending);
-                            if(valid){
-                                var request=await requests.create({
-                                    fromId: sendingId,
-                                    toId:replacementId,
-                                    type: "replacement",
-                                    slot:reqSlot,
-                                    location:reqLocation,
-                                    course:courseId,
-                                    day:reqDay,
-                                    date:reqDate
-                                });
-                                return res.status(200).send(request);
-                            }else{
-                                return res.status(403).send("Please choose replacement in same department and course");
-                            }
-            
-                        }else{
-                            return res.status(403).send("Academic member not found");
-            
-                        }
-    
-                    }else{
-                        return res.status(404).send("Can only send to academic member of same type")
-    
-                    }
+           console.log(myType.type);
+           console.log(replacementType.type);
+            if(myType&&replacementType ){
+                if(myType.type=="HOD"||replacementType.type=="HOD"){
+                    
+// return res.status(400).send("HOD can't send or receive replacement requests")
 
                 }else{
-                    return res.status(400).send("HOD can't send or receive replacement requests")
+                    if(myType.type==replacementType.type || myType.type=="CC"&& replacementType.type=="TA"||myType.type=="TA"&&replacementType.type=="CC" || replacementType.type=="HR"){
+                   var sending=await academicMembers.findOne({id:sendingId,course:courseId});
+                   console.log(sending);
+                   if(sending){
+                       var departmentReq=sending.department;
+                       var valid=await academicMembers.findOne({id:replacementId,department:departmentReq,course:courseId});
+                       console.log(sending);
+                       var todayDate=new Date();
+                        todayDate.setHours(0,0,0);
+                       if(valid){
+                           var slotValid=await slots.findOne({course:courseId,instructor:sendingId,id:reqSlotId})
+                           var request=await requests.create({
+                               fromId: sendingId,
+                               toId:replacementId,
+                               type: "replacement",
+                            //    slot:reqSlot,
+                            //    location:reqLocation,
+                                course:courseId,
+                           //    day:reqDay,
+                               replacementDate:reqDate,
+                               date:todayDate,
+                               slotId:reqSlotId
+                           });
+                           return res.status(200).send(request);
+                       }else{
+                           return res.status(403).send("Please choose replacement in same department and course");
+                       }
+       
+                   }else{
+                       return res.status(403).send("Academic member not found");
+       
+                   }
+
+               }else{
+                   return res.status(404).send("CI can onlye send to CI and TA AND CC can only send to each other")
+
+               }
                 }
 
 
@@ -196,44 +202,69 @@ router.post('/sendChangeDayOffRequest',validateBody,async(req,res)=>{
         var dayToChange=req.body.day;
 
         if(dayToChange){
-            var sending=await academicMembers.findOne({id:sendingId});
-            if(sending){
-                var slotsAvailable=await slots.find({day:dayToChange});
-                if(slotsAvailable){
-                    if(slotsAvailable.length>0){
-                        return res.status(400).send("Cannot request  day off if you have slots on that day");
+            if(dayToChange=="Sunday"||dayToChange=="Monday"||
+            dayToChange=="Tuesday"||dayToChange=="Wednesday"||
+            dayToChange=="Thursday"||dayToChange=="Saturday"
+                ){
+                    var sending=await academicMembers.findOne({id:sendingId});
+                    if(sending){
+                        var slotsAvailable=await slots.find({day:dayToChange});
+                        if(slotsAvailable){
+                            if(slotsAvailable.length>0){
+                                return res.status(400).send("Cannot request  day off if you have slots on that day");
+        
+                            }else{
+                                let dayNumber=6;                      
+                                switch(dayToChange){
+                                    case"Sunday": dayNumber=0;break;
+                                    case"Monday": dayNumber=1;break;
+                                    case"Tuesday": dayNumber=2;break;
+                                    case"Wednesday": dayNumber=3;break;
+                                    case"Thursday": dayNumber=4;break;
+                                    case"Saturday": dayNumber=6;break;
+                                }
+                                var departmentReq=sending.department;
+                                var hod=await departments.findOne({name:departmentReq});
+                                if(hod){
+                                    var todayDate=new Date();
+                                    todayDate.setHours(0,0,0);
+                                    if(hod){
+                                        var request=await requests.create({
+                                            fromId: sendingId,
+                                            toId:hod.HOD,
+                                            type: "changeDayOff",
+                                            reason: reqReason,
+                                            date:todayDate,
+                                            dayToChange:dayNumber
+                                        });
+                                        return res.status(200).send(request);
+                            
+                                    }else{
+                                        return res.status(404).send("HOD not found");   
+                                    }
 
-                    }else{
-                        var departmentReq=sending.department;
-                        var hod=await departments.findOne({name:departmentReq});
-                        var todayDate=new Date();
-                        todayDate.setHours(0,0,0);
-                        if(hod){
-                            var request=await requests.create({
-                                fromId: sendingId,
-                                toId:hod.HOD,
-                                type: "changeDayOff",
-                                reason: reqReason,
-                                date:todayDate,
-                                dayToChange:day
-                            });
-                            return res.status(200).send(request);
-                
+                                }else{
+                                    return res.status(404).send("No hod");
+                                }
+
+                            }
+        
                         }else{
-                            return res.status(404).send("HOD not found");   
+                            return res.status(400).send("Error finding slots");
+        
                         }
+        
+            
+                    }else{
+                        return res.status(404).send("Member not assigned to specific department");
+            
                     }
 
                 }else{
-                    return res.status(400).send("Error finding slots");
+                    return res.status(400).send("Please enter valid day off (not Friday)");
 
                 }
 
-    
-            }else{
-                return res.status(404).send("Member not assigned to specific department");
-    
-            }
 
         }else{
             return res.status(400).send("Please provide day off");
@@ -546,16 +577,20 @@ router.delete('/cancelRequest/:id',async(req,res)=>{
     if(request){
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
-        if(request.status=="Pending"||request.date>todayDate){
+        if(request.status=="Pending"||request.startDate>todayDate){
             if(request.type=="leave"){
-                if(request.leaveType=="Annual"||request.leaveType=="Accidental"){
-                    var days=Math.ceil(((request.startDate).getTime()-(request.endDate).getTime())/(1000*3600*24));
-                    var from=request.fromId;
-                    var staff=await staffMember.findOne({id:from});
-                    var leaves=staff.annualLeaves;
-                    leaves=leaves+days;
-                    var staffUpdate=await staffMember.findOneAndUpdate({id:from},{annualLeaves:leaves});
+                if(request.status=="Accepted"){
+                    if(request.leaveType=="Annual"||request.leaveType=="Accidental"){
+                        var days=Math.ceil(((request.startDate).getTime()-(request.endDate).getTime())/(1000*3600*24));
+                        var from=request.fromId;
+                        var staff=await staffMember.findOne({id:from});
+                        var leaves=staff.annualLeaves;
+                        leaves=leaves+days;
+                        var staffUpdate=await staffMember.findOneAndUpdate({id:from},{annualLeaves:leaves});
+                    }
+
                 }
+
             }
             var requestDeleted=await requests.findOneAndDelete({_id:reqId});
             return res.status(200).send(requestDeleted);
@@ -581,10 +616,10 @@ router.get('/schedule',async(req,res)=>{
         var todayDate=new Date();
         todayDate.setHours(0,0,0);
         var scheduleSlots= await slots.find({instructor:userId});
-        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",date:{$gte:todayDate},type:"replacement"});
+        var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",replacementDate:{$gte:todayDate},type:"replacement"});
         var schedule={};
         if(scheduleSlots && scheduleReplacements ){
-            if(!(scheduleSlots.length>0)||!(scheduleReplacements.length>0)){
+            if(!(scheduleSlots.length>0)&&!(scheduleReplacements.length>0)){
                 return res.status(200).send("No teaching activities or replacements");
             }else{
                     schedule.slots=scheduleSlots;
@@ -600,9 +635,9 @@ router.get('/schedule',async(req,res)=>{
 
 });
 
-router.get('/notifications/:id',async(req,res)=>{
+router.get('/notifications',async(req,res)=>{
     try{
-        var userId=req.params.id;
+        var userId=req.headers.payload.id;
         if(userId==undefined){
             return  res.status(300).send("Undefined ID");
            }
@@ -627,33 +662,40 @@ router.get('/notifications/:id',async(req,res)=>{
     }
 });
 
-
-
 router.post('/replyRequest',validateBody,async(req,res)=>{
     try{
         var requestId=req.body.id;
-        if(requestId){
-            var requestToAccept=await request.findOne({_id:requestId,type:"replacement"});
-            if(requestToAccept){
-                if(requestToAccept.status=="Pending"){
-              
-                    var acceptedRequest=await request.findOneAndUpdate({_id:requestId,type:"replacement"},{status:req.body.accepted},{new:true});
-                    var notify=await notification.create({
-                        requestID: requestId,
-                        accepted: req.body.accepted,
-                        to:acceptedRequest.fromId
-                    });
-                    return res.status(200).send(acceptedRequest);
-
+        var statusR=req.body.status;
+        if(requestId && statusR){
+            if(statusR=="Accepted"||statusR=="Rejected"){
+                var requestToAccept=await request.findOne({_id:requestId,type:"replacement"});
+                if(requestToAccept){
+                    if(requestToAccept.status=="Pending"){
+                  
+                        var acceptedRequest=await request.findOneAndUpdate({_id:requestId,type:"replacement"},{status:statusR},{new:true});
+                        var notify=await notification.create({
+                            requestID: requestId,
+                            accepted: req.body.accepted,
+                            to:acceptedRequest.fromId
+                        });
+                        return res.status(200).send(acceptedRequest);
+    
+                    }else{
+                        return res.status(400).send("Cannot accept request that is not pending");
+    
+                    }
+    
+    
                 }else{
-                    return res.status(400).send("Cannot accept request that is not pending");
-
+                    return res.status(404).send("Request not found");
                 }
 
-
             }else{
-                return res.status(404).send("Request not found");
+                return res.status(400).send("Status should be Accepted or Rejected only");
+                
+
             }
+
 
         }else{
             return res.status(400).send("Please provide request id");

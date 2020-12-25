@@ -1,25 +1,25 @@
 const Joi = require('joi');
 module.exports= {
     sendReplacementRequest:Joi.object({
-        replacementId:Joi.string().required(),
-        courseId:Joi.string().required(),
-        reqSlot:Joi.string().required(),
-        reqDay:Joi.string().required(),
-        reqLocation:Joi.string().required(),
-        reqDate:Joi.date().required()
+        id:Joi.string().required(),
+        course:Joi.string().required(),
+        slot:Joi.number().required(),
+        // day:Joi.string().required(),
+        // location:Joi.string().required(),
+        date:Joi.date().required()
         },
 
     ),
 
     sendSlotLinkingRequest:Joi.object({
-        courseId:Joi.string().required(),
-        slotId:Joi.number().required()
+        course:Joi.string().required(),
+        slot:Joi.number().required()
         },
     ),
 
     sendChangeDayOffRequest:Joi.object({
-        reqReason:Joi.string().required(),
-        dayToChange:Joi.number().required()
+        reason:Joi.string().required(),
+        day:Joi.string().required()
         },
 
     ),
@@ -29,8 +29,8 @@ module.exports= {
         },
     ),
     ReplyRequest:Joi.object({
-        requestId:Joi.string().required(),
-        accepted:Joi.boolean(),
+        id:Joi.string().required(),
+        status:Joi.string().required(),
 
     })
 }    
