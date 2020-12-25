@@ -437,13 +437,23 @@ B)Functionalities:
             Route: /hr/addCourse
             Request type: POST
             RequestBody: 
-            {
+           {
                 "department":"department-2",
-                "course":"networks"
+                "course":"NOWCourFinal",
+                "teachingSlots":2
             }
-            Response:
-            Course Added
-            *Note: course & department are required
+            Response:{
+                "instructors": [],
+                "TAs": [],
+                "_id": "5fe63834b6ab625f43c07c3d",
+                "name": "course-19",
+                "displayName": "NOWCourFinal",
+                "department": "department-2",
+                "faculty": "faculty-3",
+                "teachingSlots": 2,
+                "__v": 0
+            }
+            *Note: course & department are required, Please use the "name" output to use it to refer to the course later
 
             ii) update a Course
             Functionality: can update the Department of the course (which will automatically update its corresponding faculty too) and its display name 
@@ -1237,7 +1247,7 @@ B)Functionalities:
                         "instructor":"as-1"
                         }
                     Response: success
-                    
+
                 
 
                 iii)delete course slot

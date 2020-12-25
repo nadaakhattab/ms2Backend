@@ -14,6 +14,7 @@ const validations = require('../validations/hr');
 const Joi = require('joi');
 const { findOneAndUpdate } = require('../models/location');
 const { response } = require('../app');
+const { request } = require('express');
 
 const validateBody =(req, res,next)  =>  { try{ 
   let result;
@@ -431,7 +432,6 @@ resolve();
     })
   });
 
-
 }
 
 
@@ -446,7 +446,6 @@ toUpdate.faculty=req.body.faculty;
   arrayofPromises.push(checkFaculty(req.body.department,req.body.faculty));
   department.findOne({name:req.body.department}).then((dep)=>{
 dep.courses.forEach((course)=>{
-  console.log("COURSEE HEREEE",course);
   arrayofPromises.push(updatCourse(course, req.body.faculty));
 })
   
@@ -550,19 +549,21 @@ department.findOne({name:req.body.department}).then(result =>{
  const courses =result.courses;
 
    // update db with new courses array
-   courses.push(req.body.course); 
+  //  courses.push(req.body.course); 
    department.findOne({name:req.body.department}).then (result => {
      console.log("Deaprtment res: ",result);
 let newId;
  idDb.findOne({name:"course"}).then(idSlot =>{
         newId= idSlot.count+1;
-        const toupdate= {};
+        const toupdate= {displayName:req.body.course, department:req.body.department, faculty:result.faculty};
         if (req.body.teachingSlots){
           toupdate.teachingSlots= req.body.teachingSlots;
         }
-      return    course.create({name:`course-${newId}`,displayName:req.body.course, department:req.body.department, faculty:result.faculty,...toupdate}).then(courseNew =>{
-   res.status(200).send("course added");
+        console.log(toupdate);
+      return    course.create({name:`course-${newId}`,...toupdate}).then(courseNew =>{
+   res.status(200).send(courseNew);
     }).catch((err)=>{
+      console.log(err);
       res.status(300).send("Can't create course, a similar one exists")
     })
 
@@ -602,11 +603,75 @@ res.status(300).send("Department Doesn't exist");
  });
 
 
+
+
+function checkdep (dept,cour,newDep){
+  return new Promise((resolve, reject) => {
+    console.log(dept);
+    department.findOne({name:dept}).then(currDep=>{
+      console.log("CURDEP",currDep);
+      //Get current Faculty that this department is assigned to
+      if(currDep){
+        const listOfCo= [];
+        currDep.courses.forEach((course)=>{
+          if(course!=cour){
+            listOfCo.push(course);
+          }
+
+        });
+        //removes department from this faculty
+department.findOneAndUpdate({name:dept},{$set:{courses:listOfCo}}).then(result =>{
+  console.log("NEW DEP",newDep);
+    department.findOne({name:newDep}).then(newDepag=>{
+      //Get current Faculty that this department is assigned to
+      if(newDepag){
+        console.log(newDepag);
+        const listOfCon= newDepag.courses;
+        listOfCon.push(cour);
+department.findOneAndUpdate({name:newDep},{$set:{courses:listOfCon}}).then(fin =>{
+  resolve();
+
+
+});
+}
+else {
+        reject();
+      }
+
+    }).catch(err =>{
+      reject();
+    })
+
+
+
+});
+
+      }
+      else {
+        //department doesn't Exist
+        reject();
+      }
+
+    }).catch(err =>{
+      reject();
+    })
+  });
+
+}
+
+
+
+
+
+
+
+
 router.route('/editCourse').put(validateBody,(req, res) => {
   // law hay update el department lazm aroh ashylo from old department & add in new department IMPORTANT
   if(req.body.course==undefined){
      res.status(301).send("Can't Add a course without specifying its Name");
    }
+   const promises=[];
    const toUpdate={};
    if(req.body.displayName){
      toUpdate.displayName=req.body.displayName;
@@ -615,9 +680,14 @@ router.route('/editCourse').put(validateBody,(req, res) => {
         if (req.body.teachingSlots){
           toUpdate.teachingSlots= req.body.teachingSlots;
         }
-
+course.findOne({name:req.body.course}).then((co)=>{
    if(req.body.department!==undefined){
-     department.findOne({name:req.body.department}).then (departmentres =>{
+    promises.push( checkdep (co.department,req.body.course,req.body.department));
+    }
+
+
+    Promise.all(promises).then((fi)=>{
+    department.findOne({name:req.body.department}).then (departmentres =>{
        if(departmentres){
 course.findOneAndUpdate({name:req.body.course},{$set:{department:req.body.department,faculty:departmentres.faculty,...toUpdate}},{new:true}).then(result =>{
   console.log(result);
@@ -638,10 +708,14 @@ res.status(300).send("Department doesn't exist");
 }).catch(err=>{
        res.status(500).send("Database Error");
 })
-     }
-       else {
-res.status(300).send("Department doesn't exist");
-  }
+    }).catch(err=>{
+      res.status(300).send("Error")
+    })
+
+}).catch((err)=>{
+  res.status(500).send("Course Doesnt exist");
+})
+  
 
 });
 
