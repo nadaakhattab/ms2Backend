@@ -93,12 +93,9 @@ EditCourse:Joi.object({
 AddStaffMember:Joi.object({
   name: Joi.string().required(),
   type: Joi.string().required(),
-  email: Joi.string()
-    .required(),
-    officeLocation: Joi.string().required()
-    ,
-  department: Joi.string()
-    ,
+  email: Joi.string().required(),
+  officeLocation: Joi.string().required(),
+  department: Joi.string(),
   salary:Joi.number(),
   gender: Joi.string().required,
   dayOff:Joi.string()

@@ -749,7 +749,7 @@ n="HR"
   }
     idDb.findOne({name:n}).then(async (result)=>{
       if (result){
-        if(n){
+        if(n=="HR"){
       id=`hr-${result.count+1}`;
     dayoff="Saturday";}
     else{
@@ -779,15 +779,16 @@ n="HR"
           officeLocation: req.body.officeLocation,
           gender:req.body.gender,
           dayOff:req.body.dayOff,
-          dayOffNumber
+          dayOffNumber:dayyOffNumber,
+          type:req.body.type
 
         }
 staffMember.create({...data}).then(result=>{
 
-    idDb.updateOne({name:req.body.type},{$set:{count:idCount}}).then((result)=>{
+    idDb.updateOne({name:n},{$set:{count:idCount}}).then((result)=>{
 location.updateOne({room:req.body.officeLocation},{$set:{capacity:locCapacity+1}}).then((result)=>{
   if(req.body.type=="HOD"){
-    department.findOneAndUpdate({name:req.body.name},{$set:{HOD:id}}).then ((depart)=>{
+    department.findOneAndUpdate({name:req.body.department},{$set:{HOD:id}}).then ((depart)=>{
 academicMember.create({id:id, department:req.body.department, faculty:depart.faculty}).then (()=>{
 res.status(200).send("Successfully added");
 });
