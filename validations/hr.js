@@ -68,8 +68,8 @@ AddCourse:Joi.object({
   course: Joi.string()
     .required(),
   department: Joi.string()
-    .required()
-    
+    .required(),
+    teachingSlots:Joi.number()
     
     
   
@@ -82,7 +82,8 @@ EditCourse:Joi.object({
   course: Joi.string()
     .required(),
   department: Joi.string()
-    .required()
+    .required(),
+  teachingSlots:Joi.number()
     
     
     

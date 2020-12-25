@@ -557,9 +557,9 @@ let newId;
  idDb.findOne({name:"course"}).then(idSlot =>{
         newId= idSlot.count+1;
         const toupdate= {};
-        // if (req.body.teachingSlots){
-        //   toupdate.teachingSlots= req.body.teachingSlots;
-        // }
+        if (req.body.teachingSlots){
+          toupdate.teachingSlots= req.body.teachingSlots;
+        }
       return    course.create({name:`course-${newId}`,displayName:req.body.course, department:req.body.department, faculty:result.faculty,...toupdate}).then(courseNew =>{
    res.status(200).send("course added");
     }).catch((err)=>{
@@ -610,8 +610,11 @@ router.route('/editCourse').put(validateBody,(req, res) => {
    const toUpdate={};
    if(req.body.displayName){
      toUpdate.displayName=req.body.displayName;
-
    }
+
+        if (req.body.teachingSlots){
+          toUpdate.teachingSlots= req.body.teachingSlots;
+        }
 
    if(req.body.department!==undefined){
      department.findOne({name:req.body.department}).then (departmentres =>{

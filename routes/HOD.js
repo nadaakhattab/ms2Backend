@@ -113,9 +113,9 @@ router.route('/updateInstructor').post(validateBody,async(req, res) => {
     try{
         var myId=req.body.instructor;
         const newCourse = req.body.course;
-        var inputCourse=req.body.course;
-        if(!inputCourse||!newCourse){
-            return res.status(400).send("Please provide id of old instructor,new instructor and course id");
+        // var inputCourse=req.body.course;
+        if(!newCourse){
+            return res.status(400).send("Please provide your desired new ourse to assign this instructor to");
         }else{
             let oldCourse;
 academicMember.findOne({id:myId}).then ((member)=>{
@@ -626,8 +626,10 @@ for(let i=0;i<slots.length;i++){
  checkSlots(slots[i]),course.name);
 }
 Promise.all(arrayofPromises).then(()=>{
- 
- courseCov[course.name]=(assignedCourse/slots.length)*100;
+    console.log("heeeree",assignedCourse);
+    console.log(course.teachingSlots);
+  
+ courseCov[course.name]=(assignedCourse/course.teachingSlots)*100;
    assignedCourse=0; 
    console.log(courseCov);
  resolve();
@@ -690,24 +692,29 @@ return res.status(300).send("ERROR:NO Department belongs to Current HOD ");
 });
 
 
-router.get('/viewassignment',async (req, res) => {
+router.get('/viewassignment/:course',async (req, res) => {
  try{
+     if(req.params.course==undefined
+        ){
+            res.status(300).send("ERROR: no course given");
+        }
  console.log(req.headers.payload.id);
  department.findOne({HOD: req.headers.payload.id}).then((department)=>{
      console.log(department);
      if(department){
-             try{
-             var dep= req.body.department;
-             const x=dep.courses;
-             // var result=await slot.findOne({course:x})
-             if(!result){
-                 return res.status(404).send("Result not found");
-             }else{
-                 return res.status(200).send(user);
-             }
+         if(department.courses.includes(req.params.course)){
+       try{
+        slot.find({course:req.params.course}).then((slotsRes)=>{
+return res.status(200).send(slotsRes);
+        });
          }catch(error){
              return res.status(500).send(error.message);
          }
+         }
+         else{
+             res.status(500).send("The given course is not under your department");
+         }
+      
      }
 });
  }
@@ -746,9 +753,6 @@ router.get('/viewassignment',async (req, res) => {
                             return res.status(400).send("Course does not belong to your department");
 
                         }
-                          
-
-               
                
                     }
                     else {

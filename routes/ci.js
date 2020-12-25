@@ -436,7 +436,7 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
     let assignedCourse=0;
     function checkSlots(slot,i){
       return new Promise((resolve, reject) => {
-    
+
          if(slot.instructor){
              assignedCourse++;
       resolve();
@@ -452,6 +452,8 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
     function checkCourseCov(coursei,i){
       return new Promise((resolve, reject) => {
     console.log(coursei.course);
+
+    course.findOne({name:coursei.course}).then((courseFou)=>{
      slot.find({course:coursei.course}).then((slots)=>{
      console.log("SLOTS",slots);
          if(slots){
@@ -463,8 +465,7 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
             checkSlots(slots[i]),coursei.course);
         }
         Promise.all(arrayofPromises).then(()=>{
-            
-            courseCov[coursei.course]=(assignedCourse/slots.length)*100;
+            courseCov[coursei.course]=(assignedCourse/courseFou.teachingSlots)*100;
               assignedCourse=0; 
               console.log(courseCov);
             resolve();
@@ -476,6 +477,7 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
          
      }).catch(()=>{
          reject()});
+     });
       });
     }
     
@@ -589,7 +591,7 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
       return new Promise((resolve, reject) => {
            saveRes={};
     console.log(coursei.course);
-     academicMember.find({course:coursei.course}).then((members)=>{
+     academicMember.find({department:coursei.department}).then((members)=>{
      console.log("SLOTS",members);
          if(members){
             
@@ -601,7 +603,7 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
     
     
                     Promise.all(arrayofPromises).then(()=>{
-                        finalCourseWithstaff[coursei.course]=saveRes;
+                        finalCourseWithstaff[coursei.department]=saveRes;
                         saveRes={};
                                resolve();
                             }).catch(err=>{
@@ -624,9 +626,6 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
                 finalCourseWithstaff={};
             console.log(req.headers.payload.id);
             academicMember.find({id: req.headers.payload.id}).then((course)=>{
-    
-                console.log(course);
-                //Loop on courses el hwa fyha 
                 if(course){
                const arrayofPromises=[];
                     for(let i=0; i<course.length;i++){
@@ -652,6 +651,73 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
 
 
 
+
+    let finalCourseWithstaffSpecific={};
+       function getStaffCourseSpecific(coursei,i, specificCourse){
+      return new Promise((resolve, reject) => {
+           saveRes={};
+    console.log(coursei.course);
+     academicMember.find({department:coursei.department, course:specificCourse}).then((members)=>{
+     console.log("SLOTS",members);
+         if(members){
+            
+    //Loop on All members in this course
+            const arrayofPromises=[];
+                    for(let i=0; i<members.length;i++){
+                         arrayofPromises.push( addStaff(members[i],i));
+                    }
+    
+    
+                    Promise.all(arrayofPromises).then(()=>{
+                        finalCourseWithstaffSpecific[specificCourse]=saveRes;
+                        saveRes={};
+                               resolve();
+                            }).catch(err=>{
+                                reject();
+                            })
+    
+    
+        }
+          else{
+            resolve();  
+          }
+         
+     }).catch(()=>{
+         reject()});
+      });
+    }
+
+
+      router.route('/viewStaff/:course').get((req, res) => {
+          if(req.params.course==undefined){
+              return res.status(500).send("ERROR: NO COURSE GIVEN")
+          }
+            try{
+                finalCourseWithstaffSpecific={};
+            console.log(req.headers.payload.id);
+            academicMember.find({id: req.headers.payload.id}).then((course)=>{
+                if(course){
+               const arrayofPromises=[];
+                    for(let i=0; i<course.length;i++){
+                         arrayofPromises.push( getStaffCourseSpecific(course[i],i,req.params.course));
+                    }
+    
+    
+                    Promise.all(arrayofPromises).then(()=>{
+                                console.log(finalCourseWithstaffSpecific);
+                                res.status(200).send(finalCourseWithstaffSpecific);
+                            }).catch(err=>{
+                                res.status(500).send("Server Error");
+                            })
+                }
+                
+        
+            });
+            }
+            catch(error){
+                return res.status(500).send(error.message);       
+            }
+           })
 
 
 
