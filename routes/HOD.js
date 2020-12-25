@@ -357,7 +357,12 @@ router.post('/acceptRequest',async(req,res)=>{
                     }
                     if(requestToAccept.type=="leave"){
                         if(requestToAccept.leaveType=="Annual"||requestToAccept.leaveType=="Accidental"){
-                            var days=Math.ceil(((requestToAccept.startDate).getTime()-(requestToAccept.endDate).getTime())/(1000*3600*24));
+                            var days=Math.ceil((
+                                (requestToAccept.leaveEndDate).getTime()-
+                                (requestToAccept.leaveStartDate).getTime()
+                                )/(1000*3600*24));
+                            
+                            console.log("days",days);
                             if((Math.floor(staffMember.annualLeaves))>=days){
                                 var updatedLeaves=days-(Math.floor(staffMember.annualLeaves));
                                 var updatedStaff=findOneAndUpdate({id:academicMember},{annualLeaves:updatedLeaves});
