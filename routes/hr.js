@@ -26,6 +26,12 @@ switch(req.path){
   break;
   case '/addFaculty':result = validations.AddFaculty.validate(req.body); 
   break;
+  case '/addDepartment':result = validations.AddDepartment.validate(req.body); 
+  break;
+  case '/editDepartment':result = validations.EditDepartment.validate(req.body); 
+  break;
+  case '/editCourse':result = validations.EditCourse.validate(req.body); 
+  break;
   case '/editFaculty':result = validations.EditFaculty.validate(req.body); 
   break;
   case '/addCourse':result = validations.AddCourse.validate(req.body); 
@@ -33,6 +39,8 @@ switch(req.path){
   case '/signIn':result = validations.SignIn.validate(req.body); 
   break;
   case '/signOut':result = validations.SignOut.validate(req.body); 
+  break;
+  case '/addStaffMember':result = validations.AddStaffMember.validate(req.body); 
   break;
 
 }
@@ -122,26 +130,25 @@ staffMember.findOneAndUpdate({officeLocation:req.params.room},{$set:{officeLocat
 
 
  router.route('/addFaculty').post(validateBody,(req, res) => {
-     if(req.body.name==undefined){
+     if(req.body.displayName==undefined){
      res.status(301).send("Can't create a faculty without name");
    }
-faculty.findOne({name:req.body.name}).then(result =>{
+faculty.findOne({displayName:req.body.displayName}).then(result =>{
   // error message
   if (result){res.status(301).send("Faculty already exists");}
   else {
 
  idDb.findOne({name:"faculty"}).then(idSlot =>{
         newId= idSlot.count+1;
-faculty.create({name:newId, displayName:req.body.name}).then(result => {
-         res.status(200).json({
+faculty.create({name:`faculty-${newId}`, displayName:req.body.displayName}).then(result => {
+     idDb.updateOne({name:"faculty"},{$set:{count:newId}}).then(()=>{
+          res.status(200).json({
            message:"Added Successfully",
            data:result});
      });
-
-    }).then(()=>{
-        idDb.updateOne({name:"faculty"},{$set:{count:newId}}).then(()=>{
-            res.status(200).send("Successfully created");
         })
+       
+
     });
 
 
@@ -157,7 +164,7 @@ faculty.create({name:newId, displayName:req.body.name}).then(result => {
 router.route('/editFaculty').put(validateBody,(req, res) => {
   const toUpdate ={}
    if(req.body.displayName){
-     toUpdate.name=req.body.displayName;
+     toUpdate.displayName=req.body.displayName;
      
    }
    else {
@@ -168,11 +175,11 @@ router.route('/editFaculty').put(validateBody,(req, res) => {
      res.status(301).send("ERROR: NameId required");
    }
 
-faculty.findOne({name:req.body.name}).then(fac=>{
+faculty.findOne({displayName:req.body.diaplyName}).then(fac=>{
   if(fac){
   res.status(301).send("Name already Exists");
    }
-
+else{
    faculty.findOneAndUpdate({name:req.body.name},{...toUpdate}, {new:true}).then(result =>{
   // error message
   console.log(result);
@@ -182,12 +189,15 @@ faculty.findOne({name:req.body.name}).then(fac=>{
            message:"edited Successfully",
            data:result});
       }
-  
+      else{
+         res.status(301).send(" Faculty name doesn't exist");
+      }
+    
 }).catch(err=>{
   console.log(err);
  res.status(301).send("Faculty doesn't exist");
 })
-  
+}
 });
 
  });
@@ -265,7 +275,7 @@ resolve();
 faculty.findOne({name:req.body.faculty}).then( result =>{
   console.log(result);
   if (result){
- const departments =result.departments!==null?result.departments:[];
+ const departments =result.departments?result.departments:[];
  if(departments.includes(req.body.department)){
    // department already exists under this faculty 
    res.status(301).send("department already exists under this faculty");
@@ -278,7 +288,8 @@ faculty.findOne({name:req.body.faculty}).then( result =>{
            res.status(300).send("Department Already exists under a different Faculty");
          }else {
               res.status(200).send("Successfully Added under Faculty");
-         }}
+         }
+        }
          else {
          
 console.log("department added under Faculty");
@@ -309,18 +320,14 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
 
       return   department.create({name:newId,displayName: req.body.department,...toAdd}).then(newDept=>{
         faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
-      res.status(200).send("Successfully created");
+     idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
+            res.status(200).send("Successfully created");
+        });
         });
     });
 
-    }).then(()=>{
-        idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
-            res.status(200).send("Successfully created");
-        })
-    });
-    
+    })
 
-  
    }).catch (err =>{
      res.status(500).send("HOD/ COURSES Doesn't exist");
    });
