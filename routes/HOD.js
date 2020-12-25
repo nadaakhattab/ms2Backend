@@ -769,44 +769,44 @@ router.get('/viewassignment',async (req, res) => {
         }
        });
 
-    router.route('/viewdayoff').get((req, res) => {
- try{
-     saveResDay={};
- console.log(req.headers.payload.id);
- department.findOne({HOD: req.headers.payload.id}).then( (department)=>{
-     console.log("dept:  ",department);
-     if(department){
+//     router.route('/viewdayoff').get((req, res) => {
+//  try{
+//      saveResDay={};
+//  console.log(req.headers.payload.id);
+//  department.findOne({HOD: req.headers.payload.id}).then( (department)=>{
+//      console.log("dept:  ",department);
+//      if(department){
            
-   academicMember.find({department:department.name}).then(members =>{
-       let resultProf={};
-     const arrayofPromises=[];
-   for (let i=0; i<members.length;i++){
-console.log("members: ",members[i]);
-arrayofPromises.push( addStaffDay(members[i],i));
-   }
+//    academicMember.find({department:department.name}).then(members =>{
+//        let resultProf={};
+//      const arrayofPromises=[];
+//    for (let i=0; i<members.length;i++){
+// console.log("members: ",members[i]);
+// arrayofPromises.push( addStaffDay(members[i],i));
+//    }
 
 
-   Promise.all(arrayofPromises).then(()=>{
-       console.log(saveResDay);
-       res.status(200).send(saveResDay);
-   }).catch(err=>{
-       res.status(500).send("Server Error");
-   })
-   });
+//    Promise.all(arrayofPromises).then(()=>{
+//        console.log(saveResDay);
+//        res.status(200).send(saveResDay);
+//    }).catch(err=>{
+//        res.status(500).send("Server Error");
+//    })
+//    });
 
 
-     }
-     else {
-         return res.status(300).send("ERROR:NO Department belongs to Current HOD ");  
-     }
+//      }
+//      else {
+//          return res.status(300).send("ERROR:NO Department belongs to Current HOD ");  
+//      }
      
 
- });
- }
- catch(error){
-     return res.status(500).send(error.message);       
- }
-});
+//  });
+//  }
+//  catch(error){
+//      return res.status(500).send(error.message);       
+//  }
+// });
 
 router.route('/viewdayoff/:staffId').get((req, res) => {
     try{

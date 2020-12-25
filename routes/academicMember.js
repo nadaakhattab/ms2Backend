@@ -73,7 +73,7 @@ router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
         }else{
             var myType=await staffMember.findOne({id:myId});
             var replacementType=await staffMember.findOne({id:replacementId});
-            if(myType&&replacementType){
+            if(myType&&replacementType || myType=="CC"&& replacementType=="TA"||myType=="TA"&&replacementType=="CC"){
                 if(myType=="HOD"||replacementType=="HOD"){
                     if(myType.type==replacementType.type){
                         var sending=await academicMembers.findOne({id:sendingId,course:courseId});

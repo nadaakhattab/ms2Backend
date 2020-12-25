@@ -20,4 +20,14 @@ module.exports= {
       },
    ),
 
+   EditSlot:Joi.object({
+      slot:Joi.string().required(),
+      day:Joi.string().required(),
+      location:Joi.string().required(),
+      course: Joi.string().required(),
+      instructor: Joi.string().required()
+
+        },
+     ),
+
 }

@@ -19,6 +19,8 @@ const validateBody =(req, res,next)  =>  { try{
 switch(req.path){
   case '/addSlot':result = validations.addSlot.validate(req.body); 
   break;
+  case '/editSlot':result = validations.EditSlot.validate(req.body); 
+  break
   case '/replyRequest':result = validations.replyRequest.validate(req.body); 
   break;
   // case '/assignCourseCordinator':result = validations.assignCourseCoordinator.validate(req.body); 
@@ -137,7 +139,7 @@ function checkLoc(locationn,res){
   });
 }
 
-router.route('/editSlot').put((req, res) => {
+router.route('/editSlot').put(validateBody,(req, res) => {
     if(req.body.id==undefined){
         res.status(300).send("Error: ID not Given");
     }
