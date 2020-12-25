@@ -6,26 +6,25 @@ module.exports= {
     day:Joi.string().required(),
     location:Joi.string().required(),
     course: Joi.string().required(),
-    instructor: Joi.string().required()
+    instructor: Joi.string()
        
       },
    ),
 
-   replyRequests:Joi.object({
+   replyRequest:Joi.object({
     slotId:Joi.number().required(),
     fromId:Joi.string().required(),
     status:Joi.string().required(),
-    toId:Joi.string().required(),
-    type:Joi.string().required()
       },
    ),
 
    EditSlot:Joi.object({
-      slot:Joi.string().required(),
-      day:Joi.string().required(),
-      location:Joi.string().required(),
-      course: Joi.string().required(),
-      instructor: Joi.string().required()
+      id:Joi.number().required(),
+      slot:Joi.string(),
+      day:Joi.string(),
+      location:Joi.string(),
+      course: Joi.string(),
+      instructor: Joi.string()
 
         },
      ),
