@@ -1,36 +1,3 @@
-1)GET REQUEST WITH PARAMETERS
-Functionality: 
-Route: 
-Request type: GET
-Parameters:
-Example of how to call route:
-Response:
-*Note:
-Request Header: KEY:Authorization & VALUE: access token from login repsonse
-Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
-
-2)POST REQUEST 
-Functionality: 
-Route: 
-Request type: POST
-RequestBody:
-{..insert body..}
-Response:
-*Note:
-Request Header: KEY:Authorization & VALUE: access token from login repsonse
-Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
-
-3)GET REQUEST WITHOUT PARAMETERS
-Functionality: 
-Route: 
-Request type: GET
-Response:
-*Note:
-Request Header: KEY:Authorization & VALUE: access token from login repsonse
-Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
 A)Running Information:
     Run npm start command in milestone-1-Team-62
     Folder to run: server.js
@@ -1551,30 +1518,3 @@ e)Update/delete assignment of academic member
 
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-DATA POPULATION:
-The database is initially seeded with an HR member with ID : hr-1, email : HR1@guc.edu.eg, 
-password: 123456. We will use this user to populate the rest of the database with the following requests.
-
-1) Login:
-    route: http://localhost:3000/login
-    body: 
-    {
-        "email":"HR1@guc.edu.eg",
-        "password":"123456"
-    }
-
-2) Reset Password:
-    route:http://localhost:3000/resetPassword
-    body:
-    {  
-        "email":"HR1@guc.edu.eg",
-        "password":"up1"
-    }
-    Response:
-    Successfull Reset
-
-3)
