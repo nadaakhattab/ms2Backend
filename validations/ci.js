@@ -15,12 +15,13 @@ module.exports= {
     oldSlotId:Joi.number().required(),
     newSlotId:Joi.number().required(),
 
+    
       
 },
 ),
 
     assignCourseCoordinator:Joi.object({
-    courseName:Joi.string().required(),
+    courseId:Joi.string().required(),
     id:Joi.string().required(),
        
       },
