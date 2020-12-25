@@ -147,8 +147,6 @@ faculty.create({name:`faculty-${newId}`, displayName:req.body.displayName}).then
            data:result});
      });
         })
-       
-
     });
 
 
@@ -321,14 +319,16 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
       return   department.create({name:newId,displayName: req.body.department,...toAdd}).then(newDept=>{
         faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
      idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
-            res.status(200).send("Successfully created");
+       res.status(200).json({
+           message:"Added Successfully",
+           data:newDept});
+     });
+
         });
         });
     });
 
-    })
-
-   }).catch (err =>{
+    }).catch (err =>{
      res.status(500).send("HOD/ COURSES Doesn't exist");
    });
 
