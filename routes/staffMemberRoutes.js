@@ -219,7 +219,7 @@ router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
                     if(inputRecord.signOut.length>0){
                         if(inputRecord.signIn){
                             if(inputRecord.signIn.length>0){
-                                if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                                if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
                                     return inputRecord;
                                 }
     
@@ -257,7 +257,7 @@ router.get('/viewAllAttendance',async(req,res)=>{
                 if(inputRecord.signOut.length>0){
                     if(inputRecord.signIn){
                         if(inputRecord.signIn.length>0){
-                            if(inputRecord.signIn[0]<inputRecord.signOut[0]){
+                            if(inputRecord.signIn[0]<inputRecord.signOut[inputRecord.signOut.length-1]){
                                 return inputRecord;
                             }
 

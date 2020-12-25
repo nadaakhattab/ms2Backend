@@ -670,17 +670,19 @@ router.route('/addTA').post( async(req, res) => {
                         var instructor=await staffMember.findOne({id:inputInstructor,type:"TA"});
                         if(instructor){
                             var vCourse=await course.findOne({name:inputCourse});
-                            if(vCourse){
+                            if(vCourse){                                
                                 var newInstructors=vCourse.TAs;
                                 newInstructors.push(inputInstructor);
-                                var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+                                var updated=await course.findOneAndUpdate({name:inputCourse},{TAs:newInstructors},{new:true});
+                                
                                 if(updated){
                                     var academicMembers=await academicMember.create({
                                         id:inputInstructor,
                                         course:inputCourse,
-                                        department:dep.name,
+                                        department:dep.department,
                                         faculty: dep.faculty
                                     });
+                                    
                                   
                                         return res.status(200).send(updated);
         
@@ -732,13 +734,13 @@ router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
                             newInstructors=newInstructors.filter(function(input){
                                 return input!=inputInstructor;
                             });
-                            var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
+                            var updated=await course.findOneAndUpdate({name:inputCourse},{TAs:newInstructors},{new:true});
                             if(updated){
     
                                 var academicMembersRemove=await academicMember.findOneAndDelete({
                                     id:inputInstructor,
                                     course:inputCourse,
-                                    department:dep.name,
+                                    department:dep.department,
                                     faculty:dep.faculty
                                 })
     

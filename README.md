@@ -45,8 +45,10 @@ B)Functionalities:
             Route: /login
             Request type: POST
             RequestBody:
-            {"email":"staff@guc.edu.eg",
-             "password":"1234"}
+            {
+                "email":"HR1@guc.edu.eg",
+                "password":"123456"
+            }
             Response: access token and refresh token
             {
                 "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0YWZmQGd1Yy5lZHUuZWciLCJ0eXBlIjoiSFIiLCJpZCI6IjEiLCJpYXQiOjE2MDg0NjI5MTMsImV4cCI6MTYwODQ2MzUxM30.rjCTriyocNc09OpbmVcpj9SMqlHMPomBRONH0jJWE7s",
@@ -57,33 +59,37 @@ B)Functionalities:
             Functionality: logout as a staff member from the system
             Route: /staffMember/logout
             Request type: POST
-            RequestBody: includes refresh token which is sent as response from login
+            RequestBody: includes refresh token which is sent as response from login.
+            Example:
             {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0YWZmQGd1Yy5lZHUuZWciLCJ0eXBlIjoiSFIiLCJpZCI6IjEiLCJpYXQiOjE2MDg0NTgyNDB9.q6iEnOuD48Riiz_DuqdgofyPOyQD7lu-v9M7XbRHB9w""}
             Response: message indicating successfull log out
             Logout successful
             *Note:
-            Request Header: must include Authorization header with value equal to access token which is sent as response from login
-            KEY:Authorization & VALUE:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0YWZmQGd1Yy5lZHUuZWciLCJ0eXBlIjoiSFIiLCJpZCI6IjEiLCJpYXQiOjE2MDg0NTgyNDAsImV4cCI6MTYwODQ1ODg0MH0.CxTsXjJ1Zl_t4YFgee6w86PiUwqTgZOq4c8xaA2T7ZQ 
+            -Logout removes refresh token of the user from global.refreshTokens array, hence the user   wont be able to change access token when it expires and will be logged out.
+            -Request Header: must include Authorization header with value equal to access token which is sent as response from login
+            -KEY:Authorization & VALUE:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN0YWZmQGd1Yy5lZHUuZWciLCJ0eXBlIjoiSFIiLCJpZCI6IjEiLCJpYXQiOjE2MDg0NTgyNDAsImV4cCI6MTYwODQ1ODg0MH0.CxTsXjJ1Zl_t4YFgee6w86PiUwqTgZOq4c8xaA2T7ZQ 
 
         c)View their profile
             Functionality: any staff member can view their own profile
             Route: /staffMember/viewProfile
             Request type: GET      
             Response:
-            {
-                "acceptedLeaves": [],
+            {     
+                "dayOff": "Saturday",
+                "dayOffNumber": 6,
                 "firstLogin": false,
-                "_id": "5fd677eea0a2e17680c75a2d",
-                "email": "staff@guc.edu.eg",
+                "annualLeaves": 0,
+                "_id": "5fe5106f88ffe53449235269",
+                "name": "HR#1",
+                "email": "HR1@guc.edu.eg",
+                "id": "hr-1",
+                "gender": "female",
+                "salary": 20000,
+                "password": "$2a$10$9z8gYrEar.Z.iX6Xh2KfLuzv8u.iml08tFIXzDQNkQZjJKCKSX/zG",
+                "officeLocation": "location-1",
                 "type": "HR",
-                "password": "$2a$10$RG7TFPVos9a62yfFjK.XD.hcvqoCPkttDctoNV0SYwdLozP5a6ABG",
-                "username": "staffMem",
-                "salary": 2000,
-                "name": "staffMemUpdated",
-                "id": "1",
-                "mobileNumber": "1",
-                "officeLocation": "a",
-                "dayOffNumber": 0
+                "mobileNumber": "0120000",
+                "__v": 0
             }
             *Note:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -93,24 +99,27 @@ B)Functionalities:
             Functionality: update their mobile number or email.
             Route: /staffMember/updateProfile
             Request type: POST
-            RequestBody: can include only one of them 
-            {"email":"staff@guc.edu.eg",
-             "mobileNumber":"12345678"}
+            RequestBody:
+            {
+               "mobileNumber":"5555"
+            }
             Response: updated staff member record
             {
-                "acceptedLeaves": [],
+                "dayOff": "Saturday",
+                "dayOffNumber": 6,
                 "firstLogin": false,
-                "_id": "5fd677eea0a2e17680c75a2d",
-                "email": "staff@guc.edu.eg",
+                "annualLeaves": 0,
+                "_id": "5fe5106f88ffe53449235269",
+                "name": "HR#1",
+                "email": "HR1@guc.edu.eg",
+                "id": "hr-1",
+                "gender": "female",
+                "salary": 20000,
+                "password": "$2a$10$9z8gYrEar.Z.iX6Xh2KfLuzv8u.iml08tFIXzDQNkQZjJKCKSX/zG",
+                "officeLocation": "location-1",
                 "type": "HR",
-                "password": "$2a$10$J8fqbTyi0jRLs8vSELYeT.KghLRNKEf3xN/i8aJBqXvoJeJuZZJZ6",
-                "username": "staffMem",
-                "salary": 2000,
-                "name": "staffMemUpdated",
-                "id": "1",
-                "mobileNumber": "1234",
-                "officeLocation": "a",
-                "dayOffNumber": 0
+                "mobileNumber": "5555",
+                "__v": 0
             } 
             *Note:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -119,21 +128,28 @@ B)Functionalities:
         e)Reset their passwords
             i)reset password
                 Functionality: user can reset password in case forgotten 
-                Route: /staffMember/resetPassword
+                Route: /resetPassword
                 Request type: POST
                 RequestBody:
-                {"email":"staff@guc.edu.eg"}
-                Response: randomly generated one time password (OTP)
-                MgS0Z7
+                {
+                "email":"HR1@guc.edu.eg",
+                "password":"pass"
+                }
+                Response: message indicating successfull reset of their password
+                "Successfull Reset"
 
-            ii)change password 
-                Functionality: user can change their password when they want to
-                Route: /staffMember/changePassword
+            ii)update password 
+                Functionality: user can update their password when they want to
+                Route: /staffMember/updatePassword
                 Request type: POST
                 RequestBody:
-                {"password":"newPassword"}
+                {
+                "email":"HR1@guc.edu.eg",
+                "password":"up1",
+                "oldPassword":"pass"
+                }
                 Response: message indicating successfull change of their password
-                Password changed successfully                      
+                "Password changed successfully"                      
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member     
@@ -147,17 +163,18 @@ B)Functionalities:
             Response: updated attendance record with sign in date and time represented in UTC
             {
                 "signIn": [
-                    "2020-12-20T11:09:05.957Z"
+                    "2020-12-24T23:24:47.740Z"
                 ],
                 "signOut": [],
-                "_id": "5fdf30d2e7c24f2da0b7bc3a",
-                "id": "1",
-                "date": "12/20/2020",
+                "_id": "5fe5233f599f5d9db8cae6f0",
+                "id": "hr-1",
+                "date": "12/25/2020",
                 "__v": 0
-            }             
+            }            
             *Note:
-            Request Header: KEY:Authorization & VALUE: access token from login repsonse
-            Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member           
+            -Sign in time is represented in the database using UTC time.
+            -Request Header: KEY:Authorization & VALUE: access token from login repsonse
+            -Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member           
 
         g)Sign out 
             Functionality: staff can sign out indicating entering campus
@@ -168,16 +185,16 @@ B)Functionalities:
             Response: updated attendance record with sign out date and time represented in UTC
             {
                 "signIn": [
-                    "2020-12-20T11:09:05.957Z"
+                    "2020-12-24T23:24:47.740Z"
                 ],
                 "signOut": [
-                    "2020-12-20T11:09:39.621Z"
+                    "2020-12-24T23:27:08.009Z"
                 ],
-                "_id": "5fdf30d2e7c24f2da0b7bc3a",
-                "id": "1",
-                "date": "12/20/2020",
+                "_id": "5fe5233f599f5d9db8cae6f0",
+                "id": "hr-1",
+                "date": "12/25/2020",
                 "__v": 0
-            }
+           }
             *Note:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
             Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member  
@@ -188,18 +205,22 @@ B)Functionalities:
                 Route: /staffMember/viewAllAttendance
                 Request type: GET
                 Response: array of attendance record each like the following                        
-                {
+                [
+                    {
                         "signIn": [
-                            "2020-12-19T07:23:22.815Z"
+                            "2020-12-24T23:24:47.740Z",
+                            "2020-12-24T23:28:23.513Z"
                         ],
                         "signOut": [
-                            "2020-12-19T18:23:22.815Z"
+                            "2020-12-24T23:27:08.009Z",
+                            "2020-12-24T23:28:42.443Z"
                         ],
-                        "_id": "5fde09805b01d3369c512919",
-                        "id": "1",
-                        "date": "12/10/2020",
+                        "_id": "5fe5233f599f5d9db8cae6f0",
+                        "id": "hr-1",
+                        "date": "12/25/2020",
                         "__v": 0
-                }
+                    }
+                ]
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member 
@@ -211,17 +232,19 @@ B)Functionalities:
                 Parameters: monthToView is the month you want to view its attendance and yearToView is the year the month is in
                 Example how to call route: /staffMember/viewAttendance/2020/12
                 Response: array of attendance record each like the following                        
-                {
-                        "signIn": [
-                            "2020-12-19T07:23:22.815Z"
-                        ],
-                        "signOut": [
-                            "2020-12-19T18:23:22.815Z"
-                        ],
-                        "_id": "5fde09805b01d3369c512919",
-                        "id": "1",
-                        "date": "12/10/2020",
-                        "__v": 0
+                {           
+                    "signIn": [
+                        "2020-12-24T23:24:47.740Z",
+                        "2020-12-24T23:28:23.513Z"
+                    ],
+                    "signOut": [
+                        "2020-12-24T23:27:08.009Z",
+                        "2020-12-24T23:28:42.443Z"
+                    ],
+                    "_id": "5fe5233f599f5d9db8cae6f0",
+                    "id": "hr-1",
+                    "date": "12/25/2020",
+                    "__v": 0
                 }
                 *Note:
                 Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -233,11 +256,17 @@ B)Functionalities:
             Request type: GET
             Parameters: monthToView is the month you want to view its missing days and yearToView is the year the month is in
             Example how to call route: /staffMember/missingDays/2020/12
-            Response: array of dates of missing days each provided in UTC format like the following                        
+            Response: array of dates of missing days each provided in UTC format like the following:                        
             [
                 "2020-12-12T22:00:00.000Z",
+                "2020-12-13T22:00:00.000Z",
                 "2020-12-14T22:00:00.000Z",
-                "2020-12-15T22:00:00.000Z"
+                "2020-12-15T22:00:00.000Z",
+                "2020-12-16T22:00:00.000Z",
+                "2020-12-19T22:00:00.000Z",
+                "2020-12-20T22:00:00.000Z",
+                "2020-12-21T22:00:00.000Z",
+                "2020-12-22T22:00:00.000Z"
             ]
             *Note:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -251,8 +280,8 @@ B)Functionalities:
             Example how to call route: /staffMember/hours/2020/12
             Response: missing hours and extra hours in specified month
             {
-                "missingHours": 0,
-                "extraHours": 3.7693511111111118
+                "missingHours": 2.245778055555556,
+                "extraHours": 0
             }
             *Note:
             Request Header: KEY:Authorization & VALUE: access token from login repsonse
@@ -266,21 +295,46 @@ B)Functionalities:
             Route:/hr/addLocation
             Request type: POST
             RequestBody: 
-            Response: 
+            {
+                "room": "h18",
+                "type":"hall",
+                "maxCapacity":25
+            }
+            Response:
+            "Successfully Added" 
 
             ii) update a location
             Functionality: can updated name or max capac
             Route: /hr/editLocation
             Request type: PUT
             RequestBody:
+            {
+                "room": "location-3",
+                "maxCapacity": "2" 
+            }
             Response: 
+            {
+                "message": "Added Successfully",
+                "data": {
+                    "capacity": 0,
+                    "_id": "5fe5261eb7501c68703179a7",
+                    "room": "location-3",
+                    "displayName": "h18",
+                    "type": "hall",
+                    "maxCapacity": 23,
+                    "__v": 0
+                }
+           }
+
 
             iii) Delete a location
             Functionality: Deletes a location and sets the members with office location equal to this location to null
             Route: /hr/deleteLocation/:room
             Request type: DELETE
-            RequestBody:
+            Params:
+            /hr/deleteLocation/location-1
             Response:
+            "location successfuly deleted"
 
 
         b)Faculty : 
@@ -288,35 +342,43 @@ B)Functionalities:
             Functionality: Adds a new Faculty
             Route: /hr/addFaculty
             Request type: POST
-            RequestBody: {"name":"FacultyNameExample"}
-            Response: Info of Faculty as added to DB (_id is needed later for updating a Faculty)
+            RequestBody: 
             {
-                "message": "Added Successfully",
-                "data": {
-                    "departments": [],
-                    "_id": "5fdf588498dd31107d603f82",
-                    "name": "FacultyNameExample",
-                    "__v": 0
-                }
+              "displayName":"Engineering"
             }
+            Response: Info of Faculty as added to DB (_name is needed later for updating a Faculty)
+                {
+                    "message": "Added Successfully",
+                    "data": {
+                        "departments": [],
+                        "_id": "5fe5278ed84a0a3b91f945bd",
+                        "name": "faculty-1",
+                        "displayName": "Engineering",
+                        "__v": 0
+                            }
+                }
+
 
             ii) update a Faculty
             Functionality: Updated the Faculty Name
             Route: /hr/editFaculty
             Request type: PUT
-            RequestBody: {
-                "_id": "5fdf61b607779c12abf3e7b9",
-                "name":"FacultyNameUpdated2"
+            RequestBody: 
+                {
+                    "name": "faculty-3",
+                    "displayName": "LawUp"
                 }
-            Response: {
+            Response: 
+               {
                     "message": "edited Successfully",
                     "data": {
                         "departments": [],
-                        "_id": "5fdf61b607779c12abf3e7b9",
-                        "name": "FacultyNameUpdated3",
+                        "_id": "5fe52882bbaf5c3baf7a9ab9",
+                        "name": "faculty-3",
+                        "displayName": "LawUp",
                         "__v": 0
                     }
-                }
+               }
 
             iii) Delete a Faculty
             Functionality: Deletes a Faculty & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty), courses, departments
@@ -330,25 +392,35 @@ B)Functionalities:
             Functionality: Adds a new Department & adds it to its corresponsing department if HOD is added will create an academic member for him/her with their corresponding faculty & department
             Route: /hr/addDepartment
             Request type: POST
-            RequestBody: {
-                "faculty":"FacTrial",
-                "department":"Dept",
-                "HOD":"as-20"
-                }
+            RequestBody: 
+            {
+               "faculty":"faculty-1",
+               "department":"Media"
+            }
             Response:
-            Successfully created
+            {
+            "message": "Added Successfully",
+                "data": {
+                    "courses": [],
+                    "_id": "5fe53b241dc6bd3dd50fcd11",
+                    "name": "department-2",
+                    "displayName": "Media",
+                    "faculty": "faculty-1",
+                    "__v": 0
+                        }
+            }   
             *Note: faculty & department are required
 
             ii) update a Department
             Functionality: can update the Department HOD and/or Faculty 
             Route: /hr/editDepartment
             Request type: PUT
-            RequestBody: {
-                "faculty":"Engineering",
-                "department":"DeptNew",
-                "HOD":"as-20"
-
-                }
+            RequestBody: 
+            {
+                "department":"department-2",
+                "displayName":"Arts",
+                "faculty": "faculty-3"
+            }
             Response: updated Successfully
             *Note: Faculty & department are required (if no updates are going to happen for the faculty, place its current faculty name)
 
@@ -356,17 +428,19 @@ B)Functionalities:
             Functionality: Deletes a Department & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this faculty),and its courses courses and removes it from its coresponding faculty
             Route: /hr/deleteDepartment/:faculty/:department
             Request type: DELETE
-            Params: /hr/faculty-2/department-3
-            Response: Department successfuly deleted
+            Params:
+            /hr/deleteDepartment/faculty-2/department-3
+            Response: SUCCESSFULLY DELETED
             *Note: faculty & department are a must
         d)Course:
         i) Add a Course
             Functionality: Adds a new Course & adds it to its corresponsing department
             Route: /hr/addCourse
             Request type: POST
-            RequestBody: {
-                "course":"aNewCourse",
-            "department":"DeptNew"
+            RequestBody: 
+            {
+                "department":"department-2",
+                "course":"networks"
             }
             Response:
             Course Added
@@ -388,19 +462,32 @@ B)Functionalities:
             Functionality: Deletes a course & its corresponding: academicMember record (Not the profile of the member just the record that he/she belonged to this course), and its record in the department's courses list
             Route: /hr/deleteCourse/:course
             Request type: DELETE
-            Params: /hr/deleteCourse/course-1
-            Response: Deleted successfully
+            Params:
+            /hr/deleteCourse/course-5
+            Response: 
+            "Deleted successfully"
             
         e)add Staff Member
             Functionality: adds a new staff member
             Route: /hr/addStaffMember
             Request type: POST
             RequestBody:
+            {
+                "name":"HOD#1",
+                "type":"HOD",
+                "email":"HOD@guc.edu.eg",
+                "officeLocation":"location-2",
+                "department":"department-2",
+                "salary":10000,
+                "gender":"female",
+                "dayOff":"Thursday"
+            }
             Response:
+            "Successfully added"
 
         f)Staff Member
            i) update a staff member
-            Functionality: can update any info about the staff member(please refer to the database model)
+            Functionality: can update any info about the staff member(please refer to the database model), if it updates a location it decerements the current capacity of the old location and increments the new one (note: capacity is the number of staff in this room)
             Route: /hr/updateStaff
             Request type: PUT
             RequestBody:
@@ -419,43 +506,150 @@ B)Functionalities:
             Route: /hr/signIn
             Request type: POST
             RequestBody:
-            Response:n
+            {
+                "date":"2021-01-25T07:00:00.000Z",
+                "id":"as-2"
+            }
+            Response: return the attendance records with the time added to sign in array
+            {
+                "signIn": [
+                    "2021-01-25T07:00:00.000Z"
+                ],
+                "signOut": [],
+                "_id": "5fe5711e90c1733750f14a49",
+                "id": "as-2",
+                "date": "1/25/2021",
+                "__v": 0
+            }
 
             ii) add sign out
             Functionality: adds a missing sign out
             Route: /hr/signOut
             Request type: POST
             RequestBody:
-            Response:
+            {
+                "date":"2021-01-25T11:00:00.000Z",
+                "id":"as-2"
+            }
+            Response: return the attendance records with the time added to sign out array
+            {
+                "signIn": [
+                    "2021-01-25T07:00:00.000Z"
+                ],
+                "signOut": [
+                    "2021-01-25T11:00:00.000Z"
+                ],
+                "_id": "5fe5711e90c1733750f14a49",
+                "id": "as-2",
+                "date": "1/25/2021",
+                "__v": 0
+            }
 
         h) attendance record
             Functionality: adds any staff member attendance record
-            Route: /hr/attendanceRecord/:id
+            Route: /hr/viewAttendance/:id/:yearToView/:monthToView
             Request type: GET
-            RequestBody:
-            Response:
+            Parameters: 
+            monthToView is the month you want to view its attendance and yearToView is the year the month is in and id is the id of the staff member that I want to view his/her attendance record
+            Example of how to call route: 
+            /hr/viewAttendance/hr-1/2020/12
+            Response: array of attendance record each like the following
+            {
+                "signIn": [
+                    "2020-12-23T09:00:47.740Z",
+                    "2020-12-23T15:00:23.513Z"
+                ],
+                "signOut": [
+                    "2020-12-23T14:00:08.009Z",
+                    "2020-12-23T16:00:42.443Z"
+                ],
+                "_id": "5fe5233f599f5d9db8cae6f0",
+                "id": "hr-1",
+                "date": "12/24/2020",
+                "__v": 0
+            }
 
         i) missing hours/days
             i) view missing hours
             Functionality: view staff members with missing hours
             Route: /hr/missingHours/:yearToView/:monthToView
             Request type: GET
-            RequestBody:
-            Response:
+            Parameters: 
+            monthToView is the month you want to view its missing hours and yearToView is the year the month is in
+            Example of how to call route: 
+            hr/missingHours/2020/12
+            Response:array with all staff members with missing hours each like the following
+            {
+                "dayOff": "Saturday",
+                "dayOffNumber": 6,
+                "firstLogin": false,
+                "annualLeaves": 0,
+                "_id": "5fe5106f88ffe53449235269",
+                "name": "HR#1",
+                "email": "HR1@guc.edu.eg",
+                "id": "hr-1",
+                "gender": "female",
+                "salary": 20000,
+                "password": "$2a$10$9z8gYrEar.Z.iX6Xh2KfLuzv8u.iml08tFIXzDQNkQZjJKCKSX/zG",
+                "officeLocation": null,
+                "type": "HR",
+                "mobileNumber": "5555",
+                "__v": 0
+           }
 
             ii) view missing days
             Functionality: view staff members with missing days
             Route: /hr/missingDays/:yearToView/:monthToView
             Request type: GET
-            RequestBody:
-            Response:
+            Parameters: 
+            monthToView is the month you want to view its missing days and yearToView is the year the month is in
+            Example of how to call route: 
+            /hr/missingDays/2020/12
+            Response:array with all staff members with missing days each like the following
+            {
+                "dayOff": "Saturday",
+                "dayOffNumber": 6,
+                "firstLogin": false,
+                "annualLeaves": 0,
+                "_id": "5fe5106f88ffe53449235269",
+                "name": "HR#1",
+                "email": "HR1@guc.edu.eg",
+                "id": "hr-1",
+                "gender": "female",
+                "salary": 20000,
+                "password": "$2a$10$9z8gYrEar.Z.iX6Xh2KfLuzv8u.iml08tFIXzDQNkQZjJKCKSX/zG",
+                "officeLocation": null,
+                "type": "HR",
+                "mobileNumber": "5555",
+                "__v": 0
+             }
 
         j)update Salary
             Functionality: updates the salary of a staff member
             Route: /hr/updateSalary
             Request type: PUT
             RequestBody:
+            {
+                "id":"as-1",
+                "salary":"20"
+            }
             Response:
+            {
+                "dayOff": "Thursday",
+                "dayOffNumber": 4,
+                "firstLogin": true,
+                "annualLeaves": 0,
+                "_id": "5fe54ceb13c3b230046ec4a2",
+                "password": "$2a$10$BZafe3Gxu8nP0D6mJgphne7Azu3/8xrZtPlhvqCsZFKtj3bPbpiVu",
+                "id": "as-1",
+                "name": "HOD#1",
+                "email": "HOD@guc.edu.eg",
+                "salary": 20,
+                "officeLocation": "location-2",
+                "gender": "female",
+                "type": "HOD",
+                "__v": 0
+           }
 
 
 
@@ -466,75 +660,61 @@ B)Functionalities:
             a)Assign/delete/update a course instructor for each course in his department
                 i)Add course instructor
                     Functionality: add course instructor to course
-                    Route: /HOD/addInstructor
+                    Route: /hod/addInstructor
                     Request type: POST
                     RequestBody:
                     {
-                        "course":"c1",
-                        "instructor":"12"
+                        "course":"course-1",
+                        "instructor":"as-2"
                     }
                     Response: course with course id of instructor added in instructors
-                    {
+                   {
                         "instructors": [
-                            "12"
+                            "as-2"
                         ],
-                        "TAs": [
-                            "walid",
-                            "ahmed"
-                        ],
-                        "_id": "5fdfac852e200aca12fee9c9",
-                        "name": "c1",
-                        "coordinator": "as-2",
+                        "TAs": [],
+                        "_id": "5fe542e0dfdf8b3eb7fd30ca",
+                        "name": "course-1",
+                        "displayName": "Drawing",
+                        "department": "department-2",
+                        "faculty": "faculty-3",
                         "__v": 0
-                    }
+                  }
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
                 ii)update course instructor
                     Functionality: update course instructor by adding new one and removing old
-                    Route: /HOD/updateInstructor
+                    Route: /hod/updateInstructor
                     Request type: POST
                     RequestBody:
                     {
-                        "course":"c1",
-                        "oldInstructor":"12",
-                        "newInstructor":"15"
-                    }   
-                    Response: course with course id of instructor added in instructors
-                    {
-                        "instructors": [
-                            "15"
-                        ],
-                        "TAs": [
-                            "walid",
-                            "ahmed"
-                        ],
-                        "_id": "5fdfac852e200aca12fee9c9",
-                        "name": "c1",
-                        "coordinator": "as-2",
-                        "__v": 0
-                    }   
+                        "instructor":"as-2",
+                        "course":"course-1",
+                        "newCourse":"course-2"
+                    }  
+                    Response:
+                    Updated succesfully  
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
 
                 iii)delete course instructor
                         Functionality: delete course instructor from list of course
-                        Route: /HOD/deleteinstructor/:course/:instructor
+                        Route: /hod/deleteinstructor/:course/:instructor
                         Request type: DELETE
                         Parameters: course is course id i want to delete from and instructor is instructor id i want to delete
                         Example of how to call route: /hod/deleteInstructor/c1/15
                         Response:
                         {
                             "instructors": [],
-                            "TAs": [
-                                "walid",
-                                "ahmed"
-                            ],
-                            "_id": "5fdfac852e200aca12fee9c9",
-                            "name": "c1",
-                            "coordinator": "as-2",
+                            "TAs": [],
+                            "_id": "5fe542e0dfdf8b3eb7fd30ca",
+                            "name": "course-1",
+                            "displayName": "Drawing",
+                            "department": "department-2",
+                            "faculty": "faculty-3",
                             "__v": 0
                         }
                         *Note:
@@ -543,29 +723,87 @@ B)Functionalities:
 
 
             b)view Staff
+            i) view staff 
                Functionality: view Staff in his/her department
-                        Route: /HOD/viewStaff
+                        Route: /hod/viewStaff
                         Request type: GET
-                        Parameters: 
-                        Response:
+                        Response: returns an array of user profiles that are in my department each like the following
+                        {
+                            "dayOff": "Saturday",
+                            "dayOffNumber": 6,
+                            "firstLogin": true,
+                            "annualLeaves": 0,
+                            "_id": "5fe55063dcba28369003fff8",
+                            "password": "$2a$10$NtoH59lN5Kv0pJCOtpNTsuRcIbxdSLauI.WASMHe9eMFq26FUWdS6",
+                            "id": "as-2",
+                            "name": "CI#1",
+                            "email": "CI@guc.edu.eg",
+                            "salary": 10000,
+                            "officeLocation": "location-2",
+                            "gender": "male",
+                            "type": "CI",
+                            "__v": 0
+                        }
+
+                ii) view staff using course
+                        Functionality: view Staff in his/her department
+                        Route: /hod/viewStaff/:course
+                        Request type: GET
+                        Parameters:
+                        courseId is the course I want to view the academic members in
+                        Example of how to call route:
+                        hod/viewStaff/course-1
+                        Response:returns an array of user profiles that are in the course specified in my department 
+                        {
+                            "dayOff": "Saturday",
+                            "dayOffNumber": 6,
+                            "firstLogin": true,
+                            "annualLeaves": 0,
+                            "_id": "5fe55063dcba28369003fff8",
+                            "password": "$2a$10$NtoH59lN5Kv0pJCOtpNTsuRcIbxdSLauI.WASMHe9eMFq26FUWdS6",
+                            "id": "as-2",
+                            "name": "CI#1",
+                            "email": "CI@guc.edu.eg",
+                            "salary": 10000,
+                            "officeLocation": "location-2",
+                            "gender": "male",
+                            "type": "CI",
+                            "__v": 0
+                         }
 
             c)view Dayoff
+            i)view day off all staff
             Functionality: view the day off of the staff
-                        Route: /HOD/viewdayoff
+                        Route: /hod/viewdayoff
                         Request type: GET
-                        Parameters: 
                         Response:
+                        {
+                            "as-2": "Saturday",
+                            "as-1": "Thursday"
+                        }
+            ii)view day off single staff
+            Functionality: view the day off of the staff
+                        Route: /hod/viewdayoff/:staffId
+                        Request type: GET
+                        Parameters:
+                        staffId is the id of the academic member in my department that I want to view his/her day off
+                        Example of how to call route:
+                        /hod/viewdayoff/as-2
+                        Response:
+                        {
+                          "as-2": "Saturday"
+                        }         
 
             d)view requests
             Functionality: view requests change day off/leave sent by staff members
-                        Route: /HOD/viewrequests
+                        Route: /hod/viewrequests
                         Request type: GET
                         Parameters: 
                         Response:
             
             e)Accept request
                 Functionality: accept request sent 
-                Route: /HOD/acceptRequest
+                Route: /hod/acceptRequest
                 Request type: POST
                 RequestBody: id is mongoodb id for the request
                 {
@@ -588,7 +826,7 @@ B)Functionalities:
 
             f)reject request
                 Functionality: reject request sent 
-                Route: /HOD/rejectRequest
+                Route: /hod/rejectRequest
                 Request type: POST
                 RequestBody: id is mongoodb id for the request, reason is optional and is rejection reason provided
                 {
@@ -613,14 +851,14 @@ B)Functionalities:
             
             g) view coverage
             Functionality: view the coverage of each course
-                        Route: /HOD/viewCoverage
+                        Route: /hod/viewCoverage
                         Request type: GET
                         Parameters: 
                         Response:
 
             h) view assignments
              Functionality: view teaching assignments of course offered by his department
-                        Route: /HOD/viewassignment
+                        Route: /hod/viewassignment
                         Request type: GET
                         Parameters: 
                         Response:
@@ -762,6 +1000,53 @@ B)Functionalities:
                     *Note:
                     Request Header: KEY:Authorization & VALUE: access token from login repsonse
                     Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
+             h)TA:
+         
+             i)addTa
+                Functionality: add TA to a course
+                Route: /ci/addTA
+                Request type: POST
+                RequestBody:
+                {
+                    "ta":"as-3",
+                    "course":"course-1"
+                }
+                Response: 
+                {
+                    "instructors": [],
+                    "TAs": [
+                        "as-3"
+                    ],
+                    "_id": "5fe542e0dfdf8b3eb7fd30ca",
+                    "name": "course-1",
+                    "displayName": "Drawing",
+                    "department": "department-2",
+                    "faculty": "faculty-3",
+                    "__v": 0
+                }
+            ii)DeleteTa
+            Functionality: remove TA from course
+                    Route: /ci/deleteTA/:course/:ta
+                    Request type: DELETE
+                    Parameters: course is name of course I want to remove from, the TA is the TA i want to remove
+                    Example of how to call route: 
+                    /ci/deleteTA/course-1/as-3
+                    Response: course with TA removed from it
+                    {
+                        "instructors": [],
+                        "TAs": [],
+                        "_id": "5fe542e0dfdf8b3eb7fd30ca",
+                        "name": "course-1",
+                        "displayName": "Drawing",
+                        "department": "department-2",
+                        "faculty": "faculty-3",
+                        "__v": 0
+                    }
+                    *Note:
+                    Request Header: KEY:Authorization & VALUE: access token from login repsonse
+                    Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member
+
 
         4.3)Course Coordinator Functionalities
 
@@ -1007,6 +1292,7 @@ B)Functionalities:
                 Request Header Params: includes payload object which is provided at token verification and has id,type & email of logged in staff member                       
         
 
+
                       
 
 
@@ -1075,3 +1361,34 @@ Body of editSlot
 
 }
 result success message
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DATA POPULATION:
+The database is initially seeded with an HR member with ID : hr-1, email : HR1@guc.edu.eg, 
+password: 123456. We will use this user to populate the rest of the database with the following requests.
+
+1) Login:
+    route: http://localhost:3000/login
+    body: 
+    {
+        "email":"HR1@guc.edu.eg",
+        "password":"123456"
+    }
+
+2) Reset Password:
+    route:http://localhost:3000/resetPassword
+    body:
+    {  
+        "email":"HR1@guc.edu.eg",
+        "password":"up1"
+    }
+    Response:
+    Successfull Reset
+
+3)
