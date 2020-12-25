@@ -343,57 +343,53 @@ try{
         if(hod){
             switch(leaveType){
             case 'Annual':
-                if(todayDate<leaveStartDate){
+                if(todayDate>=leaveStartDate){
                      res.status(301).send("Can't submit request: Deadline passed"); 
                 }
                 else{
-                    request.findOne({ fromId: sendingId,type:"replacement", status:"Accepted",leaveStartDate,leaveEndDate}).then ((acceptedRequest=>{
-                        academicMember.findOne({id:acceptedRequest.instructor}).then (replacement=>{
-                            //look if there is a replacement for his slots in this day & instructor teaches same course that is accepted if true {
-                            if(replacement){
-                                //there is a replacement person 
-                            academicMember.findOne({id:sendingId}).then((currUser)=>{
-                                if(currUser.course==replacement.course){
-                               requests.create({
-                                                fromId: sendingId,
-                                                toId:hod,
-                                                type:"leave",
-                                                leaveType: "Annual",
-                                                reason: reqReason,
-                                                date:todayDate,
-                                                replacement:replacement.id,
-                                                leaveEndDate,
-                                                leaveStartDate
-                                            }).then((reques)=>{
-                                               return res.status(200).send(reques); 
-                                            })
+                    request.findOne({ fromId: sendingId,replacementDate:leaveStartDate,type:"replacement", status:"Accepted"}).then ((acceptedRequest=>{
+                        console.log(sendingId);
+                        console.log(leaveStartDate);
+                        if(acceptedRequest){ 
+                            console.log(acceptedRequest);                         
+                            requests.create({
+                                                    fromId: sendingId,
+                                                    toId:hod,
+                                                    type:"leave",
+                                                    leaveType: "Annual",
+                                                    reason: reqReason,
+                                                    date:todayDate,
+                                                    leaveEndDate,
+                                                    leaveStartDate,
+                                                    replacement:acceptedRequest.toId
                                             
-                                }
-                                else{
-                                    res.status(301).send("Error:Replacement Staff doesnt teach the same Course");
-                                }
-                            })
+                                                }).then(request=>{
+                             res.status(200).json({
+                                                    message:"Your request has been submitted.",
+                                                    data:request});
+                                                });
+                                               
+                           
+
+                        }else{
+                            requests.create({
+                                fromId: sendingId,
+                                  toId:hod,
+                                  type:"leave",
+                                  leaveType: "Annual",
+                                  reason: reqReason,
+                                  date:todayDate,
+                                  leaveEndDate,
+                                  leaveStartDate
+                          
+                              }).then(request=>{
+           res.status(200).json({
+                                  message:"Your request has been submitted. It is up to the HOD to accept/decline. since you had no replacement instructors during your leave",
+                                  data:request});
+                              });
+                            
                         }
-                        //No replacement
-                         //send the request with request.replacement= instructor that accepted his request
-// }else { send without a replacement so HOD WILL DECIDE}
-                        requests.create({
-                                              fromId: sendingId,
-                                                toId:hod,
-                                                type:"leave",
-                                                leaveType: "Annual",
-                                                reason: reqReason,
-                                                date:todayDate,
-                                                leaveEndDate,
-                                                leaveStartDate
-                                        
-                                            }).then(reques=>{
-                         res.status(200).json({
-                                                message:"Your request has been submitted. It is up to the HOD to accept/decline. since you had no replacement instructors during your leave",
-                                                data:request});
-                                            });
-                                           
-                        });     
+    
                     }));
 
                 }
@@ -455,8 +451,9 @@ try{
 
 
             case"Maternity":
-                let duration= req.body.leaveEndDate.getTime()-req.body.leaveStartDate.getTime();
+                let duration= leaveEndDate.getTime()-leaveStartDate.getTime();
                    duration= duration/(1000*3600*24);
+                   console.log("D"+duration);
                    if(duration<=90){
  staffMember.findOne({id:req.headers.payload.id}).then ((member)=>{
      if(member.gender=="female"){
@@ -481,6 +478,8 @@ try{
                     res.status(301).send("ERROR: Maternity leaves are for Females only");
                 }
             });
+        }else{
+            res.status(301).send("ERROR: Maternity leaves are for 3 months only");
         }
             break;
 
