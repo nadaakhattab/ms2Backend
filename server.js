@@ -74,10 +74,10 @@ console.log(ids);
 }
 
 
-    app.listen(3000,function()
+   app.listen(8000,function()
 {
 
-    console.log("Server started at port 3000");
+    console.log("Server started at port 8000");
 });
 }).catch((error)=>{
     console.log("Error connecting to db"+error);

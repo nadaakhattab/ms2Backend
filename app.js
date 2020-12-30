@@ -8,8 +8,10 @@ const coordinatorRoutes=require('./routes/coordinator');
 const academicMemberRoutes=require('./routes/academicMember');
 const hodRoutes=require('./routes/hod');
 const ciRoutes=require('./routes/ci')
+var cors = require('cors');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 app.use('', externalRoutes);
 app.use(verify);

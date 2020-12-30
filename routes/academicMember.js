@@ -634,7 +634,9 @@ router.get('/schedule',async(req,res)=>{
         var scheduleReplacements=await requests.find({toId:userId,status:"Accepted",replacementDate:{$gte:todayDate},type:"replacement"});
         var schedule={};
         if(scheduleSlots && scheduleReplacements ){
-            if(!(scheduleSlots.length>0)&&!(scheduleReplacements.length>0)){
+            if(!(scheduleSlots.length>0)
+            // &&!(scheduleReplacements.length>0)
+            ){
                 return res.status(200).send("No teaching activities or replacements");
             }else{
                     schedule.slots=scheduleSlots;
