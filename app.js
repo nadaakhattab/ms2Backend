@@ -7,7 +7,8 @@ const externalRoutes=require('./routes/externalRoutes');
 const coordinatorRoutes=require('./routes/coordinator');
 const academicMemberRoutes=require('./routes/academicMember');
 const hodRoutes=require('./routes/hod');
-const ciRoutes=require('./routes/ci')
+const ciRoutes=require('./routes/ci');
+const frontEndHOD=require('./frontEndRoutes/feHod');
 var cors = require('cors');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('', externalRoutes);
 app.use(verify);
+
 
 function checkHr(req, res, next) {
       if (req.headers.payload.type=="HR"){
@@ -73,6 +75,7 @@ app.use("/academicMember",checkAM,academicMemberRoutes);
 app.use("/hod",checkHOD, hodRoutes);
 app.use("/ci",checkCI,ciRoutes)
 app.use("/staffMember",staffMemberRoutes);
+app.use('/feHod', frontEndHOD);
 module.exports=app;
 
 
