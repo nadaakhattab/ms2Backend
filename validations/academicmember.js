@@ -18,7 +18,7 @@ module.exports= {
     ),
 
     sendChangeDayOffRequest:Joi.object({
-        reason:Joi.string().required(),
+        reason:Joi.string(),
         day:Joi.string().required()
         },
 
@@ -26,9 +26,11 @@ module.exports= {
     sendLeaveRequest:Joi.object({
         reason:Joi.string(),
         leave:Joi.string().required(),
-        startDate:Joi.date().required(),
-        endDate:Joi.date().required(),
-        documents:Joi.string()
+        startDate:Joi.required(),
+        endDate:Joi.required(),
+        documents:Joi.string(),
+        id:Joi.string(),
+        toId: Joi.string(),
         },
     ),
     ReplyRequest:Joi.object({

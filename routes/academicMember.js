@@ -43,6 +43,7 @@ const validateBody =(req, res,next)  =>  { try{
     const { value, error } = result; 
     const valid = error == null; 
     if (!valid) { 
+        console.log(error);
       res.status(422).send( 'Validation error: Please make sure all required fields are given') 
     } else { 
   next();
@@ -112,7 +113,7 @@ router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
                    }
 
                }else{
-                   return res.status(404).send("CI can onlye send to CI and TA AND CC can only send to each other")
+                   return res.status(402).send("CI can only send to CI and TA AND CC can only send to each other")
 
                }
                 }
@@ -120,7 +121,7 @@ router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
 
 
             }else{
-                return res.status(404).send("Replacement id or logged in id not found")
+                return res.status(402).send("Replacement id or logged in id not found")
             }
 
 
@@ -321,17 +322,23 @@ router.get('/viewRequests/:status',async(req,res)=>{
 });
 
 //add code
-router.post('/sendLeaveRequest',validateBody,async(req,res)=>{
+router.post('/sendLeaveRequest',
+validateBody
+,async(req,res)=>{
 
 try{
     if(req.headers.payload.type=="HR"){
          res.status(301).send("HR cannot submit leave requests");
     }
       var sendingId=req.headers.payload.id;
+      console.log(sendingId);
         var reqReason=req.body.reason;
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
+        console.log(sending);
         var departmentReq=sending.department;
+        
+
         var leaveStartDate=new Date(Date.parse(req.body.startDate));
         var leaveEndDate=new Date(Date.parse(req.body.endDate));
         console.log(new Date(leaveStartDate));
@@ -341,15 +348,17 @@ try{
         const hod= dept.HOD;
         console.log(hod);
         if(hod){
+            console.log(leaveType)
             switch(leaveType){
             case 'Annual':
                 if(todayDate>=leaveStartDate){
                      res.status(301).send("Can't submit request: Deadline passed"); 
                 }
                 else{
+                    console.log("IN ELSE");
                     request.findOne({ fromId: sendingId,replacementDate:leaveStartDate,type:"replacement", status:"Accepted"}).then ((acceptedRequest=>{
                         console.log(sendingId);
-                        console.log(leaveStartDate);
+                        console.log("leave",leaveStartDate);
                         if(acceptedRequest){ 
                             console.log(acceptedRequest);                         
                             requests.create({
@@ -372,6 +381,7 @@ try{
                            
 
                         }else{
+                            console.log("heree");
                             requests.create({
                                 fromId: sendingId,
                                   toId:hod,
@@ -652,16 +662,44 @@ router.get('/schedule',async(req,res)=>{
 
 });
 
+let fullRes =[];
+  function getNot(notification,i){
+      console.log(notification);
+      return new Promise((resolve, reject) => {
+    requests.findOne({_id:notification.requestID}).then((reqFound)=>{
+        fullRes.push(reqFound);
+        resolve();
+    }).catch(()=>{
+         reject()});
+     });
+    }
+
 router.get('/notifications',async(req,res)=>{
     try{
+        fullRes =[];
         var userId=req.headers.payload.id;
         if(userId==undefined){
             return  res.status(300).send("Undefined ID");
            }
+           console.log(userId);
         var notify=await notification.find({to:userId});
+        
         if(notify){
+            
+            const arrayofPromises=[];
             if(notify.length>0){
-                return res.status(200).send(notify);
+                notify.forEach((notification)=>{
+                    console.log(notification);
+                    arrayofPromises.push(getNot(notification));
+
+                });
+Promise.all(arrayofPromises).then ((result)=>{
+    console.log("done");
+     return res.status(200).send(fullRes);
+}).catch((err)=>{
+    return res.status(300).send("ERROR");
+})
+               
         
             }else{
                 return res.status(200).send("No notifications to show");
