@@ -365,6 +365,7 @@ router.delete('/removeFromCourse/:course/:staffId',async(req,res)=>{
 router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
         
         try{
+            console.log("IN ASIGN C")
             var userId=req.headers.payload.id;
             var courseName=req.body.courseId;
             var idToAssign=req.body.id;
@@ -840,6 +841,37 @@ router.route('/deleteTA/:course/:ta').delete(async(req, res) => {
         }
     
         });  
+
+        router.route('/viewSlotsAssignment/:cId').get((req, res) => {
+            try{
+            console.log(req.headers.payload.id);
+            academicMember.find({id: req.headers.payload.id,course:req.params.cId}).then((listOfCourseAssig)=>{
+                console.log(listOfCourseAssig);
+                if(listOfCourseAssig){
+                allSlotsInCourse={};
+        
+                     const arrayofPromises=[];
+                  for (let i=0; i<listOfCourseAssig.length;i++){
+           console.log("members: ",listOfCourseAssig[i]);
+               arrayofPromises.push( checkCourseAssig(listOfCourseAssig[i],i));
+                  }
+               
+        
+                  Promise.all(arrayofPromises).then(()=>{
+                      console.log(allSlotsInCourse);
+                      res.status(200).send(allSlotsInCourse);
+                  }).catch(err=>{
+                      res.status(500).send("Server Error");
+                  })
+        
+        
+                }
+           });
+            }
+                catch(error){
+                    return res.status(500).send(error.message);       
+                }
+               });
 
 
 

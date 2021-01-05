@@ -9,6 +9,7 @@ const academicMemberRoutes=require('./routes/academicMember');
 const hodRoutes=require('./routes/hod');
 const ciRoutes=require('./routes/ci');
 const frontEndHOD=require('./frontEndRoutes/feHod');
+const frontEndCI=require('./frontEndRoutes/feCI');
 var cors = require('cors');
 
 const app = express();
@@ -76,6 +77,7 @@ app.use("/hod",checkHOD, hodRoutes);
 app.use("/ci",checkCI,ciRoutes)
 app.use("/staffMember",staffMemberRoutes);
 app.use('/feHod', frontEndHOD);
+app.use('/feCi', frontEndCI);
 module.exports=app;
 
 
