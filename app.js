@@ -10,6 +10,7 @@ const hodRoutes=require('./routes/hod');
 const ciRoutes=require('./routes/ci');
 const frontEndHOD=require('./frontEndRoutes/feHod');
 const frontEndCI=require('./frontEndRoutes/feCI');
+const frontEndAll=require('./frontEndRoutes/feAll');
 var cors = require('cors');
 
 const app = express();
@@ -78,6 +79,7 @@ app.use("/ci",checkCI,ciRoutes)
 app.use("/staffMember",staffMemberRoutes);
 app.use('/feHod', frontEndHOD);
 app.use('/feCi', frontEndCI);
+app.use('/feAll', frontEndAll);
 module.exports=app;
 
 
