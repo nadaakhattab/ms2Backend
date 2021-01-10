@@ -384,7 +384,18 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
                                         if(courseV.TAs){
                                             if(courseV.TAs.length>0){
                                                 if(courseV.TAs.includes(idToAssign)){
+                                                    
+                                                    if(courseV.coordinator){
+                                                        console.log(courseV.coordinator)
+                                                        
+                                                        var remUser=await staffMember.findOneAndUpdate({id:courseV.coordinator},{type: "TA"},{new:true});
+                                                        console.log(courseV.coordinator)
+                                                        
+                      
+
+                                                    }
                                                     var courseV=await course.findOneAndUpdate({name:courseName},{coordinator: idToAssign},{new:true});
+                                                    var upuser=await staffMember.findOneAndUpdate({id:idToAssign},{type: "CC"},{new:true});
                                                     return res.status(200).send(courseV);
 
                                                 }else{

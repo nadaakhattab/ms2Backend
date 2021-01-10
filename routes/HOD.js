@@ -551,7 +551,7 @@ arrayofPromises.push( addStaffDay(members[i],i));
 let saveReq={};
 function addStaffReq(members,i){
 return new Promise((resolve, reject) => {
-request.findOne({fromId:members.id}).then((profile)=>{
+request.find({fromId:members.id}).then((profile)=>{
 if(profile){
 saveReq[i]=profile; 
 console.log("profile ",profile);}
