@@ -12,6 +12,7 @@ const frontEndHOD=require('./frontEndRoutes/feHod');
 const frontEndCI=require('./frontEndRoutes/feCI');
 const frontEndAll=require('./frontEndRoutes/feAll');
 const frontEndCC=require('./frontEndRoutes/feCC');
+const frontEndHR=require('./frontEndRoutes/feHR');
 var cors = require('cors');
 
 const app = express();
@@ -82,6 +83,7 @@ app.use('/feHod', frontEndHOD);
 app.use('/feCi', frontEndCI);
 app.use('/feAll', frontEndAll);
 app.use('/feCC', frontEndCC);
+app.use('/feHr', frontEndHR);
 module.exports=app;
 
 
