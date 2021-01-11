@@ -1142,11 +1142,16 @@ else{
         var curDate=new Date();
         var dateToday = new Date(curDate.setHours(0,0,0));
         if(dateToday<nextMonthDate){
+          console.log("here");
+          console.log(curDate);
             nextMonthDate=dateToday;
         }
         var records=await attendance.find({id: userId});
+        console.log(records);
         var recordsToSend=records.filter(function(record){
-            var date=new Date(Date.parse(record.date));
+        
+            var date=new Date(Date.parse(record.date));  
+            console.log(monthDate,date,  nextMonthDate);
             return date>=monthDate && date<nextMonthDate
         })
         let filteredRecords=recordsToSend.filter(function(inputRecord){
@@ -1271,8 +1276,10 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
   try{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
-    if(!monthToView||!yearToView){
+    if(monthToView==null ||monthToView==undefined ||!yearToView){
+      console.log(monthToView,yearToView);
         //start or end not provided in body
+        console.log("F");
         return res.status(400).send("No dates provided");
     }else{
       if(monthToView<=11){
@@ -1376,7 +1383,8 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
   } 
     var missingHours=requiredHours-workedHours;
     if(missingHours>0){
-      usersToSend.push(user);
+      user.missingHours=missingHours;
+      usersToSend.push({...user,missingHours});
   
     }  
   console.log("HEREE");      
@@ -1384,11 +1392,13 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
         
         return res.status(200).send(usersToSend);
       }else{
+         console.log("FA");
         return res.status(400).send("Invalid dates");
     }
     
 
       }else{
+         console.log("FAAA");
         return res.status(400).send("Please enter month between 1 and 12")
 
       }
@@ -1407,6 +1417,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
     if(!monthToView||!yearToView){
+      console.log("LINE 1415");
         //start or end not provided in body
         return res.status(400).send("No dates provided");
     }else{
@@ -1425,6 +1436,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
         if(dateToday<endDate){
             endDate=dateToday;
         }
+        console.log(startDate,endDate);
         if(startDate<endDate){
           var usersToSend=[];
           var allUserRecords=await attendance.find({});
@@ -1485,15 +1497,18 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                          d=new Date (d.setDate(d.getDate()+1));
                       } 
                       if(missingDays.length>0){
-                        usersToSend.push(user);
+                        user.missingDays=missingDays.length;
+                        usersToSend.push({...user,missingDays:missingDays.length});
                       }
         }
-      }else{
+      }else{  console.log("LINE 1498");
         return res.status(400).send("Invalid dates");
+      
     }
     return res.status(200).send(usersToSend);
 
       }else{
+        console.log("LINE 1502");
         return res.status(400).send("Please enter month between 1 and 12")
       }
 
