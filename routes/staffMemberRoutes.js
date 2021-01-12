@@ -192,10 +192,6 @@ router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
     else{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
-    if(!yearToView||!monthToView){
-        return res.status(400).send("Please enter month and year") 
-
-    }else{
         if(monthToView<=11){
             var monthDate=new Date(yearToView,monthToView,11);
             var nextMonthDate;
@@ -236,7 +232,7 @@ router.get('/viewAttendance/:yearToView/:monthToView',async(req,res)=>{
 
         }
 
-    }}
+    }
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -277,10 +273,10 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
     try{
         var monthToView=parseInt(req.params.monthToView-1);
         var yearToView=parseInt(req.params.yearToView);
-        if(!monthToView||!yearToView){
-            //start or end not provided in body
-            return res.status(400).send("No dates provided");
-        }else{
+        // if(!monthToView||!yearToView){
+        //     //start or end not provided in body
+        //     return res.status(400).send("No dates provided");
+        // }else{
             if(monthToView<=11){
                 var userId=req.headers.payload.id;
                 if(userId==undefined){
@@ -372,7 +368,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
                 return res.status(400).send("Please enter month between 1 and 12") 
 
             }
-}
+// }
 
     }catch(error){
         return res.status(500).send(error.message);
@@ -383,10 +379,10 @@ router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
     try{
         var monthToView=parseInt(req.params.monthToView-1);
         var yearToView=parseInt(req.params.yearToView);
-        if(!monthToView||!yearToView){
-            //start or end not provided in body
-            return res.status(400).send("No dates provided");
-        }else{
+        // if(!monthToView||!yearToView){
+        //     //start or end not provided in body
+        //     return res.status(400).send("No dates provided");
+        // }else{
             if(monthToView<=11){
                 var userId=req.headers.payload.id;
                 var userId=req.headers.payload.id;
@@ -511,7 +507,7 @@ router.get('/hours/:yearToView/:monthToView',async(req,res)=>{
 
             }
 
-}
+// }
 
     }catch(error){
         return res.status(500).send(error.message);

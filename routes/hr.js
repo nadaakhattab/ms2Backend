@@ -1150,10 +1150,10 @@ else{
      }
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
-    if(!yearToView||!monthToView){
-        return res.status(400).send("Please enter month and year") 
+    // if(!yearToView||!monthToView){
+    //     return res.status(400).send("Please enter month and year") 
 
-    }else{
+    // }else{
       if(monthToView<=11){
         var monthDate=new Date(yearToView,monthToView,11);
         var nextMonthDate;
@@ -1198,7 +1198,7 @@ else{
         return res.status(400).send("Please enter month between 1 and 12")
       }
 
-    }
+    // }
     }catch(error){
         return res.status(500).send(error.message);
     }
@@ -1299,12 +1299,12 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
   try{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
-    if(monthToView==null ||monthToView==undefined ||!yearToView){
-      console.log(monthToView,yearToView);
-        //start or end not provided in body
-        console.log("F");
-        return res.status(400).send("No dates provided");
-    }else{
+    // if(monthToView==null ||monthToView==undefined ||!yearToView){
+    //   console.log(monthToView,yearToView);
+    //     //start or end not provided in body
+    //     console.log("F");
+    //     return res.status(400).send("No dates provided");
+    // }else{
       if(monthToView<=11){
         var users=await staffMember.find({});
         var startDate=new Date(yearToView,monthToView,11);
@@ -1427,7 +1427,7 @@ router.get('/missingHours/:yearToView/:monthToView',async(req,res)=>{
       }
 
       
-    }
+    // }
 
 }catch(error){
     return res.status(500).send(error.message);
@@ -1439,11 +1439,11 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
   try{
     var monthToView=parseInt(req.params.monthToView-1);
     var yearToView=parseInt(req.params.yearToView);
-    if(!monthToView||!yearToView){
-      console.log("LINE 1415");
-        //start or end not provided in body
-        return res.status(400).send("No dates provided");
-    }else{
+    // if(!monthToView||!yearToView){
+    //   console.log("LINE 1415");
+    //     //start or end not provided in body
+    //     return res.status(400).send("No dates provided");
+    // }else{
       if(monthToView<=11){
         var users=await staffMember.find({});
         var startDate=new Date(yearToView,monthToView,11);
@@ -1536,7 +1536,7 @@ router.get('/missingDays/:yearToView/:monthToView',async(req,res)=>{
       }
 
       
-    }
+    // }
 
 }catch(error){
     return res.status(500).send(error.message);
