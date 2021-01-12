@@ -1048,13 +1048,22 @@ staffMember.deleteOne({id:req.params.id}).then((result)=>{
       }
      if(result.type=="HOD"){
        academicMember.findOne({id:req.params.id}).then((acMme)=>{
-         department.findOneAndUpdate({name:acMme.department},{$set:{HOD:null}},{new:true}).then((dep)=>{
+         if(acMme){
+           department.findOneAndUpdate({name:acMme.department},{$set:{HOD:null}},{new:true}).then((dep)=>{
            console.log(dep);
    academicMember.deleteOne({id:req.params.id}).then(()=>{
  staffMember.deleteOne({id:req.params.id}).then((result)=>{
     res.status(200).send("successfully deleted");
   })});
          })
+         }
+         else {
+    academicMember.deleteOne({id:req.params.id}).then(()=>{
+ staffMember.deleteOne({id:req.params.id}).then((result)=>{
+    res.status(200).send("successfully deleted");
+  })});
+         }
+         
   
 
        });
