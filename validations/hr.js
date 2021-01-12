@@ -55,11 +55,11 @@ AddDepartment:Joi.object({
 
 EditDepartment:Joi.object({
   displayName: Joi.string()
-    .required(),
+    ,
     faculty: Joi.string()
-    .required(),
+    ,
     HOD:Joi.string(),
-    department:Joi.string()
+    department:Joi.string().required()
   
 },
 ),
@@ -82,8 +82,9 @@ EditCourse:Joi.object({
   course: Joi.string()
     .required(),
   department: Joi.string()
-    .required(),
-  teachingSlots:Joi.number()
+   ,
+  teachingSlots:Joi.number(),
+  faculty:Joi.string().required()
     
     
     
@@ -123,7 +124,11 @@ UpdateStaff:Joi.object({
 name:Joi.string(),
 email:Joi.string(),
 officeLocation: Joi.string(),
-mobileNumber: Joi.string()
+mobileNumber: Joi.string(),
+type: Joi.string(),
+salary: Joi.number(),
+gender: Joi.string(),
+annualLeaves: Joi.number()
 
 },
 ),
