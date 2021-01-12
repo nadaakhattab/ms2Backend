@@ -453,7 +453,7 @@ dep.courses.forEach((course)=>{
 
   }
 
-
+console.log(req.body.HOD);
     // check if HOD 
     if(req.body.HOD){
      arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)); 
@@ -938,7 +938,7 @@ staffMember.findOne({id:req.body.id}).then((mem)=>{
     return res.status(300).send("Staff member doesnt exist");
   }
   else{  
-     const toUpdate={}
+     const toUpdate={};
      const arrayofPromises=[];
        if(req.body.officeLocation){
        arrayofPromises.push(  upLoc(mem.officeLocation,req.body.officeLocation));
@@ -960,9 +960,10 @@ staffMember.findOne({id:req.body.id}).then((mem)=>{
        } toUpdate.dayOffNumber= dayyOffNumber;
    }
  
-       
+console.log("TO UP",toUpdate);       
 Promise.all(arrayofPromises).then(()=>{
    staffMember.findOneAndUpdate({id: req.body.id},{$set:{...req.body,...toUpdate}},{new:true}).then(result => {
+     console.log(result);
      res.status(200).send(result);
    }).catch(err => {
      res.status(300).send(err);
@@ -1019,10 +1020,15 @@ Promise.all(arrayofPromises).then(()=>{
      res.status(300).send("Error: Please add required paramters");
    }
    const result =await staffMember.findOne({id:req.params.id});
-
-
+console.log(req.params.id);
+console.log(result,"FARAH");
    if(result){
      const listofAllCourse= await academicMember.find({id:req.params.id});
+      if(result.type=="HR"){ 
+staffMember.deleteOne({id:req.params.id}).then((result)=>{
+    res.status(200).send("successfully deleted");
+  });
+      }
      if(result.type=="HOD"){
        academicMember.findOne({id:req.params.id}).then((acMme)=>{
          department.findOneAndUpdate({name:acMme.department},{$set:{HOD:null}},{new:true}).then((dep)=>{
