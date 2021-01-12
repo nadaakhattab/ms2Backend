@@ -270,30 +270,37 @@ resolve();
 }
  router.route('/addDepartment').post(validateBody,(req, res) => {
    if(req.body.faculty==undefined || req.body.department==undefined){
-     res.status(301).send("Please add All required Fields");
+    return res.status(301).send("Please add All required Fields");
    }
    //takes faculty name & department name & all department details
 faculty.findOne({name:req.body.faculty}).then( result =>{
   console.log(result);
   if (result){
- const departments =result.departments?result.departments:[];
- if(departments.includes(req.body.department)){
-   // department already exists under this faculty 
-   res.status(301).send("department already exists under this faculty");
- }
- else {   // update db with new department array
-   departments.push(req.body.department); 
-       department.findOne({name: req.body.department}).then(dept => {
-         if (dept){ 
-           if(dept.faculty!== req.body.faculty){
-           res.status(300).send("Department Already exists under a different Faculty");
-         }else {
-              res.status(200).send("Successfully Added under Faculty");
-         }
-        }
-         else {
+    department.findOne({displayName: req.body.department}).then(dept => {
+      console.log("DEPT",dept);
+    if(dept){
+      console.log("already exists");
+      return res.status(300).send("Department Name Already Exists");
+    }
+    else {
+       const departments =result.departments?result.departments:[];
+//  if(departments.includes(req.body.department)){
+//    // department already exists under this faculty 
+//    res.status(301).send("department already exists under this faculty");
+//  }
+//  else {   // update db with new department array
+  
+      //  department.findOne({name: req.body.department}).then(dept => {
+      //    if (dept){ 
+      //      if(dept.faculty!== req.body.faculty){
+      //      res.status(300).send("Department Already exists under a different Faculty");
+      //    }else {
+      //         res.status(200).send("Successfully Added under Faculty");
+      //    }
+      //   }
+      //    else {
          
-console.log("department added under Faculty");
+
 const arrayofPromises=[];
 const toAdd= {faculty:req.body.faculty};
 if(req.body.HOD){
@@ -317,34 +324,35 @@ arrayofPromises.push(checkHOD(req.body.HOD,req.body.department,req.body.faculty)
      
   idDb.findOne({name:"department"}).then(idSlot =>{
         newId= idSlot.count+1;
-
-
-      return   department.create({name:`department-${newId}`,displayName: req.body.department,...toAdd}).then(newDept=>{
+ departments.push(`department-${newId}`); 
+  department.create({name:`department-${newId}`,displayName: req.body.department,...toAdd}).then(newDept=>{
         faculty.updateOne({name:req.body.faculty},{$set:{departments}}).then (result => {
      idDb.updateOne({name:"department"},{$set:{count:newId}}).then(()=>{
-       res.status(200).json({
+      return res.status(200).json({
            message:"Added Successfully",
            data:newDept});
      });
 
         });
-        });
+        }).catch(err =>{
+     res.status(500).send("department Name already exists");
+   })
     });
 
     }).catch (err =>{
      res.status(500).send("HOD/ COURSES Doesn't exist");
    });
 
+    }
+      
+    });
+
+
 
      
  }
 
-  });}}
-  else {
-    res.status(300).send("Faculty doesn't exist");
-  }
-
-}).catch (err => {
+  }).catch (err => {
  res.status(500).send("Database Error");
 })
  });
@@ -860,21 +868,30 @@ n="HR"
           salary: req.body.salary,
           officeLocation: req.body.officeLocation,
           gender:req.body.gender,
-          dayOff:req.body.dayOff,
-          dayOffNumber:dayyOffNumber,
           type:req.body.type
 
+        }
+        if(req.body.type!=="HR"){
+          data.dayOff=req.body.dayOff;
+          data.dayOffNumber=dayyOffNumber;
         }
 staffMember.create({...data}).then(result=>{
 
     idDb.updateOne({name:n},{$set:{count:idCount}}).then((result)=>{
 location.updateOne({room:req.body.officeLocation},{$set:{capacity:locCapacity+1}}).then((result)=>{
   if(req.body.type=="HOD"){
-    department.findOneAndUpdate({name:req.body.department},{$set:{HOD:id}}).then ((depart)=>{
+if(req.body.department){
+ department.findOneAndUpdate({name:req.body.department},{$set:{HOD:id}}).then ((depart)=>{
+
 academicMember.create({id:id, department:req.body.department, faculty:depart.faculty}).then (()=>{
 res.status(200).send("Successfully added");
 });
     });
+}
+else {
+  res.status(200).send("Successfully added");
+}
+   
 
   }
   else{
