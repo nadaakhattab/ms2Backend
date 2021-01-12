@@ -67,6 +67,8 @@ router.route('/addInstructor').post(validateBody,async(req, res) => {
                 if(instructor){
                     var vCourse=await course.findOne({name:inputCourse});
                     if(vCourse){
+                        if(vCourse.instructors.includes(inputInstructor))
+                        return res.status(300).send("Instructor already in course")
                         var newInstructors=vCourse.instructors;
                         newInstructors.push(inputInstructor);
                         var updated=await course.findOneAndUpdate({name:inputCourse},{instructors:newInstructors},{new:true});
