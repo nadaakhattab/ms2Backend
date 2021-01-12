@@ -1,18 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const slots=require('../models/slot');
+const courses = require('../models/course');
 
-router.route('/getSlots/:course').get(async(req,res)=>{
+router.route('/getSlots').get(async(req,res)=>{
     let myId=req.headers.payload.id;
     console.log("ID:"+myId);
-    let allSlots=await slots.find({course:req.params.course});
-    if(allSlots){
-        return res.status(200).send(allSlots);
-
-    }else{
-        return  res.status(400).send("No slots to show");
+    let courseB=await courses.findOne({coordinator:myId});
+    if(courseB){
+        // console.log(courseB.data)
+        let allSlots=await slots.find({course:courseB.name});
+        if(allSlots){
+            return res.status(200).send(allSlots);
+    
+        }else{
+            return  res.status(400).send("No slots to show");
+    
+        }
 
     }
+
 
 
 })

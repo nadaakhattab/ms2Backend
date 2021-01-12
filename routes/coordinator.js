@@ -59,7 +59,7 @@ catch(err){
 
 //need to check that the instructor & location & course exists
 router.route('/addSlot').post(validateBody, (req, res) => {
-
+console.log(req.headers.payload.id);
 
 slot.findOne({slot: req.body.slot, day: req.body.day, location: req.body.location}).then(result =>{
   if (result){res.status(300).send("Can't Create Slot: Location already taken at that time");}
@@ -73,7 +73,7 @@ res.status(300).send("Instructor doesn't exist ");
             if(!loc){
                 res.status(300).send("Location doesn't exist ");
             }
-            course.findOne({name:req.body.course}).then((course)=>{
+            course.findOne({coordinator:req.headers.payload.id}).then((course)=>{
                 if(!course ){
                    return  res.status(300).send("Course doesn't exist/You aren't its coordinator ");
                 }
@@ -102,7 +102,7 @@ res.status(300).send("Instructor doesn't exist ");
             if(!loc){
                 res.status(300).send("Location doesn't exist ");
             }
-            course.findOne({name:req.body.course}).then((course)=>{
+            course.findOne({coordinator:req.headers.payload.id}).then((course)=>{
                 if(!course){
                      res.status(300).send("Course doesn't exist ");
                 }
@@ -112,7 +112,7 @@ res.status(300).send("Instructor doesn't exist ");
                  let newId;
     idDb.findOne({name:"slot"}).then(idSlot =>{
         newId= idSlot.count+1;
-      return slot.create({id:newId,course:req.body.course, slot: req.body.slot, day: req.body.day, instructor:req.body.instructor,location: req.body.location});
+      return slot.create({id:newId,course:course.name, slot: req.body.slot, day: req.body.day, instructor:req.body.instructor,location: req.body.location});
     }).then(()=>{
         idDb.updateOne({name:"slot"},{$set:{count:newId}}).then(()=>{
             res.status(200).send("Successfully created");
