@@ -734,12 +734,14 @@ router.post('/assignCourseCordinator',validateBody,async(req,res)=>{
 
 
 
+
 router.route('/addTA').post( async(req, res) => {
             try{
                 var myId=req.headers.payload.id;
                 var inputCourse=req.body.course;
                 var inputInstructor=req.body.ta;
                 if(!inputCourse||!inputInstructor){
+                    console.log("invalid daa");
                     return res.status(400).send("Please provide ta and course id");
                 }else{
                     // var dep=await department.findOne({HOD: myId});
@@ -772,14 +774,17 @@ router.route('/addTA').post( async(req, res) => {
                                 }
           
                             }else{
+                                console.log("invalid course");
                                 return res.status(400).send("Invalid course");
                                 
                             }
         
                         }else{
+                            console.log("invalid ta");
                             return res.status(400).send("Invalid TA");
                         }
                     }else{
+                         console.log("invalid taaa");
                         return res.status(404).send("Cannot find department");
         
                     }

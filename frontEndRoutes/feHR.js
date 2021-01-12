@@ -52,4 +52,13 @@ router.route('/getAllStaffMember').get(async(req,res)=>{
     }
 })
 
+router.route('/getAllHOD').get(async(req,res)=>{
+    let c= await staffMember.find({type:"HOD"});
+    if(c){
+        return res.status(200).send(c);
+    }else{
+       return  res.status(400).send("No Courses to show");
+    }
+})
+
 module.exports=router;

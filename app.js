@@ -56,6 +56,7 @@ function checkAM(req, res, next) {
 }
 
 function checkHOD(req,res,next){
+  console.log(req.headers.payload.type);
   if(req.headers.payload.type=="HOD"){
       console.log("HOD Confirmed");
       return next();}
@@ -65,6 +66,7 @@ function checkHOD(req,res,next){
   }
 
   function checkCI(req,res,next){
+    console.log(req.headers.payload.type);
       if(req.headers.payload.type=="CI"){
           console.log("CI Confirmed");
           return next();}
@@ -77,7 +79,7 @@ app.use ("/hr",checkHr,hrRoutes);
 app.use ("/coordinator",checkCC,coordinatorRoutes);
 app.use("/academicMember",checkAM,academicMemberRoutes);
 app.use("/hod",checkHOD, hodRoutes);
-app.use("/ci",checkCI,ciRoutes)
+app.use("/ci",checkCI,ciRoutes);
 app.use("/staffMember",staffMemberRoutes);
 app.use('/feHod', frontEndHOD);
 app.use('/feCi', frontEndCI);
