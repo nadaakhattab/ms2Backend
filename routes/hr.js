@@ -108,7 +108,7 @@ location.updateOne({room:req.body.room},{$set:{...toUpdate}}).then(result =>{
       
       res.status(200).send("Success: edited");}
   else {
-res.status(501).send("Location doesn't exist");
+res.status(501).send("Nothing to modify");
   }
 });
  });
