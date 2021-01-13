@@ -7,7 +7,7 @@ const department = require('./models/department');
 const course = require('./models/course');
 const bcrypt=require('bcryptjs');
 const location= require('./models/location');
-const URL = "mongodb+srv://nada:1234@aclproject.lz3yx.mongodb.net/GUCPortal?retryWrites=true&w=majority";
+const URL = process.env.MONGODB_URI || "mongodb+srv://nada:1234@aclproject.lz3yx.mongodb.net/GUCPortal?retryWrites=true&w=majority";
 global.accessKey="qfsgdbhcvkdlfgdfsdaksjaqfsvghbkshb";
 global.refreshKey="wghdkjfhl;gjlkuiopo23yorpiotpyhgf";
 global.refreshTokens=[];
