@@ -20,13 +20,22 @@ router.route('/getDetails').get(async(req,res)=>{
 });
 
 router.route('/removeNotification/:nId').get(async(req,res)=>{
-    let notId=this.reqs.params.nId;
-    var update=await notifications.findOneAndUpdate({_id:notId},{removed:true})
+    console.log("in remove");
+    try{
+        var update=await notifications.findOneAndUpdate({_id:req.params.nId},{removed:true})
+        console.log(update);
+        if(update){
+            res.status(200).send("success")
+        }else{
+            res.status(300).send("erorr")
+        }
+
+    }catch(error){
+        res.status(500).send(error);
+    }
+
 })
 
-router.route('/seenNotification/:nId').get(async(req,res)=>{
-    let notId=this.reqs.params.nId;
-    var update=await notifications.findOneAndUpdate({_id:notId},{seen:true})
-})
+
 
 module.exports=router;

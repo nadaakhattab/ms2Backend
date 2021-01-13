@@ -136,6 +136,7 @@ router.post('/sendReplacementRequest',validateBody,async(req,res)=>{
 
 router.get('/viewReplacementRequests',async(req,res)=>{
     try{
+        console.log("here");
         var userId=req.headers.payload.id;
         var request=await requests.find({toId:userId});
         if(request.length>0){
@@ -667,9 +668,13 @@ let fullRes =[];
       console.log(notification);
       return new Promise((resolve, reject) => {
     requests.findOne({_id:notification.requestID}).then((reqFound)=>{
-        console.log("FARAH",reqFound);
+        // console.log("FARAH",reqFound);
         if(reqFound){
-fullRes.push(reqFound)
+           var res={req:reqFound,
+            not:notification
+           }
+           console.log(res);
+fullRes.push(res)
         }
         resolve();
     }).catch(()=>{
@@ -677,8 +682,9 @@ fullRes.push(reqFound)
      });
     }
 
-router.get('/notifications',async(req,res)=>{
+router.get('/getNotification',async(req,res)=>{
     try{
+        console.log("in not");
         fullRes =[];
         var userId=req.headers.payload.id;
         if(userId==undefined){
@@ -715,6 +721,7 @@ Promise.all(arrayofPromises).then ((result)=>{
         }
 
     }catch(error){
+        console.log(error);
         return res.status(500).send(error.message);
 
     }
