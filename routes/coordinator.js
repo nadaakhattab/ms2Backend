@@ -10,6 +10,7 @@ const department = require('../models/department');
 const course = require('../models/course');
 const idDb = require('../models/id');
 const validations = require('../validations/coordinator');
+const notification=require('../models/notification');
 const Joi = require('joi');
 const e = require('express');
 
@@ -275,6 +276,7 @@ router.route('/slotRequests').get((req, res) => {
   request.find({ toId:req.headers.payload.id,type:"slotLinking"}).then(result =>{
 res.status(200).send(result);       
     }).catch(err=>{
+      console.log(err);
         res.status(500).send("Database Error");
     });
 });
@@ -285,21 +287,30 @@ router.route('/replyRequest').post(validateBody, (req, res) => {
         res.status(301).send("ERROR: Incomplete Requiured fields");
     }
 
-   request.findOneAndUpdate({slotId:req.body.slotId,toId:req.headers.payload.id ,fromId:req.body.fromId,type:"slotLinking" },{$set:{status:req.body.status}}, {
+   request.findOneAndUpdate({_id:req.body.id,type:"slotLinking" },{$set:{status:req.body.status}}, {
           new: true,
         }).then(result =>{
   console.log(result);
   if(!result){
       res.status(301).send("Error: Slot Request with the given fields doesn't exist ");
   }
+
+ notification.create({
+                            requestID: result._id,
+                            accepted: req.body.status=="Accepted"?true:false,
+                            to:req.body.fromId
+                        }).then (()=>{
 if(req.body.status=="Accepted"){
+  console.log(result._id,req.body.status,req.body.fromId);
+
+                 
   slot.findOne({id: req.body.slotId}).then((slott)=>{
     if(slott.instructor){
       res.status(300).send("ERROR: Slot already assigned to an instructor");
 
     }
     slot.findOneAndUpdate({id: req.body.slotId},{$set:{instructor:result.fromId}}).then(slotRes =>{
-    if(slotRes){
+    if(slotRes){    
     res.status(200).send("Succesffuly linked");}
     else {
          res.status(300).send("Slot not found");
@@ -308,13 +319,16 @@ if(req.body.status=="Accepted"){
 
   })
 
-}
-else {
+
+}else {
     res.status(200).send("Succesffuly Rejected the following request ");
 
 }
+});
+
         }
 ).catch(err =>{
+  console.log(err);
     res.status(500).send("Database Error");
 });
     
