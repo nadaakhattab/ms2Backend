@@ -14,6 +14,7 @@ module.exports= {
     slotId:Joi.number().required(),
     fromId:Joi.string().required(),
     status:Joi.string().required(),
+    id:Joi.string().required()
       },
    ),
 

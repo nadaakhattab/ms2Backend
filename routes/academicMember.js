@@ -201,7 +201,7 @@ router.post('/sendChangeDayOffRequest',validateBody,async(req,res)=>{
         var sendingId=req.headers.payload.id;
         var reqReason=req.body.reason;
         var dayToChange=req.body.day;
-
+console.log(dayToChange=="Monday");
         if(dayToChange){
             if(dayToChange=="Sunday"||dayToChange=="Monday"||
             dayToChange=="Tuesday"||dayToChange=="Wednesday"||
@@ -209,7 +209,7 @@ router.post('/sendChangeDayOffRequest',validateBody,async(req,res)=>{
                 ){
                     var sending=await academicMembers.findOne({id:sendingId});
                     if(sending){
-                        var slotsAvailable=await slots.find({day:dayToChange});
+                        var slotsAvailable=await slots.find({day:dayToChange,instructor:sendingId});
                         if(slotsAvailable){
                             if(slotsAvailable.length>0){
                                 return res.status(400).send("Cannot request  day off if you have slots on that day");
@@ -331,11 +331,11 @@ try{
          res.status(301).send("HR cannot submit leave requests");
     }
       var sendingId=req.headers.payload.id;
-      console.log(sendingId);
+      console.log("myyy iddd",sendingId,req.headers.payload.type);
         var reqReason=req.body.reason;
         var leaveType=req.body.leave;
         var sending=await academicMembers.findOne({id:sendingId});
-        console.log(sending);
+        console.log("myID",sending);
         var departmentReq=sending.department;
         
 
@@ -667,7 +667,10 @@ let fullRes =[];
       console.log(notification);
       return new Promise((resolve, reject) => {
     requests.findOne({_id:notification.requestID}).then((reqFound)=>{
-        fullRes.push(reqFound);
+        console.log("FARAH",reqFound);
+        if(reqFound){
+fullRes.push(reqFound)
+        }
         resolve();
     }).catch(()=>{
          reject()});
