@@ -78,7 +78,7 @@ function checkHOD(req,res,next){
 app.use ("/hr",checkHr,hrRoutes);
 app.use ("/coordinator",checkCC,coordinatorRoutes);
 app.use("/academicMember",checkAM,academicMemberRoutes);
-app.use("/hod",checkHOD, hodRoutes);
+app.use("/HOD",checkHOD, hodRoutes);
 app.use("/ci",checkCI,ciRoutes);
 app.use("/staffMember",staffMemberRoutes);
 app.use('/feHod', frontEndHOD);
